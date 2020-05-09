@@ -1,15 +1,16 @@
 import sys
 import random
 import flask
-import threading
+import lobby
+from threading import Lock
 from flask import request
 
-srvprt = -1
 srv = flask.Flask(__name__)
 # app.config["DEBUG"] = True
 games = []
 nobles = []
 cards = []
+lock = Lock()
 
 
 # Noble object
@@ -39,10 +40,9 @@ class Card:
 
 
 class Game:
-    def __init__(self, scr_name):
+    def __init__(self, username):
         self.session_id = ""  # game ID
-        self.lock = threading.Lock()  # mutex locking
-        self.players = [["p0", scr_name]]  # 2D list (username, screen_name)  # TODO: randomize on game start
+        self.players = [["p0", username]]  # 2D list (player_id, username)  # TODO: randomize on game start
         self.player_turn = ""  # who's turn is it?  # TODO: randomize on game start
         self.player_cards = [["p0"]]  # 2D list
         self.player_reserved_cards = [["p0"]]  # 2D list (face down cards)
@@ -51,19 +51,15 @@ class Game:
         self.field_cards = [[], [], []]  # list of card objects
         self.cards_remaining = [40, 30, 20]  # list of # of remaining cards for each field stack
         self.field_chips = [4, 4, 4, 4, 4, 5]  # list indicating remaining chips on the field  # TODO: increase on join
-        self.player_nobles = []  # 2D list of player Noble objects
+        self.player_nobles = [["p0"]]  # 2D list of player Noble objects
         self.field_nobles = []  # list of field Noble objects
         self.victory = []  # list of victorious player(s)
         self.card_order = []  # order of card objects  # TODO: randomize on game start
         self.noble_order = []  # order of noble objects  # TODO: randomize on game start
 
 
-@srv.route('/', methods=['GET'])
-def home():
-    return "42"
-
-
-@srv.route('/shutdown', methods=['GET'])  # TODO: possibly very insecure, remove later
+# Shut down server when Ctrl+C decides not to work properly  TODO: definitely not secure, remove later
+@srv.route('/shutdown', methods=['POST'])
 def shutdown():
     fnc = request.environ.get('werkzeug.server.shutdown')
     if fnc is None:
@@ -72,11 +68,36 @@ def shutdown():
     return 'Server shutting down...'
 
 
+# create new game
+@srv.route('/new_game', methods=['POST'])
+def new_game():
+    game = Game(request.args.get('username'))
+    with lock:
+        ret = lobby.new_game(game, games)
+    return ret
+
+
+# join existing game
+@srv.route('/join_game', methods=['POST'])
+def join_game():
+    with lock:
+        ret = lobby.join_game(request.args, games)
+    return ret
+
+
+# drop out of game
+@srv.route('/drop_out', methods=['POST'])
+def drop_out():
+    with lock:
+        ret = lobby.drop_out(request.args, games)
+    return ret
+
+
 # main
 arg_len = len(sys.argv)
 if arg_len >= 2:
     srv_prt = int(sys.argv[1])
-    if srv_prt > 65535 or srvprt < 1024:
+    if srv_prt > 65535 or srv_prt < 1024:
         print("ERROR: Expected port between 1024 and 65535")
         sys.exit(1)
 else:
