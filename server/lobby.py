@@ -18,9 +18,8 @@ def generate_session_id():
 def new_game(game, games):
     while True:
         session_id = generate_session_id()
-        if session_id in games.keys():
-            continue
-        break
+        if session_id not in games.keys():
+            break
 
     game.session_id = session_id
     games[session_id] = game
@@ -100,7 +99,7 @@ def drop_out(args, games):
     game.player_reserved_cards.pop(x)
     game.user_reserved_cards.pop(x)
     for y in range(0, 6):
-        game.field_chips[x] += game.player_chips[x][y+1]
+        game.field_chips[y] += game.player_chips[x][y+1]
         if y != 5:
             game.field_chips[y] -= 1  # intentionally can become negative, must be properly relayed in client
     game.player_chips.pop(x)
