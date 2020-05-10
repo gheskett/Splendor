@@ -7,7 +7,7 @@ from flask import request
 
 srv = flask.Flask(__name__)
 # app.config["DEBUG"] = True
-games = []
+games = {}
 nobles = []
 cards = []
 lock = Lock()
