@@ -66,6 +66,8 @@ def join_game(args, games):
     game.player_reserved_cards.append([player_id])
     game.user_reserved_cards.append([player_id])
     game.player_chips.append([player_id, 0, 0, 0, 0, 0, 0])
+    for y in range(0, 5):
+        game.field_chips[y] += 1
     game.player_nobles.append([player_id])
     games.append(game)
 
@@ -115,7 +117,8 @@ def drop_out(args, games):
     game.user_reserved_cards.pop(y)
     for z in range(0, 6):
         game.field_chips[z] += game.player_chips[y][z+1]
-        game.field_chips[z] -= 1  # intentionally can become negative, must be properly relayed in client
+        if z != 5:
+            game.field_chips[z] -= 1  # intentionally can become negative, must be properly relayed in client
     game.player_chips.pop(y)
     game.player_nobles.pop(y)
 

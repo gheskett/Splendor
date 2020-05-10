@@ -43,14 +43,14 @@ class Game:
     def __init__(self, username):
         self.session_id = ""  # game ID
         self.players = [["p0", username]]  # 2D list (player_id, username)  # TODO: randomize on game start
-        self.player_turn = ""  # who's turn is it?  # TODO: randomize on game start
+        self.player_turn = ""  # who's turn is it?  # TODO: randomize on game start (self.players[0][0])
         self.player_cards = [["p0"]]  # 2D list
         self.player_reserved_cards = [["p0"]]  # 2D list (face down cards)
         self.user_reserved_cards = [["p0"]]  # 2D list (face up cards)
         self.player_chips = [["p0", 0, 0, 0, 0, 0, 0]]  # 2D list of player chips
         self.field_cards = [[], [], []]  # list of card objects
         self.cards_remaining = [40, 30, 20]  # list of # of remaining cards for each field stack
-        self.field_chips = [4, 4, 4, 4, 4, 5]  # list indicating remaining chips on the field  # TODO: increase on join
+        self.field_chips = [4, 4, 4, 4, 4, 5]  # list indicating remaining chips on the field
         self.player_nobles = [["p0"]]  # 2D list of player Noble objects
         self.field_nobles = []  # list of field Noble objects
         self.victory = []  # list of victorious player(s)
@@ -103,35 +103,35 @@ if arg_len >= 2:
 else:
     srv_prt = random.randint(1024, 49151)
 
-file = open("nobles", "r")
-if not file:
+try:
+    with open("nobles", "r") as file:
+        while True:
+            ln = file.readline()
+            if len(ln) == 0:
+                break
+            if len(ln) < 13:
+                print("ERROR: Formatting of Nobles database invalid!")
+                sys.exit(1)
+            new_noble = Noble(int(ln[1]), int(ln[3]), int(ln[5]), int(ln[7]), int(ln[9]), int(ln[11]))
+            nobles.append(new_noble)
+except IOError:
     print("ERROR: Cannot locate Nobles database!")
     sys.exit(1)
-while True:
-    ln = file.readline()
-    if len(ln) == 0:
-        break
-    if len(ln) < 13:
-        print("ERROR: Formatting of Nobles database invalid!")
-        sys.exit(1)
-    new_noble = Noble(int(ln[1]), int(ln[3]), int(ln[5]), int(ln[7]), int(ln[9]), int(ln[11]))
-    nobles.append(new_noble)
-file.close()
 
-file = open("cards", "r")
-if not file:
+try:
+    with open("cards", "r") as file:
+        while True:
+            ln = file.readline()
+            if len(ln) == 0:
+                break
+            if len(ln) < 17:
+                print("ERROR: Formatting of card database invalid!")
+                sys.exit(1)
+            new_card = Card(int(ln[1]), int(ln[3]), int(ln[5]), int(ln[7]), int(ln[9]), int(ln[11]), int(ln[13]),
+                            int(ln[15]))
+            cards.append(new_card)
+except IOError:
     print("ERROR: Cannot locate card database!")
     sys.exit(1)
-while True:
-    ln = file.readline()
-    if len(ln) == 0:
-        break
-    if len(ln) < 17:
-        print("ERROR: Formatting of card database invalid!")
-        sys.exit(1)
-    new_card = Card(int(ln[1]), int(ln[3]), int(ln[5]), int(ln[7]), int(ln[9]), int(ln[11]), int(ln[13]),
-                    int(ln[15]))
-    cards.append(new_card)
-file.close()
 
 srv.run(port=srv_prt)
