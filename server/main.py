@@ -39,19 +39,31 @@ class Card:
         self.onyx = onx  # onyx needed
 
 
+# Player object
+class Player:
+    def __init__(self):
+        self.player_id = 0
+        self.username = ""
+        self.player_cards = []
+        self.player_reserved_cards = []
+        self.private_reserved_cards = []
+        self.player_chips = [0, 0, 0, 0, 0, 0]
+        self.player_nobles = []
+        self.player_num_gem_cards = [0, 0, 0, 0, 0]
+
+
+# Game object
 class Game:
-    def __init__(self, username):
+    def __init__(self, player):
         self.session_id = ""  # game ID
-        self.players = [["p0", username]]  # 2D list (player_id, username)  # TODO: randomize on game start
-        self.player_turn = ""  # who's turn is it?  # TODO: randomize on game start (self.players[0][0])
-        self.player_cards = [["p0"]]  # 2D list
-        self.player_reserved_cards = [["p0"]]  # 2D list (face down cards)
-        self.user_reserved_cards = [["p0"]]  # 2D list (face up cards)
-        self.player_chips = [["p0", 0, 0, 0, 0, 0, 0]]  # 2D list of player chips
+        self.is_started = False  # has game started?
+        self.host_id = player.player_id  # game host
+        self.players = {player.player_id: player}  # 2D list (player_id, username)  # TODO: randomize on game start
+        self.player_order = [player.player_id]  # turn order  # TODO: randomize on game start
+        self.player_turn = ""  # who's turn is it?  # TODO: randomize on game start (self.player_order[0])
         self.field_cards = [[], [], []]  # list of card objects
         self.cards_remaining = [40, 30, 20]  # list of # of remaining cards for each field stack
         self.field_chips = [4, 4, 4, 4, 4, 5]  # list indicating remaining chips on the field
-        self.player_nobles = [["p0"]]  # 2D list of player Noble objects
         self.field_nobles = []  # list of field Noble objects
         self.victory = []  # list of victorious player(s)
         self.card_order = []  # order of card objects  # TODO: randomize on game start
@@ -71,17 +83,30 @@ def shutdown():
 # create new game
 @srv.route('/new_game', methods=['POST'])
 def new_game():
-    game = Game(request.args.get('username'))
+    player = Player()
+    game = Game(player)
     with lock:
-        ret = lobby.new_game(game, games)
+        ret = lobby.new_game(player, request.args, game, games)
     return ret
 
 
 # join existing game
 @srv.route('/join_game', methods=['POST'])
 def join_game():
+    session_id = request.args.get('session_id')
+    if session_id is None or session_id not in games.keys():
+        return flask.jsonify(player_id=-1, session_id="NULL")
+    player = Player()
     with lock:
-        ret = lobby.join_game(request.args, games)
+        ret = lobby.join_game(player, request.args, games)
+    return ret
+
+
+# check if game has started
+@srv.route('/is_game_started', methods=['GET'])
+def is_game_started():
+    with lock:
+        ret = lobby.is_game_started(request.args, games)
     return ret
 
 
