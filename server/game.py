@@ -27,7 +27,10 @@ def start_game(args, games):
         return flask.jsonify("ERROR: Game already started!")
 
     num_players = len(game.players)
-    game.field_chips = [3+num_players, 3+num_players, 3+num_players, 3+num_players, 3+num_players, 5]
+    if num_players >= 4:
+        game.field_chips = [3+num_players, 3+num_players, 3+num_players, 3+num_players, 3+num_players, 5]
+    else:
+        game.field_chips = [2+num_players, 2+num_players, 2+num_players, 2+num_players, 2+num_players, 5]
     game.field_cards = [[], [], []]
     game.field_nobles = []
     game.cards_remaining = [game.total_cards[0], game.total_cards[1], game.total_cards[2]]

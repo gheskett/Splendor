@@ -84,7 +84,7 @@ class Game:
         self.field_cards = [[], [], []]
         self.total_cards = [r1, r2, r3]
         self.cards_remaining = [r1, r2, r3]
-        self.field_chips = [4, 4, 4, 4, 4, 5]
+        self.field_chips = [3, 3, 3, 3, 3, 5]
         self.field_nobles = []
         self.victory = []
         self.most_recent_action = "New lobby created successfully!"
