@@ -30,7 +30,8 @@ def new_game(player, args, game, games):
     else:
         player.username = username
 
-    return flask.jsonify(player_id=game.players[player.player_id].player_id, session_id=session_id)
+    return flask.jsonify(player_id=game.players[player.player_id].player_id, session_id=session_id,
+                         most_recent_action=game.most_recent_action)
 
 
 # join existing game
@@ -39,10 +40,10 @@ def join_game(player, args, games):
     username = args.get('username')
 
     game = games[session_id]
-    if len(game.players) >= 4:
-        return flask.jsonify(player_id=-1, session_id="FULL")
     if game.is_started:
         return flask.jsonify(player_id=-1, session_id="STARTED")
+    if len(game.players) >= 4:
+        return flask.jsonify(player_id=-1, session_id="FULL")
 
     x = 0
     while True:
@@ -59,7 +60,9 @@ def join_game(player, args, games):
     for y in range(0, 5):
         game.field_chips[y] += 1
 
-    return flask.jsonify(player_id=player.player_id, session_id=session_id)
+    game.most_recent_action = player.username + " joined the game lobby!"
+
+    return flask.jsonify(player_id=player.player_id, session_id=session_id, most_recent_action=game.most_recent_action)
 
 
 # change username
@@ -79,10 +82,15 @@ def change_username(args, games):
     if player_id not in game.players.keys():
         return flask.jsonify("ERROR: Could not find player in game!")
 
+    tmp = game.players[player_id].username
+
     if username == "":
         game.players[player_id].username = "Player " + str(game.players[player_id].player_id + 1)
     else:
         game.players[player_id].username = username
+
+    if tmp != username:
+        game.most_recent_action = tmp + " changed their username to " + username + "!"
 
     return flask.jsonify("OK")
 
@@ -102,7 +110,8 @@ def is_game_started(args, games):
                   }
         players[player["player_id"]] = player
 
-    return flask.jsonify(is_started=game.is_started, players=players, host_id=game.host_id)
+    return flask.jsonify(is_started=game.is_started, players=players, host_id=game.host_id,
+                         most_recent_action=game.most_recent_action)
 
 
 # drop out of game
@@ -141,6 +150,8 @@ def drop_out(args, games):
         if y != 5:
             game.field_chips[y] -= 1  # intentionally can become negative, must be properly relayed in client
 
+    tmp = game.players[player_id]
+
     del game.players[player_id]
 
     if leave_point == 1 and len(game.players) == 1:
@@ -151,5 +162,10 @@ def drop_out(args, games):
         del games[session_id]
     elif game.host_id == player_id:
         game.host_id = game.player_order[0]
+
+    game.most_recent_action = tmp + " left the game"
+    if leave_point == 0:
+        game.most_recent_action += " lobby"
+    game.most_recent_action += "!"
 
     return flask.jsonify("OK")

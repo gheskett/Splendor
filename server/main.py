@@ -87,6 +87,7 @@ class Game:
         self.field_chips = [4, 4, 4, 4, 4, 5]
         self.field_nobles = []
         self.victory = []
+        self.most_recent_action = "New lobby created successfully!"
 
 
 # get nobles being used with server

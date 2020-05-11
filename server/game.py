@@ -65,6 +65,7 @@ def start_game(args, games):
     game.player_turn = game.player_order[0]
     game.is_started = True
 
+    game.most_recent_action = "The game has started! " + game.players[game.player_turn].username + " will go first."
 
     return flask.jsonify("OK")
 
@@ -121,7 +122,8 @@ def get_game_state(args, games):
         "cards_remaining": game.cards_remaining,
         "field_chips": game.field_chips,
         "field_nobles": game.field_nobles,
-        "victory": game.victory
+        "victory": game.victory,
+        "most_recent_action": game.most_recent_action
     }
 
     return flask.jsonify(game=return_game)
