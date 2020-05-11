@@ -44,6 +44,7 @@ def join_game(player, args, games):
     if game.is_started:
         return flask.jsonify(player_id=-1, session_id="STARTED")
 
+
     x = 0
     while True:
         if x not in game.players.keys():
