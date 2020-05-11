@@ -2,6 +2,7 @@ import sys
 import random
 import flask
 import lobby
+import game
 from threading import Lock
 from flask import request
 
@@ -16,7 +17,7 @@ lock = Lock()
 # Noble object
 class Noble:
     def __init__(self, vp, dmd, sap, emr, rby, onx):
-        self.card_id = len(cards)  # noble ID
+        self.noble_id = len(nobles)  # noble ID
         self.vp = vp  # victory points (always 3 for Nobles)
         self.diamond = dmd  # diamonds needed
         self.sapphire = sap  # sapphires needed
@@ -31,7 +32,7 @@ class Card:
         self.card_id = len(cards)  # card ID
         self.rank = rank  # card rank (1, 2, or 3)
         self.vp = vp  # victory points
-        self.gem_type = gem_type  # gem tyoe of card
+        self.gem_type = gem_type  # gem type of card
         self.diamond = dmd  # diamonds needed
         self.sapphire = sap  # sapphires needed
         self.emerald = emr  # emeralds needed
@@ -50,24 +51,82 @@ class Player:
         self.player_chips = [0, 0, 0, 0, 0, 0]
         self.player_nobles = []
         self.player_num_gem_cards = [0, 0, 0, 0, 0]
+        self.victory_points = 0
 
 
 # Game object
 class Game:
     def __init__(self, player):
-        self.session_id = ""  # game ID
-        self.is_started = False  # has game started?
-        self.host_id = player.player_id  # game host
-        self.players = {player.player_id: player}  # 2D list (player_id, username)  # TODO: randomize on game start
-        self.player_order = [player.player_id]  # turn order  # TODO: randomize on game start
-        self.player_turn = ""  # who's turn is it?  # TODO: randomize on game start (self.player_order[0])
-        self.field_cards = [[], [], []]  # list of card objects
-        self.cards_remaining = [40, 30, 20]  # list of # of remaining cards for each field stack
-        self.field_chips = [4, 4, 4, 4, 4, 5]  # list indicating remaining chips on the field
-        self.field_nobles = []  # list of field Noble objects
-        self.victory = []  # list of victorious player(s)
-        self.card_order = []  # order of card objects  # TODO: randomize on game start
-        self.noble_order = []  # order of noble objects  # TODO: randomize on game start
+        self.card_order = [[], [], []]
+        self.noble_order = []
+
+        r1, r2, r3 = 0, 0, 0
+        for x in range(0, len(cards)):
+            if cards[x].rank == 1:
+                r1 += 1
+                self.card_order[0].append(x)
+            elif cards[x].rank == 2:
+                r2 += 1
+                self.card_order[1].append(x)
+            elif cards[x].rank == 3:
+                r3 += 1
+                self.card_order[2].append(x)
+
+        for x in range(0, len(nobles)):
+            self.noble_order.append(x)
+
+        self.session_id = ""
+        self.is_started = False
+        self.host_id = player.player_id
+        self.players = {player.player_id: player}
+        self.player_order = [player.player_id]
+        self.player_turn = ""
+        self.field_cards = [[], [], []]
+        self.total_cards = [r1, r2, r3]
+        self.cards_remaining = [r1, r2, r3]
+        self.field_chips = [4, 4, 4, 4, 4, 5]
+        self.field_nobles = []
+        self.victory = []
+
+
+# get nobles being used with server
+@srv.route('/get_nobles_database', methods=['GET'])
+def get_nobles_database():
+    nobles_db = {}
+    with lock:
+        for x in range(0, len(nobles)):
+            noble = {
+                "noble_id": nobles[x].noble_id,
+                "vp": nobles[x].vp,
+                "diamond": nobles[x].diamond,
+                "sapphire": nobles[x].sapphire,
+                "emerald": nobles[x].emerald,
+                "ruby": nobles[x].ruby,
+                "onyx": nobles[x].onyx
+            }
+            nobles_db[x] = noble
+    return flask.jsonify(nobles=nobles_db)
+
+
+# get cards being used with server
+@srv.route('/get_cards_database', methods=['GET'])
+def get_cards_database():
+    cards_db = {}
+    with lock:
+        for x in range(0, len(cards)):
+            card = {
+                "card_id": cards[x].card_id,
+                "rank": cards[x].rank,
+                "vp": cards[x].vp,
+                "gem_type": cards[x].gem_type,
+                "diamond": cards[x].diamond,
+                "sapphire": cards[x].sapphire,
+                "emerald": cards[x].emerald,
+                "ruby": cards[x].ruby,
+                "onyx": cards[x].onyx
+            }
+            cards_db[x] = card
+    return flask.jsonify(cards=cards_db)
 
 
 # Shut down server when Ctrl+C decides not to work properly  TODO: definitely not secure, remove later
@@ -84,9 +143,9 @@ def shutdown():
 @srv.route('/new_game', methods=['POST'])
 def new_game():
     player = Player()
-    game = Game(player)
+    gm = Game(player)
     with lock:
-        ret = lobby.new_game(player, request.args, game, games)
+        ret = lobby.new_game(player, request.args, gm, games)
     return ret
 
 
@@ -95,10 +154,18 @@ def new_game():
 def join_game():
     session_id = request.args.get('session_id')
     if session_id is None or session_id not in games.keys():
-        return flask.jsonify(player_id=-1, session_id="NULL")
+        return flask.jsonify(player_id=-1, session_id=None)
     player = Player()
     with lock:
         ret = lobby.join_game(player, request.args, games)
+    return ret
+
+
+# change username
+@srv.route('/change_username', methods=['POST'])
+def change_username():
+    with lock:
+        ret = lobby.change_username(request.args, games)
     return ret
 
 
@@ -115,6 +182,22 @@ def is_game_started():
 def drop_out():
     with lock:
         ret = lobby.drop_out(request.args, games)
+    return ret
+
+
+# start game
+@srv.route('/start_game', methods=['POST'])
+def start_game():
+    with lock:
+        ret = game.start_game(request.args, games)
+    return ret
+
+
+# get current status of game
+@srv.route('/get_game_state', methods=['GET'])
+def get_game_state():
+    with lock:
+        ret = game.get_game_state(request.args, games)
     return ret
 
 
