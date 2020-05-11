@@ -94,18 +94,17 @@ class Game:
 @srv.route('/get_nobles_database', methods=['GET'])
 def get_nobles_database():
     nobles_db = {}
-    with lock:
-        for x in range(0, len(nobles)):
-            noble = {
-                "noble_id": nobles[x].noble_id,
-                "vp": nobles[x].vp,
-                "diamond": nobles[x].diamond,
-                "sapphire": nobles[x].sapphire,
-                "emerald": nobles[x].emerald,
-                "ruby": nobles[x].ruby,
-                "onyx": nobles[x].onyx
-            }
-            nobles_db[x] = noble
+    for x in range(0, len(nobles)):
+        noble = {
+            "noble_id": nobles[x].noble_id,
+            "vp": nobles[x].vp,
+            "diamond": nobles[x].diamond,
+            "sapphire": nobles[x].sapphire,
+            "emerald": nobles[x].emerald,
+            "ruby": nobles[x].ruby,
+            "onyx": nobles[x].onyx
+        }
+        nobles_db[x] = noble
     return flask.jsonify(nobles=nobles_db)
 
 
@@ -113,20 +112,19 @@ def get_nobles_database():
 @srv.route('/get_cards_database', methods=['GET'])
 def get_cards_database():
     cards_db = {}
-    with lock:
-        for x in range(0, len(cards)):
-            card = {
-                "card_id": cards[x].card_id,
-                "rank": cards[x].rank,
-                "vp": cards[x].vp,
-                "gem_type": cards[x].gem_type,
-                "diamond": cards[x].diamond,
-                "sapphire": cards[x].sapphire,
-                "emerald": cards[x].emerald,
-                "ruby": cards[x].ruby,
-                "onyx": cards[x].onyx
-            }
-            cards_db[x] = card
+    for x in range(0, len(cards)):
+        card = {
+            "card_id": cards[x].card_id,
+            "rank": cards[x].rank,
+            "vp": cards[x].vp,
+            "gem_type": cards[x].gem_type,
+            "diamond": cards[x].diamond,
+            "sapphire": cards[x].sapphire,
+            "emerald": cards[x].emerald,
+            "ruby": cards[x].ruby,
+            "onyx": cards[x].onyx
+        }
+        cards_db[x] = card
     return flask.jsonify(cards=cards_db)
 
 

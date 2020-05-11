@@ -33,7 +33,7 @@ def start_game(args, games):
     game.cards_remaining = [game.total_cards[0], game.total_cards[1], game.total_cards[2]]
     game.victory = []
 
-    for key, value in game.players.items():
+    for _, value in game.players.items():
         value.player_cards = []
         value.player_reserved_cards = []
         value.private_reserved_cards = []
@@ -51,7 +51,7 @@ def start_game(args, games):
     for x in range(0, num_players + 1):
         game.field_nobles.append(game.noble_order[x])
 
-    for x in range(0, 4):
+    for _ in range(0, 4):
         if game.cards_remaining[0] > 0:
             game.field_cards[0].append(game.card_order[0][game.cards_remaining[0] - game.total_cards[0]])
             game.cards_remaining[0] -= 1
@@ -95,7 +95,7 @@ def get_game_state(args, games):
     player_id = int(player_id)
 
     players = {}
-    for key, value in game.players.items():
+    for _, value in game.players.items():
         player = {"player_id": value.player_id,
                   "username": value.username,
                   "player_cards": value.player_cards,

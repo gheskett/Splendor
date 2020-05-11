@@ -104,7 +104,7 @@ def is_game_started(args, games):
 
     game = games[session_id]
     players = {}
-    for key, value in game.players.items():
+    for _, value in game.players.items():
         player = {"player_id": value.player_id,
                   "username": value.username
                   }
