@@ -40,7 +40,7 @@ def join_game(player, args, games):
     username = args.get('username')
 
     game = games[session_id]
-    if game.is_started:
+    if game.player_turn != -2:
         return flask.jsonify(player_id=-1, session_id="STARTED")
     if len(game.players) >= 4:
         return flask.jsonify(player_id=-1, session_id="FULL")
@@ -110,7 +110,11 @@ def is_game_started(args, games):
                   }
         players[player["player_id"]] = player
 
-    return flask.jsonify(is_started=game.is_started, players=players, host_id=game.host_id,
+    started = False
+    if game.player_turn != -2:
+        started = True
+
+    return flask.jsonify(is_started=started, players=players, host_id=game.host_id,
                          most_recent_action=game.most_recent_action)
 
 
@@ -150,14 +154,13 @@ def drop_out(args, games):
         if y != 5:
             game.field_chips[y] -= 1  # intentionally can become negative, must be properly relayed in client
 
-    tmp = game.players[player_id]
+    tmp = game.players[player_id].username
 
     del game.players[player_id]
 
     if leave_point == 1 and len(game.players) == 1:
         game.victory.append(game.player_order[0])
-        game.player_turn = ""
-        game.is_started = False
+        game.player_turn = -2
     elif len(game.players) == 0:
         del games[session_id]
     elif game.host_id == player_id:
