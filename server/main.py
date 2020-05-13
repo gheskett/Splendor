@@ -6,7 +6,7 @@ import game
 from threading import Lock
 from flask import request
 
-srv = flask.Flask(__name__)
+app = flask.Flask(__name__)
 # app.config["DEBUG"] = True
 games = {}
 nobles = []
@@ -80,18 +80,18 @@ class Game:
         self.host_id = player.player_id
         self.players = {player.player_id: player}
         self.player_order = [player.player_id]
-        self.player_turn = ""
+        self.player_turn = -2
         self.field_cards = [[], [], []]
         self.total_cards = [r1, r2, r3]
         self.cards_remaining = [r1, r2, r3]
-        self.field_chips = [4, 4, 4, 4, 4, 5]
+        self.field_chips = [3, 3, 3, 3, 3, 5]
         self.field_nobles = []
         self.victory = []
         self.most_recent_action = "New lobby created successfully!"
 
 
 # get nobles being used with server
-@srv.route('/get_nobles_database', methods=['GET'])
+@app.route('/get_nobles_database', methods=['GET'])
 def get_nobles_database():
     nobles_db = {}
     for x in range(0, len(nobles)):
@@ -109,7 +109,7 @@ def get_nobles_database():
 
 
 # get cards being used with server
-@srv.route('/get_cards_database', methods=['GET'])
+@app.route('/get_cards_database', methods=['GET'])
 def get_cards_database():
     cards_db = {}
     for x in range(0, len(cards)):
@@ -129,7 +129,7 @@ def get_cards_database():
 
 
 # Shut down server when Ctrl+C decides not to work properly  TODO: definitely not secure, remove later
-@srv.route('/shutdown', methods=['POST'])
+@app.route('/shutdown', methods=['POST'])
 def shutdown():
     fnc = request.environ.get('werkzeug.server.shutdown')
     if fnc is None:
@@ -139,7 +139,7 @@ def shutdown():
 
 
 # create new game
-@srv.route('/new_game', methods=['POST'])
+@app.route('/new_game', methods=['POST'])
 def new_game():
     player = Player()
     gm = Game(player)
@@ -149,7 +149,7 @@ def new_game():
 
 
 # join existing game
-@srv.route('/join_game', methods=['POST'])
+@app.route('/join_game', methods=['POST'])
 def join_game():
     session_id = request.args.get('session_id')
     if session_id is None or session_id not in games.keys():
@@ -161,7 +161,7 @@ def join_game():
 
 
 # change username
-@srv.route('/change_username', methods=['POST'])
+@app.route('/change_username', methods=['POST'])
 def change_username():
     with lock:
         ret = lobby.change_username(request.args, games)
@@ -169,7 +169,7 @@ def change_username():
 
 
 # check if game has started
-@srv.route('/is_game_started', methods=['GET'])
+@app.route('/is_game_started', methods=['GET'])
 def is_game_started():
     with lock:
         ret = lobby.is_game_started(request.args, games)
@@ -177,7 +177,7 @@ def is_game_started():
 
 
 # drop out of game
-@srv.route('/drop_out', methods=['POST'])
+@app.route('/drop_out', methods=['POST'])
 def drop_out():
     with lock:
         ret = lobby.drop_out(request.args, games)
@@ -185,7 +185,7 @@ def drop_out():
 
 
 # start game
-@srv.route('/start_game', methods=['POST'])
+@app.route('/start_game', methods=['POST'])
 def start_game():
     with lock:
         ret = game.start_game(request.args, games)
@@ -193,20 +193,30 @@ def start_game():
 
 
 # get current status of game
-@srv.route('/get_game_state', methods=['GET'])
+@app.route('/get_game_state', methods=['GET'])
 def get_game_state():
     with lock:
         ret = game.get_game_state(request.args, games)
     return ret
 
 
+# get current status of game
+@app.route('/grab_chips', methods=['POST'])
+def grab_chips():
+    with lock:
+        ret = game.grab_chips(request.args, games)
+    return ret
+
+
 # main
-arg_len = len(sys.argv)
-if arg_len >= 2:
-    srv_prt = int(sys.argv[1])
-    if srv_prt > 65535 or srv_prt < 1024:
-        print("ERROR: Expected port between 1024 and 65535")
-        sys.exit(1)
+srv_prt = -1
+if __name__ == '__main__':
+    arg_len = len(sys.argv)
+    if arg_len >= 2:
+        srv_prt = int(sys.argv[1])
+        if srv_prt > 65535 or srv_prt < 1024:
+            print("ERROR: Expected port between 1024 and 65535")
+            sys.exit(1)
 else:
     srv_prt = random.randint(1024, 49151)
 
@@ -241,4 +251,5 @@ except IOError:
     print("ERROR: Cannot locate card database!")
     sys.exit(1)
 
-srv.run(port=srv_prt)
+if __name__ == '__main__':
+    app.run(port=srv_prt)
