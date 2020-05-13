@@ -196,6 +196,7 @@ def get_game_state(args, games):
     return flask.jsonify(game=return_game)
 
 
+# player grabs chips from field
 def grab_chips(args, games):
     player_id = args.get('player_id')
     session_id = args.get('session_id')

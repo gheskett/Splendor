@@ -200,7 +200,7 @@ def get_game_state():
     return ret
 
 
-# get current status of game
+# player grabs chips from field
 @app.route('/grab_chips', methods=['POST'])
 def grab_chips():
     with lock:
