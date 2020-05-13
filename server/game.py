@@ -52,36 +52,14 @@ def comma_parse(total, index, num, bef):
 def token_str(total, lst):
     ret = ""
     index = 0
-    if lst[0] > 0:
-        ret += comma_parse(total, index, lst[0], True)
-        ret += "Diamond"
-        ret += comma_parse(total, index, lst[0], False)
-        index += 1
-    if lst[1] > 0:
-        ret += comma_parse(total, index, lst[1], True)
-        ret += "Sapphire"
-        ret += comma_parse(total, index, lst[1], False)
-        index += 1
-    if lst[2] > 0:
-        ret += comma_parse(total, index, lst[2], True)
-        ret += "Emerald"
-        ret += comma_parse(total, index, lst[2], False)
-        index += 1
-    if lst[3] > 0:
-        ret += comma_parse(total, index, lst[3], True)
-        ret += "Ruby"
-        ret += comma_parse(total, index, lst[3], False)
-        index += 1
-    if lst[4]:
-        ret += comma_parse(total, index, lst[4], True)
-        ret += "Onyx"
-        ret += comma_parse(total, index, lst[4], False)
-        index += 1
-    if lst[5] > 0:
-        ret += comma_parse(total, index, lst[5], True)
-        ret += "Wild"
-        ret += comma_parse(total, index, lst[5], False)
-        index += 1
+    gems = ["Diamond", "Sapphire", "Emerald", "Ruby", "Onyx", "Wild"]
+    for x in range(0, 6):
+        if lst[x] > 0:
+            ret += comma_parse(total, index, lst[x], True)
+            ret += gems[x]
+            ret += comma_parse(total, index, lst[x], False)
+            index += 1
+
     if total == 0:
         ret += "no"
     ret += "token"
