@@ -172,9 +172,8 @@ def test_init_get_game_state(client):
             session_id=session_id[x],
             player_id=x
         ), follow_redirects=True)
-        json = result.get_json()
+        game = result.get_json()
 
-        game = json['game']
         assert game['session_id'] == session_id[x]
         if x == 0:
             assert game['field_cards'] == [[8, 18, 14, 7], [51, 69, 57, 53], [84, 72, 77, 87]]
@@ -232,9 +231,8 @@ def test_grab_chips(client):
             session_id=session_id[x],
             player_id=x
         ), follow_redirects=True)
-        json = result.get_json()
+        game = result.get_json()
 
-        game = json['game']
         assert game['session_id'] == session_id[x]
         if x == 0:
             assert game['field_cards'] == [[8, 18, 14, 7], [51, 69, 57, 53], [84, 72, 77, 87]]
@@ -263,3 +261,77 @@ def test_grab_chips(client):
             assert game['field_chips'] == [7, 6, 6, 7, 6, 5]
             assert game['most_recent_action'] == 'Player 3 grabbed 1 Sapphire, 1 Emerald, and 1 Onyx tokens!'
             assert game['cards_remaining'] == [36, 26, 16]
+
+
+def test_reserve_card(client):
+    for x in range(0, 3):
+        result = ""
+        if x == 0:
+            result = client.post('/reserve_card', query_string=dict(
+                session_id=session_id[x],
+                player_id=1,
+                reserved_card=8,
+                returned_chips='[0, 0, 0, 0, 0, 0]'
+            ), follow_redirects=True)
+        elif x == 1:
+            result = client.post('/reserve_card', query_string=dict(
+                session_id=session_id[x],
+                player_id=0,
+                reserved_card=63,
+                returned_chips='[0, 0, 0, 0, 0, 0]'
+            ), follow_redirects=True)
+        elif x == 2:
+            result = client.post('/reserve_card', query_string=dict(
+                session_id=session_id[x],
+                player_id=3,
+                reserved_card=-3,
+                returned_chips='[0, 0, 0, 0, 0, 0]'
+            ), follow_redirects=True)
+        assert result.get_json() == 'OK'
+
+    for x in range(0, 3):
+        result = client.get('/get_game_state', query_string=dict(
+            session_id=session_id[x],
+            player_id=3
+        ), follow_redirects=True)
+        game = result.get_json()
+
+        assert game['session_id'] == session_id[x]
+        if x == 0:
+            assert game['field_cards'] == [[18, 14, 7, 25], [51, 69, 57, 53], [84, 72, 77, 87]]
+            assert game['players']['1']['player_reserved_cards'] == [1]
+            assert game['players']['1']['private_reserved_cards'] is None
+            assert game['field_nobles'] == [9, 2, 8]
+            assert game['player_order'] == [0, 1]
+            assert game['player_turn'] == 0
+            assert game['players']['1']['player_chips'] == [0, 0, 0, 0, 0, 1]
+            assert game['field_chips'] == [3, 4, 4, 3, 3, 4]
+            assert game['most_recent_action'] == 'John reserved a card!'
+            assert game['cards_remaining'] == [35, 26, 16]
+        elif x == 1:
+            assert game['field_cards'] == [[23, 31, 22, 34], [67, 59, 65, 46], [82, 78, 76, 83]]
+            assert game['players']['0']['player_reserved_cards'] == [2]
+            assert game['players']['0']['private_reserved_cards'] is None
+            assert game['field_nobles'] == [9, 1, 2, 3]
+            assert game['player_order'] == [2, 0, 1]
+            assert game['player_turn'] == 1
+            assert game['players']['0']['player_chips'] == [0, 0, 0, 0, 0, 1]
+            assert game['field_chips'] == [5, 5, 3, 5, 5, 4]
+            assert game['most_recent_action'] == 'Bob reserved a card!'
+            assert game['cards_remaining'] == [36, 25, 16]
+        elif x == 2:
+            assert game['field_cards'] == [[5, 11, 34, 4], [66, 51, 43, 62], [72, 89, 85, 87]]
+            assert game['players']['3']['player_reserved_cards'] == [3]
+            assert game['players']['3']['private_reserved_cards'] == [82]
+            assert game['field_nobles'] == [8, 6, 9, 7, 5]
+            assert game['player_order'] == [2, 3, 1, 0]
+            assert game['player_turn'] == 1
+            assert game['players']['3']['player_chips'] == [0, 0, 0, 0, 0, 1]
+            assert game['field_chips'] == [7, 6, 6, 7, 6, 4]
+            assert game['most_recent_action'] == 'Charlie reserved a card!'
+            assert game['cards_remaining'] == [36, 26, 15]
+
+        print(client.get('/get_game_state', query_string=dict(
+            session_id=session_id[x],
+            player_id=3
+        ), follow_redirects=True).get_json(), flush=True)

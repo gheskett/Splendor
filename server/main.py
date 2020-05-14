@@ -76,11 +76,10 @@ class Game:
             self.noble_order.append(x)
 
         self.session_id = ""
-        self.is_started = False
         self.host_id = player.player_id
         self.players = {player.player_id: player}
         self.player_order = [player.player_id]
-        self.player_turn = -2
+        self.player_turn = -3
         self.field_cards = [[], [], []]
         self.total_cards = [r1, r2, r3]
         self.cards_remaining = [r1, r2, r3]
@@ -205,6 +204,14 @@ def get_game_state():
 def grab_chips():
     with lock:
         ret = game.grab_chips(request.args, games)
+    return ret
+
+
+# player reserves card from field
+@app.route('/reserve_card', methods=['POST'])
+def reserve_card():
+    with lock:
+        ret = game.reserve_card(request.args, games, cards)
     return ret
 
 

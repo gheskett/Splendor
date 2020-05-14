@@ -40,7 +40,7 @@ def join_game(player, args, games):
     username = args.get('username')
 
     game = games[session_id]
-    if game.player_turn != -2:
+    if game.player_turn >= 0:
         return flask.jsonify(player_id=-1, session_id="STARTED")
     if len(game.players) >= 4:
         return flask.jsonify(player_id=-1, session_id="FULL")
@@ -111,7 +111,7 @@ def is_game_started(args, games):
         players[player["player_id"]] = player
 
     started = False
-    if game.player_turn != -2:
+    if game.player_turn >= 0:
         started = True
 
     return flask.jsonify(is_started=started, players=players, host_id=game.host_id,

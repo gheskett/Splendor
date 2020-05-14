@@ -87,7 +87,7 @@ def start_game(args, games):
         return flask.jsonify("ERROR: Only the game host can start the game!")
     if len(game.players) < 2:
         return flask.jsonify("ERROR: At least two players must be present to start new game!")
-    if game.player_turn != -2:
+    if game.player_turn >= 0:
         return flask.jsonify("ERROR: Game already started!")
 
     num_players = len(game.players)
@@ -130,7 +130,6 @@ def start_game(args, games):
             game.cards_remaining[2] -= 1
 
     game.player_turn = game.player_order[0]
-    game.is_started = True
 
     game.most_recent_action = "The game has started! " + game.players[game.player_turn].username + " will go first."
 
@@ -151,10 +150,14 @@ def get_game_state(args, games):
 
     game = games[session_id]
 
-    if not game.is_started:
+    if game.player_turn == -3:
         return_game["is_started"] = False
         return_game["exists"] = True
         return flask.jsonify(game=return_game)
+
+    started = True
+    if game.player_turn < 0:
+        started = False
 
     if player_id is None:
         player_id = -1
@@ -181,7 +184,7 @@ def get_game_state(args, games):
         "exists": True,
         "players": players,
         "session_id": game.session_id,
-        "is_started": game.is_started,
+        "is_started": started,
         "host_id": game.host_id,
         "player_order": game.player_order,
         "player_turn": game.player_turn,
@@ -193,7 +196,7 @@ def get_game_state(args, games):
         "most_recent_action": game.most_recent_action
     }
 
-    return flask.jsonify(game=return_game)
+    return flask.jsonify(return_game)
 
 
 # player grabs chips from field
@@ -218,8 +221,11 @@ def grab_chips(args, games):
     if player_id not in game.players.keys():
         return flask.jsonify("ERROR: Could not find player in game!")
 
-    if not game.is_started:
+    if game.player_turn == -3:
         return flask.jsonify("ERROR: The game has not been started yet!")
+
+    if game.player_turn == -2:
+        return flask.jsonify("ERROR: The game is over!")
 
     if game.player_turn != player_id:
         return flask.jsonify("ERROR: It is not " + game.players[player_id].username + "'s turn!")
@@ -305,6 +311,109 @@ def grab_chips(args, games):
         if returned != 1:
             game.most_recent_action += "!"
     game.most_recent_action += "!"
+
+    if game.player_turn == game.player_order[0]:
+        check_victory(game)
+
+    return flask.jsonify("OK")
+
+
+# player reserves card from field
+def reserve_card(args, games, cards):
+    player_id = args.get('player_id')
+    session_id = args.get('session_id')
+    reserved_card = args.get('reserved_card')
+    returned_chips = args.get('returned_chips')
+
+    if player_id is None or session_id is None or reserved_card is None or returned_chips is None:
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id', "
+                             "'grabbed_chips', 'returned_chips'")
+
+    player_id = int(player_id)
+    reserved_card = int(reserved_card)
+    returned_chips = json.loads(returned_chips)
+
+    if session_id not in games.keys():
+        return flask.jsonify("ERROR: Could not find game!")
+
+    game = games[session_id]
+    if player_id not in game.players.keys():
+        return flask.jsonify("ERROR: Could not find player in game!")
+
+    if game.player_turn == -3:
+        return flask.jsonify("ERROR: The game has not been started yet!")
+
+    if game.player_turn == -2:
+        return flask.jsonify("ERROR: The game is over!")
+
+    if game.player_turn != player_id:
+        return flask.jsonify("ERROR: It is not " + game.players[player_id].username + "'s turn!")
+
+    if len(returned_chips) != 6:
+        return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a list of int length 6."
+                             "\nExample: [0, 0, 1, 0, 0, 0]")
+
+    player = game.players[player_id]
+    if len(player.private_reserved_cards) >= 3:
+        return flask.jsonify("ERROR: Player cannot reserve more than 3 cards at a time!")
+
+    total_chips = 1  # wild token for reserving card
+    returned = 0
+    for x in range(0, 6):
+        total_chips += player.player_chips[x]
+        returned += returned_chips[x]
+
+    if total_chips - returned > 10:
+        return flask.jsonify("ERROR: Player may not hold more than ten chips at the end of their turn!")
+    if returned > 0 and total_chips - returned < 10:
+        return flask.jsonify("ERROR: Player should not be returning chips when they don't need to!")
+
+    if 0 > reserved_card >= -3:
+        index = (reserved_card * -1) - 1
+        if game.cards_remaining[index] <= 0:
+            return flask.jsonify("ERROR: No more cards are left in this deck!")
+        reserved_card = game.card_order[index][game.total_cards[index] - game.cards_remaining[index]]
+        game.field_cards[index].append(reserved_card)
+        game.cards_remaining[index] -= 1
+
+    index = [-1, -1]
+    for x in range(0, len(game.field_cards)):
+        for y in range(0, len(game.field_cards[x])):
+            if game.field_cards[x][y] == reserved_card:
+                index = [x, y]
+                break
+        if index[0] != -1:
+            break
+
+    if index[0] == -1:
+        return flask.jsonify("ERROR: Card does not exist on the field at this time!")
+
+    player.private_reserved_cards.append(reserved_card)
+    player.player_reserved_cards.append(index[0]+1)
+    game.field_cards[index[0]].pop(index[1])
+    player.player_chips[5] += 1
+    game.field_chips[5] -= 1
+
+    if len(game.field_cards[index[0]]) < 4 and game.cards_remaining[index[0]] > 0:
+        game.field_cards[index[0]].append(game.card_order[index[0]][game.total_cards[index[0]]
+                                                                    - game.cards_remaining[index[0]]])
+        game.cards_remaining[index[0]] -= 1
+
+    if returned > 0:
+        for x in range(0, 6):
+            player.player_chips -= returned_chips[x]
+
+    p_index = 0
+    for p_index in range(0, len(game.player_order)):
+        if game.player_order[p_index] == player_id:
+            break
+    if p_index == len(game.player_order) - 1:
+        p_index = 0
+    else:
+        p_index += 1
+    game.player_turn = game.player_order[p_index]
+
+    game.most_recent_action = player.username + " reserved a card!"
 
     if game.player_turn == game.player_order[0]:
         check_victory(game)
