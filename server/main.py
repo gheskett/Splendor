@@ -90,44 +90,6 @@ class Game:
         self.most_recent_action = "New lobby created successfully!"
 
 
-# get nobles being used with server
-@app.route('/api/get_nobles_database', methods=['GET'])
-def get_nobles_database():
-    nobles_db = {}
-    for x in range(0, len(nobles)):
-        noble = {
-            "noble_id": nobles[x].noble_id,
-            "vp": nobles[x].vp,
-            "diamond": nobles[x].diamond,
-            "sapphire": nobles[x].sapphire,
-            "emerald": nobles[x].emerald,
-            "ruby": nobles[x].ruby,
-            "onyx": nobles[x].onyx
-        }
-        nobles_db[x] = noble
-    return flask.jsonify(nobles=nobles_db)
-
-
-# get cards being used with server
-@app.route('/api/get_cards_database', methods=['GET'])
-def get_cards_database():
-    cards_db = {}
-    for x in range(0, len(cards)):
-        card = {
-            "card_id": cards[x].card_id,
-            "rank": cards[x].rank,
-            "vp": cards[x].vp,
-            "gem_type": gem_ids[cards[x].gem_type],
-            "diamond": cards[x].diamond,
-            "sapphire": cards[x].sapphire,
-            "emerald": cards[x].emerald,
-            "ruby": cards[x].ruby,
-            "onyx": cards[x].onyx
-        }
-        cards_db[x] = card
-    return flask.jsonify(cards=cards_db)
-
-
 # Shut down server when Ctrl+C decides not to work properly  TODO: definitely not secure, remove later
 @app.route('/api/shutdown', methods=['POST'])
 def shutdown():
@@ -222,6 +184,44 @@ def buy_card():
     with lock:
         ret = game.buy_card(request.args, games, cards, nobles)
     return ret
+
+
+# get nobles being used with server
+@app.route('/api/get_nobles_database', methods=['GET'])
+def get_nobles_database():
+    nobles_db = {}
+    for x in range(0, len(nobles)):
+        noble = {
+            "noble_id": nobles[x].noble_id,
+            "victory_points": nobles[x].vp,
+            "diamond": nobles[x].diamond,
+            "sapphire": nobles[x].sapphire,
+            "emerald": nobles[x].emerald,
+            "ruby": nobles[x].ruby,
+            "onyx": nobles[x].onyx
+        }
+        nobles_db[x] = noble
+    return flask.jsonify(nobles_db)
+
+
+# get cards being used with server
+@app.route('/api/get_cards_database', methods=['GET'])
+def get_cards_database():
+    cards_db = {}
+    for x in range(0, len(cards)):
+        card = {
+            "card_id": cards[x].card_id,
+            "rank": cards[x].rank,
+            "victory_points": cards[x].vp,
+            "gem_type": gem_ids[cards[x].gem_type],
+            "diamond": cards[x].diamond,
+            "sapphire": cards[x].sapphire,
+            "emerald": cards[x].emerald,
+            "ruby": cards[x].ruby,
+            "onyx": cards[x].onyx
+        }
+        cards_db[x] = card
+    return flask.jsonify(cards_db)
 
 
 # main

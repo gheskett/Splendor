@@ -275,12 +275,15 @@ def grab_chips(args, games):
     if game.player_turn != player_id:
         return flask.jsonify("ERROR: It is not " + game.players[player_id].username + "'s turn!")
 
-    if len(grabbed_chips) != 6:
-        return flask.jsonify("ERROR: grabbed_chips has incorrect syntax!\nValue should be a list of int length 6."
-                             "\nExample: [1, 0, 1, 1, 0, 0]")
-    if len(returned_chips) != 6:
-        return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a list of int length 6."
-                             "\nExample: [0, 1, 0, 0, 2, 0]")
+    if len(grabbed_chips) != 6 or not isinstance(grabbed_chips, dict):
+        return flask.jsonify("ERROR: grabbed_chips has incorrect syntax!\nValue should be a dictionary length 6.")
+    if len(returned_chips) != 6 or not isinstance(returned_chips, dict):
+        return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a dictionary length 6.")
+
+    grabbed_chips = [grabbed_chips['diamond'], grabbed_chips['sapphire'], grabbed_chips['emerald'],
+                     grabbed_chips['ruby'], grabbed_chips['onyx'], grabbed_chips['wild']]
+    returned_chips = [returned_chips['diamond'], returned_chips['sapphire'], returned_chips['emerald'],
+                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['wild']]
 
     grabbed, returned, field_ch, player_ch, ret_cnt, grb_cnt = 0, 0, 0, 0, 0, 0
     is_two = False
@@ -389,9 +392,11 @@ def reserve_card(args, games):
     if game.player_turn != player_id:
         return flask.jsonify("ERROR: It is not " + game.players[player_id].username + "'s turn!")
 
-    if len(returned_chips) != 6:
-        return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a list of int length 6."
-                             "\nExample: [0, 0, 1, 0, 0, 0]")
+    if len(returned_chips) != 6 or not isinstance(returned_chips, dict):
+        return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a dictionary length 6.")
+
+    returned_chips = [returned_chips['diamond'], returned_chips['sapphire'], returned_chips['emerald'],
+                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['wild']]
 
     player = game.players[player_id]
     if len(player.private_reserved_cards) >= 3:
@@ -504,9 +509,11 @@ def buy_card(args, games, cards, nobles):
     if game.player_turn != player_id:
         return flask.jsonify("ERROR: It is not " + game.players[player_id].username + "'s turn!")
 
-    if len(returned_chips) != 6:
-        return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a list of int length 6."
-                             "\nExample: [4, 0, 1, 2, 0, 1]")
+    if len(returned_chips) != 6 or not isinstance(returned_chips, dict):
+        return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a dictionary length 6.")
+
+    returned_chips = [returned_chips['diamond'], returned_chips['sapphire'], returned_chips['emerald'],
+                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['wild']]
 
     player = game.players[player_id]
 
