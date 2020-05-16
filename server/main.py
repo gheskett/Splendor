@@ -211,7 +211,15 @@ def grab_chips():
 @app.route('/reserve_card', methods=['POST'])
 def reserve_card():
     with lock:
-        ret = game.reserve_card(request.args, games, cards)
+        ret = game.reserve_card(request.args, games)
+    return ret
+
+
+# player buys card from field
+@app.route('/buy_card', methods=['POST'])
+def buy_card():
+    with lock:
+        ret = game.buy_card(request.args, games, cards, nobles)
     return ret
 
 

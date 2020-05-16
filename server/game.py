@@ -2,6 +2,8 @@ import random
 import flask
 import json
 
+gems = ["Diamond", "Sapphire", "Emerald", "Ruby", "Onyx", "Wild"]
+
 
 def check_victory(game):
     highest_vp = 0
@@ -34,6 +36,30 @@ def check_victory(game):
     if len(game.victory) > 0:
         game.player_turn = -2
 
+        game.most_recent_action += "\n\nThe game is over! Winner"
+        if len(game.victory) > 1:
+            game.most_recent_action += "s"
+        game.most_recent_action += ": "
+        for x in range(0, len(game.victory)):
+            game.most_recent_action += game.players[game.victory[x]].username
+            if x != len(game.victory) + 1:
+                game.most_recent_action += ", "
+
+
+def next_turn(game):
+    p_index = 0
+    for p_index in range(0, len(game.player_order)):
+        if game.player_order[p_index] == game.player_turn:
+            break
+    if p_index == len(game.player_order) - 1:
+        p_index = 0
+    else:
+        p_index += 1
+    game.player_turn = game.player_order[p_index]
+
+    if game.player_turn == game.player_order[0]:
+        check_victory(game)
+
 
 def comma_parse(total, index, num, bef):
     if total - index <= 0:
@@ -52,7 +78,6 @@ def comma_parse(total, index, num, bef):
 def token_str(total, lst):
     ret = ""
     index = 0
-    gems = ["Diamond", "Sapphire", "Emerald", "Ruby", "Onyx", "Wild"]
     for x in range(0, 6):
         if lst[x] > 0:
             ret += comma_parse(total, index, lst[x], True)
@@ -153,7 +178,16 @@ def get_game_state(args, games):
     if game.player_turn == -3:
         return_game["is_started"] = False
         return_game["exists"] = True
-        return flask.jsonify(game=return_game)
+        return_game["host_id"] = game.host_id
+
+        players = {}
+        for _, value in game.players.items():
+            player = {"player_id": value.player_id,
+                      "username": value.username
+                      }
+            players[player["player_id"]] = player
+        return_game["players"] = players
+        return flask.jsonify(return_game)
 
     started = True
     if game.player_turn < 0:
@@ -250,6 +284,12 @@ def grab_chips(args, games):
         if grabbed_chips[x] > 0:
             grb_cnt += 1
 
+        if grabbed_chips[x] < 0:
+            return flask.jsonify("ERROR: Player cannot take negative chips!")
+
+        if returned_chips[x] < 0:
+            return flask.jsonify("ERROR: Player cannot return negative chips!")
+
         if returned_chips[x] > game.players[player_id].player_chips[x] + grabbed_chips[x]:
             return flask.jsonify("ERROR: Player cannot return chips they do not have or did not pick up!")
 
@@ -293,16 +333,6 @@ def grab_chips(args, games):
         game.field_chips[x] += returned_chips[x]
         game.field_chips[x] -= grabbed_chips[x]
 
-    p_index = 0
-    for p_index in range(0, len(game.player_order)):
-        if game.player_order[p_index] == player_id:
-            break
-    if p_index == len(game.player_order) - 1:
-        p_index = 0
-    else:
-        p_index += 1
-    game.player_turn = game.player_order[p_index]
-
     game.most_recent_action = player.username + " grabbed " + token_str(grb_cnt, grabbed_chips)
     if grabbed != 1:
         game.most_recent_action += "s"
@@ -312,14 +342,13 @@ def grab_chips(args, games):
             game.most_recent_action += "!"
     game.most_recent_action += "!"
 
-    if game.player_turn == game.player_order[0]:
-        check_victory(game)
+    next_turn(game)
 
     return flask.jsonify("OK")
 
 
 # player reserves card from field
-def reserve_card(args, games, cards):
+def reserve_card(args, games):
     player_id = args.get('player_id')
     session_id = args.get('session_id')
     reserved_card = args.get('reserved_card')
@@ -327,7 +356,7 @@ def reserve_card(args, games, cards):
 
     if player_id is None or session_id is None or reserved_card is None or returned_chips is None:
         return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id', "
-                             "'grabbed_chips', 'returned_chips'")
+                             "'reserved_card', 'returned_chips'")
 
     player_id = int(player_id)
     reserved_card = int(reserved_card)
@@ -362,6 +391,9 @@ def reserve_card(args, games, cards):
     for x in range(0, 6):
         total_chips += player.player_chips[x]
         returned += returned_chips[x]
+
+        if returned_chips[x] < 0:
+            return flask.jsonify("ERROR: Player cannot return negative chips!")
 
     if total_chips - returned > 10:
         return flask.jsonify("ERROR: Player may not hold more than ten chips at the end of their turn!")
@@ -403,19 +435,195 @@ def reserve_card(args, games, cards):
         for x in range(0, 6):
             player.player_chips -= returned_chips[x]
 
-    p_index = 0
-    for p_index in range(0, len(game.player_order)):
-        if game.player_order[p_index] == player_id:
-            break
-    if p_index == len(game.player_order) - 1:
-        p_index = 0
-    else:
-        p_index += 1
-    game.player_turn = game.player_order[p_index]
-
     game.most_recent_action = player.username + " reserved a card!"
 
-    if game.player_turn == game.player_order[0]:
-        check_victory(game)
+    next_turn(game)
+
+    return flask.jsonify("OK")
+
+
+# player buys card from field
+def buy_card(args, games, cards, nobles):
+    player_id = args.get('player_id')
+    session_id = args.get('session_id')
+    purchased_card = args.get('purchased_card')
+    returned_chips = args.get('returned_chips')
+    noble_acquired = args.get('noble_acquired')
+
+    if player_id is None or session_id is None or purchased_card is None or returned_chips is None \
+            or noble_acquired is None:
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id', "
+                             "'purchased_card', 'returned_chips', 'noble_acquired'")
+
+    player_id = int(player_id)
+    purchased_card = int(purchased_card)
+    returned_chips = json.loads(returned_chips)
+    noble_acquired = int(noble_acquired)
+
+    if session_id not in games.keys():
+        return flask.jsonify("ERROR: Could not find game!")
+
+    game = games[session_id]
+    if player_id not in game.players.keys():
+        return flask.jsonify("ERROR: Could not find player in game!")
+
+    if game.player_turn == -3:
+        return flask.jsonify("ERROR: The game has not been started yet!")
+
+    card = None
+    noble = None
+    for x in range(0, len(cards)):
+        if cards[x].card_id == purchased_card:
+            card = cards[x]
+            break
+    if card is None:
+        return flask.jsonify("ERROR: Requested card does not exist in game!")
+
+    if noble_acquired > 0:
+        for x in range(0, len(nobles)):
+            if nobles[x].noble_id == noble_acquired:
+                noble = nobles[x]
+                break
+        if noble is None:
+            return flask.jsonify("ERROR: Acquired noble does not exist in game!")
+
+    if game.player_turn == -2:
+        return flask.jsonify("ERROR: The game is over!")
+
+    if game.player_turn != player_id:
+        return flask.jsonify("ERROR: It is not " + game.players[player_id].username + "'s turn!")
+
+    if len(returned_chips) != 6:
+        return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a list of int length 6."
+                             "\nExample: [4, 0, 1, 2, 0, 1]")
+
+    player = game.players[player_id]
+
+    # is card present in game?
+    card_location = [-1, -1]
+    noble_location = -1
+    for x in range(0, len(game.field_cards)):
+        for y in range(0, len(game.field_cards[x])):
+            if purchased_card == game.field_cards[x][y]:
+                card_location = [x, y]
+                break
+        if card_location[0] != -1:
+            break
+
+    # is card present in reserved stash?
+    if card_location[0] == -1:
+        for x in range(0, len(player.private_reserved_cards)):
+            if purchased_card == player.private_reserved_cards[x]:
+                card_location = [len(game.field_cards), x]
+
+    if card_location[0] == -1:
+        return flask.jsonify("ERROR: The current player does not have access to purchase this card!")
+
+    # is noble present in game?
+    if noble is not None:
+        for x in range(0, len(game.field_nobles)):
+            if noble_acquired == game.field_nobles[x]:
+                noble_location = x
+                break
+        if noble_location == -1:
+            return flask.jsonify("ERROR: The desired noble is not currently up for grabs!")
+
+    chip_offset = [card.diamond, card.sapphire, card.emerald, card.ruby, card.onyx, 0]
+    gem_type = card.gem_type
+
+    # is card request valid?
+    for x in range(0, 6):
+        if x != 5:
+            chip_offset[x] -= player.player_num_gem_cards[x]
+            if chip_offset[x] < 0:
+                chip_offset[x] = 0
+        if returned_chips[x] < 0:
+            return flask.jsonify("ERROR: Player cannot return negative chips!")
+        if returned_chips[x] > player.player_chips[x]:
+            return flask.jsonify("ERROR: Player cannot return chips they don't have!")
+
+    for x in range(0, 5):
+        chip_offset[x] -= returned_chips[x]
+        if chip_offset[x] < 0:
+            return flask.jsonify("ERROR: Player tried to return more " + gems[x] + " chips than needed!")
+        if chip_offset[x] > 0:
+            chip_offset[5] += chip_offset[x]
+            chip_offset[x] = 0
+
+    if chip_offset[5] < returned_chips[5]:
+        return flask.jsonify("ERROR: Player tried to return more " + gems[5] + " chips than needed!")
+    if chip_offset[5] > returned_chips[5]:
+        return flask.jsonify("ERROR: Player has not selected the necessary chips required to buy card!")
+
+    # is noble request valid?
+    if noble is not None:
+        noble_req = [noble.diamond, noble.sapphire, noble.emerald, noble.ruby, noble.onyx]
+        for x in range(0, 5):
+            if player.player_num_gem_cards[x] + (1 if gem_type == x else 0) < noble_req[x]:
+                return flask.jsonify("ERROR: Player unqualified to acquire noble!")
+    else:
+        for x in range(0, len(game.field_nobles)):
+            noble_req = None
+            for y in range(0, len(nobles)):
+                if nobles[y].noble_id == game.field_nobles[x]:
+                    noble_req = [nobles[y].diamond, nobles[y].sapphire, nobles[y].emerald, nobles[y].ruby, nobles[y].onyx]
+                    break
+            if noble_req is None:
+                print("ERROR: Field nobles acquired a noble ID that does not exist! ID=" + str(game.field_nobles[x]),
+                      flush=True)
+                return flask.jsonify("ERROR: Fatal server error, please see server!")
+            acquirable = True
+            for y in range(0, 5):
+                if player.player_num_gem_cards[y] + (1 if gem_type == y else 0) < noble_req[y]:
+                    acquirable = False
+                    break
+
+            if acquirable:
+                return flask.jsonify("ERROR: Player can and must acquire a noble!")
+
+    # checks passed, change actual game data
+    if noble is not None:
+        player.player_nobles.append(noble_acquired)
+        game.field_nobles.pop(noble_location)
+        player.victory_points += noble.vp
+
+    player.player_cards.append(purchased_card)
+    if card_location[0] == len(game.field_cards):
+        player.private_reserved_cards.pop(card_location[1])
+        player.player_reserved_cards.pop(card_location[1])
+    else:
+        game.field_cards[card_location[0]].pop(card_location[1])
+        if len(game.field_cards[card_location[0]]) < 4 and game.cards_remaining[card_location[0]] > 0:
+            game.field_cards[card_location[0]].append(game.card_order[card_location[0]]
+                                                      [game.total_cards[card_location[0]]
+                                                       - game.cards_remaining[card_location[0]]])
+            game.cards_remaining[card_location[0]] -= 1
+
+    player.player_num_gem_cards[gem_type] += 1
+    player.victory_points += card.vp
+
+    for x in range(0, 6):
+        player.player_chips[x] -= returned_chips[x]
+        game.field_chips[x] += returned_chips[x]
+
+    game.most_recent_action = player.username + " purchased a"
+    if gem_type == 2 or gem_type == 4:
+        game.most_recent_action += "n"
+    game.most_recent_action += " " + gems[gem_type] + " card"
+    if card_location[0] == len(game.field_cards):
+        game.most_recent_action += " from their reserved stash"
+    if card.vp > 0:
+        game.most_recent_action += " worth " + str(card.vp) + " victory point"
+        if card.vp > 1:
+            game.most_recent_action += "s"
+    if noble is not None:
+        game.most_recent_action += " and acquired a noble"
+        if noble.vp > 0:
+            game.most_recent_action += " worth " + str(noble.vp) + " victory point"
+            if noble.vp > 1:
+                game.most_recent_action += "s"
+    game.most_recent_action += "!"
+
+    next_turn(game)
 
     return flask.jsonify("OK")
