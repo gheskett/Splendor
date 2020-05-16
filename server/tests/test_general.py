@@ -1,7 +1,6 @@
 import main
 from main import app
 import pytest
-import flask
 
 session_id = []
 
