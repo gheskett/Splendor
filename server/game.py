@@ -3,6 +3,7 @@ import flask
 import json
 
 gems = ["Diamond", "Sapphire", "Emerald", "Ruby", "Onyx", "Wild"]
+gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "wild"]
 
 
 def check_victory(game):
@@ -200,20 +201,30 @@ def get_game_state(args, games):
 
     players = {}
     for _, value in game.players.items():
+        player_gems = {}
+        player_gem_cards = {}
+        for x in range(0, len(value.player_chips)):
+            player_gems[gem_ids[x]] = value.player_chips[x]
+        for x in range(0, len(value.player_num_gem_cards)):
+            player_gem_cards[gem_ids[x]] = value.player_num_gem_cards[x]
         player = {"player_id": value.player_id,
                   "username": value.username,
                   "player_cards": value.player_cards,
                   "player_reserved_cards": value.player_reserved_cards,
                   "private_reserved_cards": None,
-                  "player_chips": value.player_chips,
+                  "player_chips": player_gems,
                   "player_nobles": value.player_nobles,
-                  "player_num_gem_cards": value.player_num_gem_cards,
+                  "player_num_gem_cards": player_gem_cards,
                   "victory_points": value.victory_points
                   }
+
         if player_id == value.player_id:
             player["private_reserved_cards"] = value.private_reserved_cards
         players[player["player_id"]] = player
 
+    field_gems = {}
+    for x in range(0, len(game.field_chips)):
+        field_gems[gem_ids[x]] = game.field_chips[x]
     return_game = {
         "exists": True,
         "players": players,
@@ -224,7 +235,7 @@ def get_game_state(args, games):
         "player_turn": game.player_turn,
         "field_cards": game.field_cards,
         "cards_remaining": game.cards_remaining,
-        "field_chips": game.field_chips,
+        "field_chips": field_gems,
         "field_nobles": game.field_nobles,
         "victory": game.victory,
         "most_recent_action": game.most_recent_action

@@ -12,6 +12,7 @@ games = {}
 nobles = []
 cards = []
 lock = Lock()
+gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "wild"]
 
 
 # Noble object
@@ -116,7 +117,7 @@ def get_cards_database():
             "card_id": cards[x].card_id,
             "rank": cards[x].rank,
             "vp": cards[x].vp,
-            "gem_type": cards[x].gem_type,
+            "gem_type": gem_ids[cards[x].gem_type],
             "diamond": cards[x].diamond,
             "sapphire": cards[x].sapphire,
             "emerald": cards[x].emerald,
