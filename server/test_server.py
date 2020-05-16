@@ -15,7 +15,7 @@ def client():
 
 def test_new_game(client):
     for _ in range(0, 3):
-        result = client.post('/new_game', query_string=dict(
+        result = client.post('/api/new_game', query_string=dict(
             username='Bob'
         ), follow_redirects=True)
         json = result.get_json()
@@ -33,7 +33,7 @@ def test_join_game(client):
             elif y == 2:
                 username = 'Charlie'
 
-            result = client.post('/join_game', query_string=dict(
+            result = client.post('/api/join_game', query_string=dict(
                 session_id=session_id[x],
                 username=username
             ), follow_redirects=True)
@@ -44,14 +44,14 @@ def test_join_game(client):
 
 def test_leave_lobby(client):
     for x in range(0, 3):
-        result = client.post('/drop_out', query_string=dict(
+        result = client.post('/api/drop_out', query_string=dict(
             session_id=session_id[x],
             player_id=x,
             leave_point=0
         ), follow_redirects=True)
         assert result.get_json() == 'OK'
 
-        result = client.post('/join_game', query_string=dict(
+        result = client.post('/api/join_game', query_string=dict(
             session_id=session_id[x],
             username=''
         ), follow_redirects=True)
@@ -62,7 +62,7 @@ def test_leave_lobby(client):
 
 def test_is_game_started(client):
     for x in range(0, 3):
-        result = client.get('/is_game_started', query_string=dict(
+        result = client.get('/api/is_game_started', query_string=dict(
             session_id=session_id[x]
         ), follow_redirects=True)
 
@@ -103,7 +103,7 @@ def test_is_game_started(client):
 
 def test_start_game(client):
     for x in range(0, 3):
-        result = client.post('/start_game', query_string=dict(
+        result = client.post('/api/start_game', query_string=dict(
             session_id=session_id[x],
             player_id=0
         ), follow_redirects=True)
@@ -111,7 +111,7 @@ def test_start_game(client):
             assert result.get_json() == 'OK'
         else:
             assert result.get_json() == 'ERROR: Only the game host can start the game!'
-            result = client.post('/start_game', query_string=dict(
+            result = client.post('/api/start_game', query_string=dict(
                 session_id=session_id[x],
                 player_id=1
             ), follow_redirects=True)
@@ -171,7 +171,7 @@ def set_vars():
 def test_init_get_game_state(client):
     set_vars()
     for x in range(0, 3):
-        result = client.get('/get_game_state', query_string=dict(
+        result = client.get('/api/get_game_state', query_string=dict(
             session_id=session_id[x],
             player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
                                                              (main.games[session_id[x]].player_turn) - 1]
@@ -206,7 +206,7 @@ def test_grab_chips(client):
     for x in range(0, 3):
         result = ""
         if x == 0:
-            result = client.post('/grab_chips', query_string=dict(
+            result = client.post('/api/grab_chips', query_string=dict(
                 session_id=session_id[x],
                 player_id=0,
                 grabbed_chips='[1, 0, 0, 1, 1, 0]',
@@ -214,7 +214,7 @@ def test_grab_chips(client):
             ), follow_redirects=True)
             assert result.get_json() == 'OK'
         elif x == 1:
-            result = client.post('/grab_chips', query_string=dict(
+            result = client.post('/api/grab_chips', query_string=dict(
                 session_id=session_id[x],
                 player_id=2,
                 grabbed_chips='[0, 0, 2, 0, 0, 0]',
@@ -224,7 +224,7 @@ def test_grab_chips(client):
         elif x == 2:
             # main.games[session_id[x]].players[2].player_chips = [0, 3, 3, 3, 0, 0]
             # main.games[session_id[x]].field_chips = [7, 4, 4, 4, 7, 5]
-            result = client.post('/grab_chips', query_string=dict(
+            result = client.post('/api/grab_chips', query_string=dict(
                 session_id=session_id[x],
                 player_id=2,
                 grabbed_chips='[0, 1, 1, 0, 1, 0]',
@@ -233,7 +233,7 @@ def test_grab_chips(client):
             assert result.get_json() == 'OK'
 
     for x in range(0, 3):
-        result = client.get('/get_game_state', query_string=dict(
+        result = client.get('/api/get_game_state', query_string=dict(
             session_id=session_id[x],
             player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
                                                              (main.games[session_id[x]].player_turn) - 1]
@@ -274,7 +274,7 @@ def test_reserve_card(client):
     for x in range(0, 3):
         result = ""
         if x == 0:
-            result = client.post('/reserve_card', query_string=dict(
+            result = client.post('/api/reserve_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=1,
                 reserved_card=8,
@@ -282,7 +282,7 @@ def test_reserve_card(client):
             ), follow_redirects=True)
             assert result.get_json() == 'OK'
         elif x == 1:
-            result = client.post('/reserve_card', query_string=dict(
+            result = client.post('/api/reserve_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=0,
                 reserved_card=63,
@@ -290,7 +290,7 @@ def test_reserve_card(client):
             ), follow_redirects=True)
             assert result.get_json() == 'OK'
         elif x == 2:
-            result = client.post('/reserve_card', query_string=dict(
+            result = client.post('/api/reserve_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=3,
                 reserved_card=-3,
@@ -299,7 +299,7 @@ def test_reserve_card(client):
             assert result.get_json() == 'OK'
 
     for x in range(0, 3):
-        result = client.get('/get_game_state', query_string=dict(
+        result = client.get('/api/get_game_state', query_string=dict(
             session_id=session_id[x],
             player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
                                                              (main.games[session_id[x]].player_turn) - 1]
@@ -355,7 +355,7 @@ def test_buy_card(client):
             main.games[session_id[x]].players[0].player_chips = [3, 3, 3, 3, 3, 3]
             main.games[session_id[x]].players[0].player_num_gem_cards = [0, 0, 0, 0, 0]
             main.games[session_id[x]].field_chips = [1, 1, 1, 1, 1, 1]
-            result = client.post('/buy_card', query_string=dict(
+            result = client.post('/api/buy_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=0,
                 purchased_card=53,
@@ -364,7 +364,7 @@ def test_buy_card(client):
             ), follow_redirects=True)
             assert result.get_json() == 'OK'
         elif x == 1:
-            result = client.post('/buy_card', query_string=dict(
+            result = client.post('/api/buy_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=1,
                 purchased_card=63,
@@ -373,7 +373,7 @@ def test_buy_card(client):
             ), follow_redirects=True)
             assert result.get_json() == 'OK'
         elif x == 2:
-            result = client.post('/buy_card', query_string=dict(
+            result = client.post('/api/buy_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=1,
                 purchased_card=-3,
@@ -383,7 +383,7 @@ def test_buy_card(client):
             assert result.get_json() == 'OK'
 
     for x in range(0, 3):
-        result = client.get('/get_game_state', query_string=dict(
+        result = client.get('/api/get_game_state', query_string=dict(
             session_id=session_id[x],
             player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
                                                              (main.games[session_id[x]].player_turn) - 1]

@@ -90,7 +90,7 @@ class Game:
 
 
 # get nobles being used with server
-@app.route('/get_nobles_database', methods=['GET'])
+@app.route('/api/get_nobles_database', methods=['GET'])
 def get_nobles_database():
     nobles_db = {}
     for x in range(0, len(nobles)):
@@ -108,7 +108,7 @@ def get_nobles_database():
 
 
 # get cards being used with server
-@app.route('/get_cards_database', methods=['GET'])
+@app.route('/api/get_cards_database', methods=['GET'])
 def get_cards_database():
     cards_db = {}
     for x in range(0, len(cards)):
@@ -128,7 +128,7 @@ def get_cards_database():
 
 
 # Shut down server when Ctrl+C decides not to work properly  TODO: definitely not secure, remove later
-@app.route('/shutdown', methods=['POST'])
+@app.route('/api/shutdown', methods=['POST'])
 def shutdown():
     fnc = request.environ.get('werkzeug.server.shutdown')
     if fnc is None:
@@ -138,7 +138,7 @@ def shutdown():
 
 
 # create new game
-@app.route('/new_game', methods=['POST'])
+@app.route('/api/new_game', methods=['POST'])
 def new_game():
     player = Player()
     gm = Game(player)
@@ -148,7 +148,7 @@ def new_game():
 
 
 # join existing game
-@app.route('/join_game', methods=['POST'])
+@app.route('/api/join_game', methods=['POST'])
 def join_game():
     session_id = request.args.get('session_id')
     if session_id is None or session_id not in games.keys():
@@ -160,7 +160,7 @@ def join_game():
 
 
 # change username
-@app.route('/change_username', methods=['POST'])
+@app.route('/api/change_username', methods=['POST'])
 def change_username():
     with lock:
         ret = lobby.change_username(request.args, games)
@@ -168,7 +168,7 @@ def change_username():
 
 
 # check if game has started
-@app.route('/is_game_started', methods=['GET'])
+@app.route('/api/is_game_started', methods=['GET'])
 def is_game_started():
     with lock:
         ret = lobby.is_game_started(request.args, games)
@@ -176,7 +176,7 @@ def is_game_started():
 
 
 # drop out of game
-@app.route('/drop_out', methods=['POST'])
+@app.route('/api/drop_out', methods=['POST'])
 def drop_out():
     with lock:
         ret = lobby.drop_out(request.args, games)
@@ -184,7 +184,7 @@ def drop_out():
 
 
 # start game
-@app.route('/start_game', methods=['POST'])
+@app.route('/api/start_game', methods=['POST'])
 def start_game():
     with lock:
         ret = game.start_game(request.args, games)
@@ -192,7 +192,7 @@ def start_game():
 
 
 # get current status of game
-@app.route('/get_game_state', methods=['GET'])
+@app.route('/api/get_game_state', methods=['GET'])
 def get_game_state():
     with lock:
         ret = game.get_game_state(request.args, games)
@@ -200,7 +200,7 @@ def get_game_state():
 
 
 # player grabs chips from field
-@app.route('/grab_chips', methods=['POST'])
+@app.route('/api/grab_chips', methods=['POST'])
 def grab_chips():
     with lock:
         ret = game.grab_chips(request.args, games)
@@ -208,7 +208,7 @@ def grab_chips():
 
 
 # player reserves card from field
-@app.route('/reserve_card', methods=['POST'])
+@app.route('/api/reserve_card', methods=['POST'])
 def reserve_card():
     with lock:
         ret = game.reserve_card(request.args, games)
@@ -216,7 +216,7 @@ def reserve_card():
 
 
 # player buys card from field
-@app.route('/buy_card', methods=['POST'])
+@app.route('/api/buy_card', methods=['POST'])
 def buy_card():
     with lock:
         ret = game.buy_card(request.args, games, cards, nobles)
