@@ -1,7 +1,10 @@
 # Splendor
 Desktop variant of Splendor
 
-To run game API server: `python3 main.py [Port]`
+To run game API server:
+ - Run `python3 -m pip install -r requirements.txt
+ - Navigate to `server` folder
+ - Run `python3 main.py [Port]`
 
 To run phaser for frotend client:
  - Install nodejs and npm
