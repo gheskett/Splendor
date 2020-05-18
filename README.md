@@ -2,7 +2,7 @@
 Desktop variant of Splendor
 
 To run game API server:
- - Run `python3 -m pip install -r requirements.txt
+ - Run `python3 -m pip install -r requirements.txt`
  - Navigate to `server` folder
  - Run `python3 main.py [Port]`
 
