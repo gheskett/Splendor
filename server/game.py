@@ -399,7 +399,7 @@ def reserve_card(args, games):
                       returned_chips['ruby'], returned_chips['onyx'], returned_chips['wild']]
 
     player = game.players[player_id]
-    if len(player.private_reserved_cards) >= 3:
+    if len(player.private_reserved_cards) + 1 > 3:
         return flask.jsonify("ERROR: Player cannot reserve more than 3 cards at a time!")
 
     total_chips = 1  # wild token for reserving card
