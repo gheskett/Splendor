@@ -227,10 +227,9 @@ def test_init_get_game_state(client):
 
 def test_grab_chips(client):
     for x in range(0, 3):
-        result = ""
         if x == 0:
-            g_chips = '{"diamond": 1, "sapphire": 0, "emerald": 0, "ruby": 1, "onyx": 1, "wild": 0}'
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 0}'
+            g_chips = '{"diamond": 1, "sapphire": 0, "emerald": 0, "ruby": 1, "onyx": 1, "joker": 0}'
+            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
             result = client.post('/api/grab_chips', query_string=dict(
                 session_id=session_id[x],
                 player_id=0,
@@ -239,8 +238,8 @@ def test_grab_chips(client):
             ), follow_redirects=True)
             assert result.get_json() == 'OK'
         elif x == 1:
-            g_chips = '{"diamond": 0, "sapphire": 0, "emerald": 2, "ruby": 0, "onyx": 0, "wild": 0}'
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 0}'
+            g_chips = '{"diamond": 0, "sapphire": 0, "emerald": 2, "ruby": 0, "onyx": 0, "joker": 0}'
+            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
             result = client.post('/api/grab_chips', query_string=dict(
                 session_id=session_id[x],
                 player_id=2,
@@ -251,8 +250,8 @@ def test_grab_chips(client):
         elif x == 2:
             # main.games[session_id[x]].players[2].player_chips = [0, 3, 3, 3, 0, 0]
             # main.games[session_id[x]].field_chips = [7, 4, 4, 4, 7, 5]
-            g_chips = '{"diamond": 0, "sapphire": 1, "emerald": 1, "ruby": 0, "onyx": 1, "wild": 0}'
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 0}'
+            g_chips = '{"diamond": 0, "sapphire": 1, "emerald": 1, "ruby": 0, "onyx": 1, "joker": 0}'
+            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
             result = client.post('/api/grab_chips', query_string=dict(
                 session_id=session_id[x],
                 player_id=2,
@@ -271,8 +270,8 @@ def test_grab_chips(client):
 
         assert game['session_id'] == session_id[x]
         if x == 0:
-            p_chips = {"diamond": 1, "sapphire": 0, "emerald": 0, "ruby": 1, "onyx": 1, "wild": 0}
-            f_chips = {"diamond": 3, "sapphire": 4, "emerald": 4, "ruby": 3, "onyx": 3, "wild": 5}
+            p_chips = {"diamond": 1, "sapphire": 0, "emerald": 0, "ruby": 1, "onyx": 1, "joker": 0}
+            f_chips = {"diamond": 3, "sapphire": 4, "emerald": 4, "ruby": 3, "onyx": 3, "joker": 5}
             assert game['field_cards'] == [[8, 18, 14, 7], [51, 69, 57, 53], [84, 72, 77, 87]]
             assert game['field_nobles'] == [9, 2, 8]
             assert game['player_order'] == [0, 1]
@@ -282,8 +281,8 @@ def test_grab_chips(client):
             assert game['most_recent_action'] == 'Player 1 grabbed 1 Diamond, 1 Ruby, and 1 Onyx tokens!'
             assert game['cards_remaining'] == [36, 26, 16]
         elif x == 1:
-            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 2, "ruby": 0, "onyx": 0, "wild": 0}
-            f_chips = {"diamond": 5, "sapphire": 5, "emerald": 3, "ruby": 5, "onyx": 5, "wild": 5}
+            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 2, "ruby": 0, "onyx": 0, "joker": 0}
+            f_chips = {"diamond": 5, "sapphire": 5, "emerald": 3, "ruby": 5, "onyx": 5, "joker": 5}
             assert game['field_cards'] == [[23, 31, 22, 34], [67, 59, 63, 65], [82, 78, 76, 83]]
             assert game['field_nobles'] == [9, 1, 2, 3]
             assert game['player_order'] == [2, 0, 1]
@@ -293,8 +292,8 @@ def test_grab_chips(client):
             assert game['most_recent_action'] == 'Player 3 grabbed 2 Emerald tokens!'
             assert game['cards_remaining'] == [36, 26, 16]
         elif x == 2:
-            p_chips = {"diamond": 0, "sapphire": 1, "emerald": 1, "ruby": 0, "onyx": 1, "wild": 0}
-            f_chips = {"diamond": 7, "sapphire": 6, "emerald": 6, "ruby": 7, "onyx": 6, "wild": 5}
+            p_chips = {"diamond": 0, "sapphire": 1, "emerald": 1, "ruby": 0, "onyx": 1, "joker": 0}
+            f_chips = {"diamond": 7, "sapphire": 6, "emerald": 6, "ruby": 7, "onyx": 6, "joker": 5}
             assert game['field_cards'] == [[5, 11, 34, 4], [66, 51, 43, 62], [72, 89, 85, 87]]
             assert game['field_nobles'] == [8, 6, 9, 7, 5]
             assert game['player_order'] == [2, 3, 1, 0]
@@ -307,9 +306,8 @@ def test_grab_chips(client):
 
 def test_reserve_card(client):
     for x in range(0, 3):
-        result = ""
         if x == 0:
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 0}'
+            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
             result = client.post('/api/reserve_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=1,
@@ -318,7 +316,7 @@ def test_reserve_card(client):
             ), follow_redirects=True)
             assert result.get_json() == 'OK'
         elif x == 1:
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 0}'
+            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
             result = client.post('/api/reserve_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=0,
@@ -327,7 +325,7 @@ def test_reserve_card(client):
             ), follow_redirects=True)
             assert result.get_json() == 'OK'
         elif x == 2:
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 0}'
+            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
             result = client.post('/api/reserve_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=3,
@@ -346,8 +344,8 @@ def test_reserve_card(client):
 
         assert game['session_id'] == session_id[x]
         if x == 0:
-            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 1}
-            f_chips = {"diamond": 3, "sapphire": 4, "emerald": 4, "ruby": 3, "onyx": 3, "wild": 4}
+            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 1}
+            f_chips = {"diamond": 3, "sapphire": 4, "emerald": 4, "ruby": 3, "onyx": 3, "joker": 4}
             assert game['field_cards'] == [[25, 18, 14, 7], [51, 69, 57, 53], [84, 72, 77, 87]]
             assert game['players']['1']['player_reserved_cards'] == [1]
             assert game['players']['1']['private_reserved_cards'] == [8]
@@ -359,8 +357,8 @@ def test_reserve_card(client):
             assert game['most_recent_action'] == 'John reserved a card!'
             assert game['cards_remaining'] == [35, 26, 16]
         elif x == 1:
-            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 1}
-            f_chips = {"diamond": 5, "sapphire": 5, "emerald": 3, "ruby": 5, "onyx": 5, "wild": 4}
+            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 1}
+            f_chips = {"diamond": 5, "sapphire": 5, "emerald": 3, "ruby": 5, "onyx": 5, "joker": 4}
             assert game['field_cards'] == [[23, 31, 22, 34], [67, 59, 46, 65], [82, 78, 76, 83]]
             assert game['players']['0']['player_reserved_cards'] == [2]
             assert game['players']['0']['private_reserved_cards'] == [63]
@@ -372,8 +370,8 @@ def test_reserve_card(client):
             assert game['most_recent_action'] == 'Bob reserved a card!'
             assert game['cards_remaining'] == [36, 25, 16]
         elif x == 2:
-            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 1}
-            f_chips = {"diamond": 7, "sapphire": 6, "emerald": 6, "ruby": 7, "onyx": 6, "wild": 4}
+            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 1}
+            f_chips = {"diamond": 7, "sapphire": 6, "emerald": 6, "ruby": 7, "onyx": 6, "joker": 4}
             assert game['field_cards'] == [[5, 11, 34, 4], [66, 51, 43, 62], [72, 89, 85, 87]]
             assert game['players']['3']['player_reserved_cards'] == [3]
             assert game['players']['3']['private_reserved_cards'] == [82]
@@ -394,12 +392,11 @@ def test_reserve_card(client):
 
 def test_buy_card(client):
     for x in range(0, 3):
-        result = ""
         if x == 0:
             main.games[session_id[x]].players[0].player_chips = [3, 3, 3, 3, 3, 3]
             main.games[session_id[x]].players[0].player_num_gem_cards = [0, 0, 0, 0, 0]
             main.games[session_id[x]].field_chips = [1, 1, 1, 1, 1, 1]
-            r_chips = '{"diamond": 3, "sapphire": 0, "emerald": 2, "ruby": 3, "onyx": 0, "wild": 0}'
+            r_chips = '{"diamond": 3, "sapphire": 0, "emerald": 2, "ruby": 3, "onyx": 0, "joker": 0}'
             result = client.post('/api/buy_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=0,
@@ -412,7 +409,7 @@ def test_buy_card(client):
             main.games[session_id[x]].players[1].player_chips = [1, 1, 1, 1, 2, 1]
             main.games[session_id[x]].players[1].player_num_gem_cards = [0, 0, 0, 0, 0]
             main.games[session_id[x]].field_chips = [4, 4, 2, 4, 3, 3]
-            r_chips = '{"diamond": 0, "sapphire": 1, "emerald": 0, "ruby": 1, "onyx": 2, "wild": 1}'
+            r_chips = '{"diamond": 0, "sapphire": 1, "emerald": 0, "ruby": 1, "onyx": 2, "joker": 1}'
             result = client.post('/api/buy_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=1,
@@ -429,7 +426,7 @@ def test_buy_card(client):
             main.games[session_id[x]].players[1].private_reserved_cards.append(72)
             main.games[session_id[x]].field_cards[2][0] = 82
             main.games[session_id[x]].cards_remaining[2] -= 1
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 3, "wild": 1}'
+            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 3, "joker": 1}'
             result = client.post('/api/buy_card', query_string=dict(
                 session_id=session_id[x],
                 player_id=1,
@@ -449,9 +446,9 @@ def test_buy_card(client):
 
         assert game['session_id'] == session_id[x]
         if x == 0:
-            p_chips = {"diamond": 0, "sapphire": 3, "emerald": 1, "ruby": 0, "onyx": 3, "wild": 3}
+            p_chips = {"diamond": 0, "sapphire": 3, "emerald": 1, "ruby": 0, "onyx": 3, "joker": 3}
             g_cards = {"diamond": 0, "sapphire": 0, "emerald": 1, "ruby": 0, "onyx": 0}
-            f_chips = {"diamond": 4, "sapphire": 1, "emerald": 3, "ruby": 4, "onyx": 1, "wild": 1}
+            f_chips = {"diamond": 4, "sapphire": 1, "emerald": 3, "ruby": 4, "onyx": 1, "joker": 1}
             assert game['field_cards'] == [[25, 18, 14, 7], [51, 69, 57, 40], [84, 72, 77, 87]]
             assert game['players']['0']['player_reserved_cards'] == []
             assert game['players']['0']['private_reserved_cards'] == []
@@ -462,12 +459,12 @@ def test_buy_card(client):
             assert game['players']['0']['player_num_gem_cards'] == g_cards
             assert game['players']['0']['prestige_points'] == 1
             assert game['field_chips'] == f_chips
-            assert game['most_recent_action'] == 'Player 1 purchased an Emerald card worth 1 victory point!'
+            assert game['most_recent_action'] == 'Player 1 purchased an Emerald card worth 1 prestige point!'
             assert game['cards_remaining'] == [35, 25, 16]
         elif x == 1:
-            p_chips = {"diamond": 1, "sapphire": 0, "emerald": 1, "ruby": 0, "onyx": 0, "wild": 0}
+            p_chips = {"diamond": 1, "sapphire": 0, "emerald": 1, "ruby": 0, "onyx": 0, "joker": 0}
             g_cards = {"diamond": 0, "sapphire": 0, "emerald": 1, "ruby": 0, "onyx": 0}
-            f_chips = {"diamond": 4, "sapphire": 5, "emerald": 2, "ruby": 5, "onyx": 5, "wild": 4}
+            f_chips = {"diamond": 4, "sapphire": 5, "emerald": 2, "ruby": 5, "onyx": 5, "joker": 4}
             assert game['field_cards'] == [[23, 31, 30, 34], [67, 59, 46, 65], [82, 78, 76, 83]]
             assert game['players']['1']['player_reserved_cards'] == []
             assert game['players']['1']['private_reserved_cards'] == []
@@ -481,9 +478,9 @@ def test_buy_card(client):
             assert game['most_recent_action'] == 'Player 2 purchased an Emerald card!'
             assert game['cards_remaining'] == [35, 25, 16]
         elif x == 2:
-            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 1, "wild": 0}
+            p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 1, "joker": 0}
             g_cards = {"diamond": 2, "sapphire": 1, "emerald": 0, "ruby": 2, "onyx": 3}
-            f_chips = {"diamond": 7, "sapphire": 6, "emerald": 6, "ruby": 7, "onyx": 5, "wild": 4}
+            f_chips = {"diamond": 7, "sapphire": 6, "emerald": 6, "ruby": 7, "onyx": 5, "joker": 4}
             assert game['field_cards'] == [[5, 11, 34, 4], [66, 51, 43, 62], [82, 89, 85, 87]]
             assert game['players']['1']['player_reserved_cards'] == []
             assert game['players']['1']['private_reserved_cards'] == []
@@ -495,7 +492,7 @@ def test_buy_card(client):
             assert game['players']['1']['prestige_points'] == 4
             assert game['field_chips'] == f_chips
             assert game['most_recent_action'] == 'John purchased a Diamond card from their reserved stash worth 4 ' \
-                                                 'victory points!'
+                                                 'prestige points!'
             assert game['cards_remaining'] == [36, 26, 14]
 
         # print(client.get('/get_game_state', query_string=dict(

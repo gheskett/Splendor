@@ -12,14 +12,14 @@ games = {}
 nobles = []
 cards = []
 lock = Lock()
-gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "wild"]
+gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "Joker"]
 
 
 # Noble object
 class Noble:
     def __init__(self, pp, dmd, sap, emr, rby, onx):
         self.noble_id = len(nobles)  # noble ID
-        self.pp = pp  # victory points (always 3 for Nobles)
+        self.pp = pp  # prestige points (always 3 for Nobles)
         self.diamond = dmd  # diamonds needed
         self.sapphire = sap  # sapphires needed
         self.emerald = emr  # emeralds needed
@@ -32,7 +32,7 @@ class Card:
     def __init__(self, rank, pp, gem_type, dmd, sap, emr, rby, onx):
         self.card_id = len(cards)  # card ID
         self.rank = rank  # card rank (1, 2, or 3)
-        self.pp = pp  # victory points
+        self.pp = pp  # prestige points
         self.gem_type = gem_type  # gem type of card
         self.diamond = dmd  # diamonds needed
         self.sapphire = sap  # sapphires needed
@@ -88,16 +88,6 @@ class Game:
         self.field_nobles = []
         self.victory = []
         self.most_recent_action = "New lobby created successfully!"
-
-
-# Shut down server when Ctrl+C decides not to work properly  TODO: definitely not secure, remove later
-@app.route('/api/shutdown', methods=['POST'])
-def shutdown():
-    fnc = request.environ.get('werkzeug.server.shutdown')
-    if fnc is None:
-        raise RuntimeError('Not running Werkzeug Server')
-    fnc()
-    return 'Server shutting down...'
 
 
 # create new game

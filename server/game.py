@@ -2,8 +2,8 @@ import random
 import flask
 import json
 
-gems = ["Diamond", "Sapphire", "Emerald", "Ruby", "Onyx", "Wild"]
-gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "wild"]
+gems = ["Diamond", "Sapphire", "Emerald", "Ruby", "Onyx", "Joker"]
+gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "joker"]
 
 
 def check_victory(game):
@@ -281,9 +281,9 @@ def grab_chips(args, games):
         return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a dictionary length 6.")
 
     grabbed_chips = [grabbed_chips['diamond'], grabbed_chips['sapphire'], grabbed_chips['emerald'],
-                     grabbed_chips['ruby'], grabbed_chips['onyx'], grabbed_chips['wild']]
+                     grabbed_chips['ruby'], grabbed_chips['onyx'], grabbed_chips['joker']]
     returned_chips = [returned_chips['diamond'], returned_chips['sapphire'], returned_chips['emerald'],
-                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['wild']]
+                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['joker']]
 
     grabbed, returned, field_ch, player_ch, ret_cnt, grb_cnt = 0, 0, 0, 0, 0, 0
     is_two = False
@@ -312,13 +312,13 @@ def grab_chips(args, games):
 
         if grabbed_chips[x] == 1:
             if x == 5:
-                return flask.jsonify("ERROR: Player cannot take wilds with the grab_chips function!")
+                return flask.jsonify("ERROR: Player cannot take jokers with the grab_chips function!")
             if game.field_chips[x] <= 0:
                 return flask.jsonify("ERROR: Player tried to take unavailable chips from field!")
 
         if grabbed_chips[x] == 2:
             if x == 5:
-                return flask.jsonify("ERROR: Player cannot take wilds with the grab_chips function!")
+                return flask.jsonify("ERROR: Player cannot take jokers with the grab_chips function!")
             if game.field_chips[x] < 4:
                 return flask.jsonify("ERROR: Player cannot take two of the same gem type if there are less than four "
                                      "available!")
@@ -396,13 +396,15 @@ def reserve_card(args, games):
         return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a dictionary length 6.")
 
     returned_chips = [returned_chips['diamond'], returned_chips['sapphire'], returned_chips['emerald'],
-                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['wild']]
+                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['joker']]
 
     player = game.players[player_id]
     if len(player.private_reserved_cards) + 1 > 3:
         return flask.jsonify("ERROR: Player cannot reserve more than 3 cards at a time!")
 
-    total_chips = 1  # wild token for reserving card
+    total_chips = 1  # joker token for reserving card
+    if game.field_chips[5] <= 0:
+        total_chips = 0
     returned = 0
     for x in range(0, 6):
         total_chips += player.player_chips[x]
@@ -445,8 +447,10 @@ def reserve_card(args, games):
         else:
             game.field_cards[index[0]][index[1]] = None
 
-    player.player_chips[5] += 1
-    game.field_chips[5] -= 1
+    if game.field_chips[5] > 0:
+        player.player_chips[5] += 1
+        game.field_chips[5] -= 1
+
     game.cards_remaining[index[0]] -= 1
 
     if returned > 0:
@@ -515,7 +519,7 @@ def buy_card(args, games, cards, nobles):
         return flask.jsonify("ERROR: returned_chips has incorrect syntax!\nValue should be a dictionary length 6.")
 
     returned_chips = [returned_chips['diamond'], returned_chips['sapphire'], returned_chips['emerald'],
-                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['wild']]
+                      returned_chips['ruby'], returned_chips['onyx'], returned_chips['joker']]
 
     player = game.players[player_id]
 
@@ -586,7 +590,8 @@ def buy_card(args, games, cards, nobles):
             noble_req = None
             for y in range(0, len(nobles)):
                 if nobles[y].noble_id == game.field_nobles[x]:
-                    noble_req = [nobles[y].diamond, nobles[y].sapphire, nobles[y].emerald, nobles[y].ruby, nobles[y].onyx]
+                    noble_req = [nobles[y].diamond, nobles[y].sapphire, nobles[y].emerald, nobles[y].ruby,
+                                 nobles[y].onyx]
                     break
             if noble_req is None:
                 print("ERROR: Field nobles acquired a noble ID that does not exist! ID=" + str(game.field_nobles[x]),
@@ -634,13 +639,13 @@ def buy_card(args, games, cards, nobles):
     if card_location[0] == len(game.field_cards):
         game.most_recent_action += " from their reserved stash"
     if card.pp > 0:
-        game.most_recent_action += " worth " + str(card.pp) + " victory point"
+        game.most_recent_action += " worth " + str(card.pp) + " prestige point"
         if card.pp > 1:
             game.most_recent_action += "s"
     if noble is not None:
         game.most_recent_action += " and acquired a noble"
         if noble.pp > 0:
-            game.most_recent_action += " worth " + str(noble.pp) + " victory point"
+            game.most_recent_action += " worth " + str(noble.pp) + " prestige point"
             if noble.pp > 1:
                 game.most_recent_action += "s"
     game.most_recent_action += "!"
