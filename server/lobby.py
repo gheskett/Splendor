@@ -166,7 +166,7 @@ def drop_out(args, games):
     if leave_point == 1 and len(game.players) == 1:
         game.victory.append(game.player_order[0])
         game.player_turn = -2
-        game.most_recent_action += "\n" + game.players[game.player_order[0]].username + " is the only player left, so"\
+        game.most_recent_action += "\n\n" + game.players[game.player_order[0]].username + " is the only player left, so"\
                                                                                         "this means they win the game!"
     elif len(game.players) == 0:
         del games[session_id]
