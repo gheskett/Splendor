@@ -324,7 +324,7 @@ def test_reserve_card(client):
         if x == 0:
             p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 1}
             f_chips = {"diamond": 3, "sapphire": 4, "emerald": 4, "ruby": 3, "onyx": 3, "wild": 4}
-            assert game['field_cards'] == [[18, 14, 7, 25], [51, 69, 57, 53], [84, 72, 77, 87]]
+            assert game['field_cards'] == [[25, 18, 14, 7], [51, 69, 57, 53], [84, 72, 77, 87]]
             assert game['players']['1']['player_reserved_cards'] == [1]
             assert game['players']['1']['private_reserved_cards'] == [8]
             assert game['field_nobles'] == [9, 2, 8]
@@ -337,7 +337,7 @@ def test_reserve_card(client):
         elif x == 1:
             p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "wild": 1}
             f_chips = {"diamond": 5, "sapphire": 5, "emerald": 3, "ruby": 5, "onyx": 5, "wild": 4}
-            assert game['field_cards'] == [[23, 31, 22, 34], [67, 59, 65, 46], [82, 78, 76, 83]]
+            assert game['field_cards'] == [[23, 31, 22, 34], [67, 59, 46, 65], [82, 78, 76, 83]]
             assert game['players']['0']['player_reserved_cards'] == [2]
             assert game['players']['0']['private_reserved_cards'] == [63]
             assert game['field_nobles'] == [9, 1, 2, 3]
@@ -403,8 +403,7 @@ def test_buy_card(client):
             main.games[session_id[x]].field_chips = [7, 6, 6, 7, 2, 3]
             main.games[session_id[x]].players[1].player_reserved_cards.append(2)
             main.games[session_id[x]].players[1].private_reserved_cards.append(72)
-            main.games[session_id[x]].field_cards[2].pop(0)
-            main.games[session_id[x]].field_cards[2].append(82)
+            main.games[session_id[x]].field_cards[2][0] = 82
             main.games[session_id[x]].cards_remaining[2] -= 1
             r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 3, "wild": 1}'
             result = client.post('/api/buy_card', query_string=dict(
@@ -429,7 +428,7 @@ def test_buy_card(client):
             p_chips = {"diamond": 0, "sapphire": 3, "emerald": 1, "ruby": 0, "onyx": 3, "wild": 3}
             g_cards = {"diamond": 0, "sapphire": 0, "emerald": 1, "ruby": 0, "onyx": 0}
             f_chips = {"diamond": 4, "sapphire": 1, "emerald": 3, "ruby": 4, "onyx": 1, "wild": 1}
-            assert game['field_cards'] == [[18, 14, 7, 25], [51, 69, 57, 40], [84, 72, 77, 87]]
+            assert game['field_cards'] == [[25, 18, 14, 7], [51, 69, 57, 40], [84, 72, 77, 87]]
             assert game['players']['0']['player_reserved_cards'] == []
             assert game['players']['0']['private_reserved_cards'] == []
             assert game['field_nobles'] == [9, 2, 8]
@@ -445,7 +444,7 @@ def test_buy_card(client):
             p_chips = {"diamond": 1, "sapphire": 0, "emerald": 1, "ruby": 0, "onyx": 0, "wild": 0}
             g_cards = {"diamond": 0, "sapphire": 0, "emerald": 1, "ruby": 0, "onyx": 0}
             f_chips = {"diamond": 4, "sapphire": 5, "emerald": 2, "ruby": 5, "onyx": 5, "wild": 4}
-            assert game['field_cards'] == [[23, 31, 34, 30], [67, 59, 65, 46], [82, 78, 76, 83]]
+            assert game['field_cards'] == [[23, 31, 30, 34], [67, 59, 46, 65], [82, 78, 76, 83]]
             assert game['players']['1']['player_reserved_cards'] == []
             assert game['players']['1']['private_reserved_cards'] == []
             assert game['field_nobles'] == [9, 1, 2, 3]
@@ -461,7 +460,7 @@ def test_buy_card(client):
             p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 1, "wild": 0}
             g_cards = {"diamond": 2, "sapphire": 1, "emerald": 0, "ruby": 2, "onyx": 3}
             f_chips = {"diamond": 7, "sapphire": 6, "emerald": 6, "ruby": 7, "onyx": 5, "wild": 4}
-            assert game['field_cards'] == [[5, 11, 34, 4], [66, 51, 43, 62], [89, 85, 87, 82]]
+            assert game['field_cards'] == [[5, 11, 34, 4], [66, 51, 43, 62], [82, 89, 85, 87]]
             assert game['players']['1']['player_reserved_cards'] == []
             assert game['players']['1']['private_reserved_cards'] == []
             assert game['field_nobles'] == [8, 6, 9, 7, 5]

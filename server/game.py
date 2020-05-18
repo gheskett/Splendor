@@ -416,36 +416,38 @@ def reserve_card(args, games):
     if returned > 0 and total_chips - returned < 10:
         return flask.jsonify("ERROR: Player should not be returning chips when they don't need to!")
 
-    if 0 > reserved_card >= -3:
-        index = (reserved_card * -1) - 1
-        if game.cards_remaining[index] <= 0:
-            return flask.jsonify("ERROR: No more cards are left in this deck!")
-        reserved_card = game.card_order[index][game.total_cards[index] - game.cards_remaining[index]]
-        game.field_cards[index].append(reserved_card)
-        game.cards_remaining[index] -= 1
-
     index = [-1, -1]
-    for x in range(0, len(game.field_cards)):
-        for y in range(0, len(game.field_cards[x])):
-            if game.field_cards[x][y] == reserved_card:
-                index = [x, y]
+    if 0 > reserved_card >= -3:
+        index[0] = (reserved_card * -1) - 1
+        if game.cards_remaining[index[0]] <= 0:
+            return flask.jsonify("ERROR: No more cards are left in this deck!")
+        reserved_card = game.card_order[index[0]][game.total_cards[index[0]] - game.cards_remaining[index[0]]]
+
+    if index[0] == -1:
+        for x in range(0, len(game.field_cards)):
+            for y in range(0, len(game.field_cards[x])):
+                if game.field_cards[x][y] == reserved_card:
+                    index = [x, y]
+                    break
+            if index[0] != -1:
                 break
-        if index[0] != -1:
-            break
 
     if index[0] == -1:
         return flask.jsonify("ERROR: Card does not exist on the field at this time!")
 
     player.private_reserved_cards.append(reserved_card)
     player.player_reserved_cards.append(index[0]+1)
-    game.field_cards[index[0]].pop(index[1])
+
+    if index[1] != -1:
+        if game.cards_remaining[index[0]] > 0:
+            game.field_cards[index[0]][index[1]] = game.card_order[index[0]][game.total_cards[index[0]]
+                                                                             - game.cards_remaining[index[0]]]
+        else:
+            game.field_cards[index[0]][index[1]] = None
+
     player.player_chips[5] += 1
     game.field_chips[5] -= 1
-
-    if len(game.field_cards[index[0]]) < 4 and game.cards_remaining[index[0]] > 0:
-        game.field_cards[index[0]].append(game.card_order[index[0]][game.total_cards[index[0]]
-                                                                    - game.cards_remaining[index[0]]])
-        game.cards_remaining[index[0]] -= 1
+    game.cards_remaining[index[0]] -= 1
 
     if returned > 0:
         for x in range(0, 6):
@@ -610,12 +612,13 @@ def buy_card(args, games, cards, nobles):
         player.private_reserved_cards.pop(card_location[1])
         player.player_reserved_cards.pop(card_location[1])
     else:
-        game.field_cards[card_location[0]].pop(card_location[1])
-        if len(game.field_cards[card_location[0]]) < 4 and game.cards_remaining[card_location[0]] > 0:
-            game.field_cards[card_location[0]].append(game.card_order[card_location[0]]
-                                                      [game.total_cards[card_location[0]]
-                                                       - game.cards_remaining[card_location[0]]])
+        if game.cards_remaining[card_location[0]] > 0:
+            game.field_cards[card_location[0]][card_location[1]] = \
+                game.card_order[card_location[0]][game.total_cards[card_location[0]]
+                                                  - game.cards_remaining[card_location[0]]]
             game.cards_remaining[card_location[0]] -= 1
+        else:
+            game.field_cards[card_location[0]][card_location[1]] = None
 
     player.player_num_gem_cards[gem_type] += 1
     player.victory_points += card.vp
