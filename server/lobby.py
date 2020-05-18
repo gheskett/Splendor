@@ -122,12 +122,10 @@ def is_game_started(args, games):
 def drop_out(args, games):
     player_id = args.get('player_id')
     session_id = args.get('session_id')
-    leave_point = args.get('leave_point')
-    if player_id is None or session_id is None or leave_point is None:
-        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'player_id', 'session_id', 'leave_point'")
+    if player_id is None or session_id is None:
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'player_id', 'session_id'")
 
     player_id = int(player_id)
-    leave_point = int(leave_point)
 
     if session_id not in games.keys():
         return flask.jsonify("ERROR: Could not find game!")
@@ -159,11 +157,11 @@ def drop_out(args, games):
     del game.players[player_id]
 
     game.most_recent_action = tmp + " left the game"
-    if leave_point == 0:
+    if game.player_turn == -3:
         game.most_recent_action += " lobby"
     game.most_recent_action += "!"
 
-    if leave_point == 1 and len(game.players) == 1:
+    if game.player_turn >= 0 and len(game.players) == 1:
         game.victory.append(game.player_order[0])
         game.player_turn = -2
         game.most_recent_action += "\n\n" + game.players[game.player_order[0]].username + " is the only player left, " \
