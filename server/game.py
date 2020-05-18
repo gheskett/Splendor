@@ -7,13 +7,13 @@ gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "wild"]
 
 
 def check_victory(game):
-    highest_vp = 0
+    highest_pp = 0
     lowest_count = -1
     for _, value in game.players.items():
-        if value.victory_points >= highest_vp:
-            highest_vp = value.victory_points
+        if value.prestige_points >= highest_pp:
+            highest_pp = value.prestige_points
 
-    if highest_vp < 15:
+    if highest_pp < 15:
         return
 
     for _, value in game.players.items():
@@ -24,7 +24,7 @@ def check_victory(game):
                 lowest_count = tmp
 
     for _, value in game.players.items():
-        if value.victory_points != highest_vp:
+        if value.prestige_points != highest_pp:
             continue
         tmp = 0
         for x in range(0, 5):
@@ -133,7 +133,7 @@ def start_game(args, games):
         value.player_chips = [0, 0, 0, 0, 0, 0]
         value.player_num_gem_cards = [0, 0, 0, 0, 0]
         value.player_nobles = []
-        value.victory_points = 0
+        value.prestige_points = 0
 
     random.shuffle(game.player_order)
     random.shuffle(game.noble_order)
@@ -215,7 +215,7 @@ def get_game_state(args, games):
                   "player_chips": player_gems,
                   "player_nobles": value.player_nobles,
                   "player_num_gem_cards": player_gem_cards,
-                  "victory_points": value.victory_points
+                  "prestige_points": value.prestige_points
                   }
 
         if player_id == value.player_id:
@@ -605,7 +605,7 @@ def buy_card(args, games, cards, nobles):
     if noble is not None:
         player.player_nobles.append(noble_acquired)
         game.field_nobles.pop(noble_location)
-        player.victory_points += noble.vp
+        player.prestige_points += noble.pp
 
     player.player_cards.append(purchased_card)
     if card_location[0] == len(game.field_cards):
@@ -621,7 +621,7 @@ def buy_card(args, games, cards, nobles):
             game.field_cards[card_location[0]][card_location[1]] = None
 
     player.player_num_gem_cards[gem_type] += 1
-    player.victory_points += card.vp
+    player.prestige_points += card.pp
 
     for x in range(0, 6):
         player.player_chips[x] -= returned_chips[x]
@@ -633,15 +633,15 @@ def buy_card(args, games, cards, nobles):
     game.most_recent_action += " " + gems[gem_type] + " card"
     if card_location[0] == len(game.field_cards):
         game.most_recent_action += " from their reserved stash"
-    if card.vp > 0:
-        game.most_recent_action += " worth " + str(card.vp) + " victory point"
-        if card.vp > 1:
+    if card.pp > 0:
+        game.most_recent_action += " worth " + str(card.pp) + " victory point"
+        if card.pp > 1:
             game.most_recent_action += "s"
     if noble is not None:
         game.most_recent_action += " and acquired a noble"
-        if noble.vp > 0:
-            game.most_recent_action += " worth " + str(noble.vp) + " victory point"
-            if noble.vp > 1:
+        if noble.pp > 0:
+            game.most_recent_action += " worth " + str(noble.pp) + " victory point"
+            if noble.pp > 1:
                 game.most_recent_action += "s"
     game.most_recent_action += "!"
 

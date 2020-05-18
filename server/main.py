@@ -17,9 +17,9 @@ gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "wild"]
 
 # Noble object
 class Noble:
-    def __init__(self, vp, dmd, sap, emr, rby, onx):
+    def __init__(self, pp, dmd, sap, emr, rby, onx):
         self.noble_id = len(nobles)  # noble ID
-        self.vp = vp  # victory points (always 3 for Nobles)
+        self.pp = pp  # victory points (always 3 for Nobles)
         self.diamond = dmd  # diamonds needed
         self.sapphire = sap  # sapphires needed
         self.emerald = emr  # emeralds needed
@@ -29,10 +29,10 @@ class Noble:
 
 # Card object
 class Card:
-    def __init__(self, rank, vp, gem_type, dmd, sap, emr, rby, onx):
+    def __init__(self, rank, pp, gem_type, dmd, sap, emr, rby, onx):
         self.card_id = len(cards)  # card ID
         self.rank = rank  # card rank (1, 2, or 3)
-        self.vp = vp  # victory points
+        self.pp = pp  # victory points
         self.gem_type = gem_type  # gem type of card
         self.diamond = dmd  # diamonds needed
         self.sapphire = sap  # sapphires needed
@@ -52,7 +52,7 @@ class Player:
         self.player_chips = [0, 0, 0, 0, 0, 0]
         self.player_nobles = []
         self.player_num_gem_cards = [0, 0, 0, 0, 0]
-        self.victory_points = 0
+        self.prestige_points = 0
 
 
 # Game object
@@ -193,7 +193,7 @@ def get_nobles_database():
     for x in range(0, len(nobles)):
         noble = {
             "noble_id": nobles[x].noble_id,
-            "victory_points": nobles[x].vp,
+            "prestige_points": nobles[x].pp,
             "diamond": nobles[x].diamond,
             "sapphire": nobles[x].sapphire,
             "emerald": nobles[x].emerald,
@@ -212,7 +212,7 @@ def get_cards_database():
         card = {
             "card_id": cards[x].card_id,
             "rank": cards[x].rank,
-            "victory_points": cards[x].vp,
+            "prestige_points": cards[x].pp,
             "gem_type": gem_ids[cards[x].gem_type],
             "diamond": cards[x].diamond,
             "sapphire": cards[x].sapphire,

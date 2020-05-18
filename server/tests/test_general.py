@@ -460,7 +460,7 @@ def test_buy_card(client):
             assert game['player_turn'] == 1
             assert game['players']['0']['player_chips'] == p_chips
             assert game['players']['0']['player_num_gem_cards'] == g_cards
-            assert game['players']['0']['victory_points'] == 1
+            assert game['players']['0']['prestige_points'] == 1
             assert game['field_chips'] == f_chips
             assert game['most_recent_action'] == 'Player 1 purchased an Emerald card worth 1 victory point!'
             assert game['cards_remaining'] == [35, 25, 16]
@@ -476,7 +476,7 @@ def test_buy_card(client):
             assert game['player_turn'] == 2
             assert game['players']['1']['player_chips'] == p_chips
             assert game['players']['1']['player_num_gem_cards'] == g_cards
-            assert game['players']['1']['victory_points'] == 0
+            assert game['players']['1']['prestige_points'] == 0
             assert game['field_chips'] == f_chips
             assert game['most_recent_action'] == 'Player 2 purchased an Emerald card!'
             assert game['cards_remaining'] == [35, 25, 16]
@@ -492,7 +492,7 @@ def test_buy_card(client):
             assert game['player_turn'] == 0
             assert game['players']['1']['player_chips'] == p_chips
             assert game['players']['1']['player_num_gem_cards'] == g_cards
-            assert game['players']['1']['victory_points'] == 4
+            assert game['players']['1']['prestige_points'] == 4
             assert game['field_chips'] == f_chips
             assert game['most_recent_action'] == 'John purchased a Diamond card from their reserved stash worth 4 ' \
                                                  'victory points!'
@@ -511,7 +511,7 @@ def test_get_cards_database(client):
     assert cards['4'] == {
         'card_id': 4,
         'rank': 1,
-        'victory_points': 0,
+        'prestige_points': 0,
         'gem_type': 'diamond',
         'diamond': 0,
         'sapphire': 3,
@@ -522,7 +522,7 @@ def test_get_cards_database(client):
     assert cards['52'] == {
         'card_id': 52,
         'rank': 2,
-        'victory_points': 1,
+        'prestige_points': 1,
         'gem_type': 'emerald',
         'diamond': 2,
         'sapphire': 3,
@@ -533,7 +533,7 @@ def test_get_cards_database(client):
     assert cards['83'] == {
         'card_id': 83,
         'rank': 3,
-        'victory_points': 4,
+        'prestige_points': 4,
         'gem_type': 'ruby',
         'diamond': 0,
         'sapphire': 3,
@@ -548,7 +548,7 @@ def test_get_nobles_database(client):
     cards = result.get_json()
     assert cards['2'] == {
         'noble_id': 2,
-        'victory_points': 3,
+        'prestige_points': 3,
         'diamond': 3,
         'sapphire': 0,
         'emerald': 0,
@@ -557,7 +557,7 @@ def test_get_nobles_database(client):
     }
     assert cards['9'] == {
         'noble_id': 9,
-        'victory_points': 3,
+        'prestige_points': 3,
         'diamond': 3,
         'sapphire': 3,
         'emerald': 3,
@@ -566,7 +566,7 @@ def test_get_nobles_database(client):
     }
     assert cards['7'] == {
         'noble_id': 7,
-        'victory_points': 3,
+        'prestige_points': 3,
         'diamond': 3,
         'sapphire': 3,
         'emerald': 0,
