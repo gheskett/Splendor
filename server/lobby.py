@@ -16,7 +16,6 @@ def generate_session_id():
 
 # create new game
 def new_game(player, args, game, games):
-    username = args.get('username')
     while True:
         session_id = generate_session_id()
         if session_id not in games.keys():
@@ -25,10 +24,10 @@ def new_game(player, args, game, games):
     game.session_id = session_id
     games[session_id] = game
 
-    if username is None or username == "":
+    if args is None or 'username' not in args.keys() or args['username'] == "":
         player.username = "Player " + str(player.player_id + 1)
     else:
-        player.username = username
+        player.username = args['username']
 
     return flask.jsonify(player_id=game.players[player.player_id].player_id, session_id=session_id,
                          most_recent_action=game.most_recent_action)
@@ -36,8 +35,10 @@ def new_game(player, args, game, games):
 
 # join existing game
 def join_game(player, args, games):
-    session_id = args.get('session_id')
-    username = args.get('username')
+    if args is None or 'session_id' not in args.keys():
+        return flask.jsonify(player_id=-1, session_id=None)
+
+    session_id = args['session_id']
 
     game = games[session_id]
     if game.player_turn >= 0:
@@ -51,10 +52,10 @@ def join_game(player, args, games):
             break
         x += 1
     player.player_id = x
-    if username is None or username == "":
+    if 'username' not in args.keys() or args['username'] is None or args['username'] == "":
         player.username = "Player " + str(player.player_id + 1)
     else:
-        player.username = username
+        player.username = args['username']
     game.players[player.player_id] = player
     game.player_order.append(player.player_id)
     for y in range(0, 5):
@@ -67,10 +68,11 @@ def join_game(player, args, games):
 
 # change username
 def change_username(args, games):
-    session_id = args.get('session_id')
-    username = args.get('username')
-    player_id = args.get('player_id')
-    if player_id is None or session_id is None or username is None:
+    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys():
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'player_id', 'session_id', 'username'")
+    session_id = args['session_id']
+    player_id = args['player_id']
+    if player_id is None or session_id is None:
         return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'player_id', 'session_id', 'username'")
     if session_id not in games.keys():
         return flask.jsonify("ERROR: Could not find game!")
@@ -84,20 +86,22 @@ def change_username(args, games):
 
     tmp = game.players[player_id].username
 
-    if username == "":
+    if 'username' not in args.keys() or args['username'] is None or args['username'] == "":
         game.players[player_id].username = "Player " + str(game.players[player_id].player_id + 1)
     else:
-        game.players[player_id].username = username
+        game.players[player_id].username = args['username']
 
-    if tmp != username:
-        game.most_recent_action = tmp + " changed their username to " + username + "!"
+    if tmp != args['username']:
+        game.most_recent_action = tmp + " changed their username to " + args['username'] + "!"
 
     return flask.jsonify("OK")
 
 
 # check if game has started
 def is_game_started(args, games):
-    session_id = args.get('session_id')
+    if args is None or 'session_id' not in args.keys():
+        return flask.jsonify(exists=False, is_started=False, players={}, host_id=-1)
+    session_id = args['session_id']
 
     if session_id is None or session_id not in games.keys():
         return flask.jsonify(exists=False, is_started=False, players={}, host_id=-1)
@@ -120,8 +124,10 @@ def is_game_started(args, games):
 
 # drop out of game
 def drop_out(args, games):
-    player_id = args.get('player_id')
-    session_id = args.get('session_id')
+    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys():
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'player_id', 'session_id'")
+    player_id = args['player_id']
+    session_id = args['session_id']
     if player_id is None or session_id is None:
         return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'player_id', 'session_id'")
 

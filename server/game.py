@@ -95,8 +95,10 @@ def token_str(total, lst):
 
 # start game
 def start_game(args, games):
-    player_id = args.get('player_id')
-    session_id = args.get('session_id')
+    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys():
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id'")
+    player_id = args['player_id']
+    session_id = args['session_id']
 
     if player_id is None or session_id is None:
         return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id'")
@@ -164,15 +166,17 @@ def start_game(args, games):
 
 # get current status of game
 def get_game_state(args, games):
-    player_id = args.get('player_id')
-    session_id = args.get('session_id')
+    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys():
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id'")
+    player_id = args['player_id']
+    session_id = args['session_id']
 
     return_game = {
         "exists": False
     }
 
     if session_id is None or session_id not in games.keys():
-        return flask.jsonify(game=return_game)
+        return flask.jsonify(return_game)
 
     game = games[session_id]
 
@@ -246,10 +250,14 @@ def get_game_state(args, games):
 
 # player grabs chips from field
 def grab_chips(args, games):
-    player_id = args.get('player_id')
-    session_id = args.get('session_id')
-    grabbed_chips = args.get('grabbed_chips')
-    returned_chips = args.get('returned_chips')
+    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys() or 'grabbed_chips' not in \
+            args.keys() or 'returned_chips' not in args.keys():
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id', "
+                             "'grabbed_chips', 'returned_chips'")
+    player_id = args['player_id']
+    session_id = args['session_id']
+    grabbed_chips = args['grabbed_chips']
+    returned_chips = args['returned_chips']
 
     if player_id is None or session_id is None or grabbed_chips is None or returned_chips is None:
         return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id', "
@@ -363,10 +371,14 @@ def grab_chips(args, games):
 
 # player reserves card from field
 def reserve_card(args, games):
-    player_id = args.get('player_id')
-    session_id = args.get('session_id')
-    reserved_card = args.get('reserved_card')
-    returned_chips = args.get('returned_chips')
+    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys() or 'reserved_card' not in \
+            args.keys() or 'returned_chips' not in args.keys():
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id', "
+                             "'reserved_card', 'returned_chips'")
+    player_id = args['player_id']
+    session_id = args['session_id']
+    reserved_card = args['reserved_card']
+    returned_chips = args['returned_chips']
 
     if player_id is None or session_id is None or reserved_card is None or returned_chips is None:
         return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id', "
@@ -469,11 +481,15 @@ def reserve_card(args, games):
 
 # player buys card from field
 def buy_card(args, games, cards, nobles):
-    player_id = args.get('player_id')
-    session_id = args.get('session_id')
-    purchased_card = args.get('purchased_card')
-    returned_chips = args.get('returned_chips')
-    noble_acquired = args.get('noble_acquired')
+    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys() or 'purchased_card' not in \
+            args.keys() or 'returned_chips' not in args.keys() or 'noble_acquired' not in args.keys():
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id', "
+                             "'purchased_card', 'returned_chips', 'noble_acquired'")
+    player_id = args['player_id']
+    session_id = args['session_id']
+    purchased_card = args['purchased_card']
+    returned_chips = args['returned_chips']
+    noble_acquired = args['noble_acquired']
 
     if player_id is None or session_id is None or purchased_card is None or returned_chips is None \
             or noble_acquired is None:

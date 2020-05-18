@@ -96,19 +96,22 @@ def new_game():
     player = Player()
     gm = Game(player)
     with lock:
-        ret = lobby.new_game(player, request.args, gm, games)
+        ret = lobby.new_game(player, request.get_json(), gm, games)
     return ret
 
 
 # join existing game
 @app.route('/api/join_game', methods=['POST'])
 def join_game():
-    session_id = request.args.get('session_id')
+    session_id = request.get_json()
+    if session_id is None or 'session_id' not in session_id.keys():
+        return flask.jsonify(player_id=-1, session_id=None)
+    session_id = session_id['session_id']
     if session_id is None or session_id not in games.keys():
         return flask.jsonify(player_id=-1, session_id=None)
     player = Player()
     with lock:
-        ret = lobby.join_game(player, request.args, games)
+        ret = lobby.join_game(player, request.get_json(), games)
     return ret
 
 
@@ -116,7 +119,7 @@ def join_game():
 @app.route('/api/change_username', methods=['POST'])
 def change_username():
     with lock:
-        ret = lobby.change_username(request.args, games)
+        ret = lobby.change_username(request.get_json(), games)
     return ret
 
 
@@ -124,7 +127,7 @@ def change_username():
 @app.route('/api/is_game_started', methods=['GET'])
 def is_game_started():
     with lock:
-        ret = lobby.is_game_started(request.args, games)
+        ret = lobby.is_game_started(request.get_json(), games)
     return ret
 
 
@@ -132,7 +135,7 @@ def is_game_started():
 @app.route('/api/drop_out', methods=['POST'])
 def drop_out():
     with lock:
-        ret = lobby.drop_out(request.args, games)
+        ret = lobby.drop_out(request.get_json(), games)
     return ret
 
 
@@ -140,7 +143,7 @@ def drop_out():
 @app.route('/api/start_game', methods=['POST'])
 def start_game():
     with lock:
-        ret = game.start_game(request.args, games)
+        ret = game.start_game(request.get_json(), games)
     return ret
 
 
@@ -148,7 +151,7 @@ def start_game():
 @app.route('/api/get_game_state', methods=['GET'])
 def get_game_state():
     with lock:
-        ret = game.get_game_state(request.args, games)
+        ret = game.get_game_state(request.get_json(), games)
     return ret
 
 
@@ -156,7 +159,7 @@ def get_game_state():
 @app.route('/api/grab_chips', methods=['POST'])
 def grab_chips():
     with lock:
-        ret = game.grab_chips(request.args, games)
+        ret = game.grab_chips(request.get_json(), games)
     return ret
 
 
@@ -164,7 +167,7 @@ def grab_chips():
 @app.route('/api/reserve_card', methods=['POST'])
 def reserve_card():
     with lock:
-        ret = game.reserve_card(request.args, games)
+        ret = game.reserve_card(request.get_json(), games)
     return ret
 
 
@@ -172,7 +175,7 @@ def reserve_card():
 @app.route('/api/buy_card', methods=['POST'])
 def buy_card():
     with lock:
-        ret = game.buy_card(request.args, games, cards, nobles)
+        ret = game.buy_card(request.get_json(), games, cards, nobles)
     return ret
 
 
