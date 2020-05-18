@@ -91,8 +91,8 @@ def change_username(args, games):
     else:
         game.players[player_id].username = args['username']
 
-    if tmp != args['username']:
-        game.most_recent_action = tmp + " changed their username to " + args['username'] + "!"
+    if tmp != game.players[player_id].username:
+        game.most_recent_action = tmp + " changed their username to " + game.players[player_id].username + "!"
 
     return flask.jsonify("OK")
 

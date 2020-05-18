@@ -52,7 +52,6 @@ def test_change_username(client):
     assert result.get_json() == 'OK'
     assert main.games[session_id[0]].players[0].username == "Gerald"
     result = client.post('/api/change_username', data=json.dumps(dict(
-        username='',
         session_id=session_id[1],
         player_id=1
     )), follow_redirects=True, content_type='application/json')
