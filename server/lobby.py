@@ -173,9 +173,4 @@ def drop_out(args, games):
     elif game.host_id == player_id:
         game.host_id = game.player_order[0]
 
-    game.most_recent_action = tmp + " left the game"
-    if leave_point == 0:
-        game.most_recent_action += " lobby"
-    game.most_recent_action += "!"
-
     return flask.jsonify("OK")
