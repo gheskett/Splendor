@@ -354,7 +354,7 @@ def test_reserve_card(client):
             assert game['player_turn'] == 0
             assert game['players']['1']['player_chips'] == p_chips
             assert game['field_chips'] == f_chips
-            assert game['most_recent_action'] == 'John reserved a card!'
+            assert game['most_recent_action'] == 'John reserved a card of rank 1 and earned a Joker token!'
             assert game['cards_remaining'] == [35, 26, 16]
         elif x == 1:
             p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 1}
@@ -367,7 +367,7 @@ def test_reserve_card(client):
             assert game['player_turn'] == 1
             assert game['players']['0']['player_chips'] == p_chips
             assert game['field_chips'] == f_chips
-            assert game['most_recent_action'] == 'Bob reserved a card!'
+            assert game['most_recent_action'] == 'Bob reserved a card of rank 2 and earned a Joker token!'
             assert game['cards_remaining'] == [36, 25, 16]
         elif x == 2:
             p_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 1}
@@ -380,7 +380,7 @@ def test_reserve_card(client):
             assert game['player_turn'] == 1
             assert game['players']['3']['player_chips'] == p_chips
             assert game['field_chips'] == f_chips
-            assert game['most_recent_action'] == 'Charlie reserved a card!'
+            assert game['most_recent_action'] == 'Charlie reserved a card of rank 3 and earned a Joker token!'
             assert game['cards_remaining'] == [36, 26, 15]
 
         # print(client.get('/get_game_state', query_string=dict(

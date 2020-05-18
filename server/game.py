@@ -353,7 +353,7 @@ def grab_chips(args, games):
     if returned > 0:
         game.most_recent_action += ", while returning " + token_str(ret_cnt, returned_chips)
         if returned != 1:
-            game.most_recent_action += "!"
+            game.most_recent_action += "s"
     game.most_recent_action += "!"
 
     next_turn(game)
@@ -447,17 +447,20 @@ def reserve_card(args, games):
         else:
             game.field_cards[index[0]][index[1]] = None
 
+    game.most_recent_action = player.username + " reserved a card of rank " + str(index[0] + 1)
+
     if game.field_chips[5] > 0:
         player.player_chips[5] += 1
         game.field_chips[5] -= 1
+        game.most_recent_action += " and earned a " + gems[5] + " token"
+
+    game.most_recent_action += "!"
 
     game.cards_remaining[index[0]] -= 1
 
     if returned > 0:
         for x in range(0, 6):
             player.player_chips -= returned_chips[x]
-
-    game.most_recent_action = player.username + " reserved a card!"
 
     next_turn(game)
 
@@ -643,7 +646,7 @@ def buy_card(args, games, cards, nobles):
         if card.pp > 1:
             game.most_recent_action += "s"
     if noble is not None:
-        game.most_recent_action += " and acquired a noble"
+        game.most_recent_action += " and acquired a noble tile"
         if noble.pp > 0:
             game.most_recent_action += " worth " + str(noble.pp) + " prestige point"
             if noble.pp > 1:
