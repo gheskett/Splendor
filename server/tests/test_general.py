@@ -41,6 +41,30 @@ def test_join_game(client):
             assert json['player_id'] == y + 1
 
 
+def test_change_username(client):
+    result = client.post('/api/change_username', query_string=dict(
+        username='Gerald',
+        session_id=session_id[0],
+        player_id=0
+    ), follow_redirects=True)
+    assert result.get_json() == 'OK'
+    assert main.games[session_id[0]].players[0].username == "Gerald"
+    result = client.post('/api/change_username', query_string=dict(
+        username='',
+        session_id=session_id[1],
+        player_id=1
+    ), follow_redirects=True)
+    assert result.get_json() == 'OK'
+    assert main.games[session_id[1]].players[1].username == "Player 2"
+    result = client.post('/api/change_username', query_string=dict(
+        username="John Doe",
+        session_id=session_id[2],
+        player_id=2
+    ), follow_redirects=True)
+    assert result.get_json() == 'OK'
+    assert main.games[session_id[2]].players[2].username == "John Doe"
+
+
 def test_leave_lobby(client):
     for x in range(0, 3):
         result = client.post('/api/drop_out', query_string=dict(
@@ -479,3 +503,73 @@ def test_buy_card(client):
         #     player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
         #                                                              (main.games[session_id[x]].player_turn) - 1]
         # ), follow_redirects=True).get_json(), flush=True)
+
+
+def test_get_cards_database(client):
+    result = client.get('/api/get_cards_database', follow_redirects=True)
+    cards = result.get_json()
+    assert cards['4'] == {
+        'card_id': 4,
+        'rank': 1,
+        'victory_points': 0,
+        'gem_type': 'diamond',
+        'diamond': 0,
+        'sapphire': 3,
+        'emerald': 0,
+        'ruby': 0,
+        'onyx': 0
+    }
+    assert cards['52'] == {
+        'card_id': 52,
+        'rank': 2,
+        'victory_points': 1,
+        'gem_type': 'emerald',
+        'diamond': 2,
+        'sapphire': 3,
+        'emerald': 0,
+        'ruby': 0,
+        'onyx': 2
+    }
+    assert cards['83'] == {
+        'card_id': 83,
+        'rank': 3,
+        'victory_points': 4,
+        'gem_type': 'ruby',
+        'diamond': 0,
+        'sapphire': 3,
+        'emerald': 6,
+        'ruby': 3,
+        'onyx': 0
+    }
+
+
+def test_get_nobles_database(client):
+    result = client.get('/api/get_nobles_database', follow_redirects=True)
+    cards = result.get_json()
+    assert cards['2'] == {
+        'noble_id': 2,
+        'victory_points': 3,
+        'diamond': 3,
+        'sapphire': 0,
+        'emerald': 0,
+        'ruby': 3,
+        'onyx': 3
+    }
+    assert cards['9'] == {
+        'noble_id': 9,
+        'victory_points': 3,
+        'diamond': 3,
+        'sapphire': 3,
+        'emerald': 3,
+        'ruby': 0,
+        'onyx': 0
+    }
+    assert cards['7'] == {
+        'noble_id': 7,
+        'victory_points': 3,
+        'diamond': 3,
+        'sapphire': 3,
+        'emerald': 0,
+        'ruby': 0,
+        'onyx': 3
+    }
