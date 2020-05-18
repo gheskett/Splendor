@@ -43,7 +43,7 @@ def check_victory(game):
         game.most_recent_action += ": "
         for x in range(0, len(game.victory)):
             game.most_recent_action += game.players[game.victory[x]].username
-            if x != len(game.victory) + 1:
+            if x != len(game.victory) - 1:
                 game.most_recent_action += ", "
 
 
