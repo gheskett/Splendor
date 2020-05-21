@@ -1,12 +1,13 @@
 # Splendor
-Desktop variant of Splendor
+Web variant of the popular board game Splendor
 
 To run game API server:
+ - Install Python 3.7+ with pip
+ - Navigate to /server directory
  - Run `python3 -m pip install -r requirements.txt`
- - Navigate to `server` folder
  - Run `python3 main.py [Port]`
 
-To run phaser for frotend client:
+To run phaser for frontend client:
  - Install nodejs and npm
  - Under /phaser directory, run `npm install` to install dependencies
  - Run `npm start` to start phaser on local machine. Files will automatically be reloaded

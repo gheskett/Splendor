@@ -459,7 +459,7 @@ def reserve_card(args, games):
         else:
             game.field_cards[index[0]][index[1]] = None
 
-    game.most_recent_action = player.username + " reserved a card of rank " + str(index[0] + 1)
+    game.most_recent_action = player.username + " reserved a development card of rank " + str(index[0] + 1)
 
     if game.field_chips[5] > 0:
         player.player_chips[5] += 1
