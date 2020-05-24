@@ -262,8 +262,6 @@ def grab_chips(args, games):
                              "'grabbed_chips', 'returned_chips'")
 
     player_id = int(player_id)
-    grabbed_chips = json.loads(grabbed_chips)
-    returned_chips = json.loads(returned_chips)
 
     if session_id not in games.keys():
         return flask.jsonify("ERROR: Could not find game!")
@@ -384,8 +382,7 @@ def reserve_card(args, games):
 
     player_id = int(player_id)
     reserved_card = int(reserved_card)
-    returned_chips = json.loads(returned_chips)
-
+	
     if session_id not in games.keys():
         return flask.jsonify("ERROR: Could not find game!")
 
@@ -496,7 +493,6 @@ def buy_card(args, games, cards, nobles):
 
     player_id = int(player_id)
     purchased_card = int(purchased_card)
-    returned_chips = json.loads(returned_chips)
     noble_acquired = int(noble_acquired)
 
     if session_id not in games.keys():

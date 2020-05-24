@@ -229,8 +229,8 @@ def test_init_get_game_state(client):
 def test_grab_chips(client):
     for x in range(0, 3):
         if x == 0:
-            g_chips = '{"diamond": 1, "sapphire": 0, "emerald": 0, "ruby": 1, "onyx": 1, "joker": 0}'
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
+            g_chips = {"diamond": 1, "sapphire": 0, "emerald": 0, "ruby": 1, "onyx": 1, "joker": 0}
+            r_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}
             result = client.post('/api/grab_chips', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=0,
@@ -239,8 +239,8 @@ def test_grab_chips(client):
             )), follow_redirects=True, content_type='application/json')
             assert result.get_json() == 'OK'
         elif x == 1:
-            g_chips = '{"diamond": 0, "sapphire": 0, "emerald": 2, "ruby": 0, "onyx": 0, "joker": 0}'
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
+            g_chips = {"diamond": 0, "sapphire": 0, "emerald": 2, "ruby": 0, "onyx": 0, "joker": 0}
+            r_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}
             result = client.post('/api/grab_chips', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=2,
@@ -251,8 +251,8 @@ def test_grab_chips(client):
         elif x == 2:
             # main.games[session_id[x]].players[2].player_chips = [0, 3, 3, 3, 0, 0]
             # main.games[session_id[x]].field_chips = [7, 4, 4, 4, 7, 5]
-            g_chips = '{"diamond": 0, "sapphire": 1, "emerald": 1, "ruby": 0, "onyx": 1, "joker": 0}'
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
+            g_chips = {"diamond": 0, "sapphire": 1, "emerald": 1, "ruby": 0, "onyx": 1, "joker": 0}
+            r_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}
             result = client.post('/api/grab_chips', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=2,
@@ -308,7 +308,7 @@ def test_grab_chips(client):
 def test_reserve_card(client):
     for x in range(0, 3):
         if x == 0:
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
+            r_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}
             result = client.post('/api/reserve_card', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=1,
@@ -317,7 +317,7 @@ def test_reserve_card(client):
             )), follow_redirects=True, content_type='application/json')
             assert result.get_json() == 'OK'
         elif x == 1:
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
+            r_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}
             result = client.post('/api/reserve_card', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=0,
@@ -326,7 +326,7 @@ def test_reserve_card(client):
             )), follow_redirects=True, content_type='application/json')
             assert result.get_json() == 'OK'
         elif x == 2:
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}'
+            r_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 0, "joker": 0}
             result = client.post('/api/reserve_card', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=3,
@@ -398,7 +398,7 @@ def test_buy_card(client):
             main.games[session_id[x]].players[0].player_chips = [3, 3, 3, 3, 3, 3]
             main.games[session_id[x]].players[0].player_num_gem_cards = [0, 0, 0, 0, 0]
             main.games[session_id[x]].field_chips = [1, 1, 1, 1, 1, 1]
-            r_chips = '{"diamond": 3, "sapphire": 0, "emerald": 2, "ruby": 3, "onyx": 0, "joker": 0}'
+            r_chips = {"diamond": 3, "sapphire": 0, "emerald": 2, "ruby": 3, "onyx": 0, "joker": 0}
             result = client.post('/api/buy_card', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=0,
@@ -411,7 +411,7 @@ def test_buy_card(client):
             main.games[session_id[x]].players[1].player_chips = [1, 1, 1, 1, 2, 1]
             main.games[session_id[x]].players[1].player_num_gem_cards = [0, 0, 0, 0, 0]
             main.games[session_id[x]].field_chips = [4, 4, 2, 4, 3, 3]
-            r_chips = '{"diamond": 0, "sapphire": 1, "emerald": 0, "ruby": 1, "onyx": 2, "joker": 1}'
+            r_chips = {"diamond": 0, "sapphire": 1, "emerald": 0, "ruby": 1, "onyx": 2, "joker": 1}
             result = client.post('/api/buy_card', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=1,
@@ -428,7 +428,7 @@ def test_buy_card(client):
             main.games[session_id[x]].players[1].private_reserved_cards.append(72)
             main.games[session_id[x]].field_cards[2][0] = 82
             main.games[session_id[x]].cards_remaining[2] -= 1
-            r_chips = '{"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 3, "joker": 1}'
+            r_chips = {"diamond": 0, "sapphire": 0, "emerald": 0, "ruby": 0, "onyx": 3, "joker": 1}
             result = client.post('/api/buy_card', data=json.dumps(dict(
                 session_id=session_id[x],
                 player_id=1,
