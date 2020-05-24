@@ -166,10 +166,8 @@ def start_game(args, games):
 
 # get current status of game
 def get_game_state(args, games):
-    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys():
-        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'session_id', 'player_id'")
-    player_id = args['player_id']
-    session_id = args['session_id']
+    player_id = args.get('player_id')
+    session_id = args.get('session_id')
 
     return_game = {
         "exists": False

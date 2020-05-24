@@ -86,9 +86,9 @@ def test_leave_lobby(client):
 
 def test_is_game_started(client):
     for x in range(0, 3):
-        result = client.get('/api/is_game_started', data=json.dumps(dict(
+        result = client.get('/api/is_game_started', query_string=dict(
             session_id=session_id[x]
-        )), follow_redirects=True, content_type='application/json')
+        ), follow_redirects=True, content_type='application/json')
 
         game = result.get_json()
         if x == 0:
@@ -195,11 +195,11 @@ def set_vars():
 def test_init_get_game_state(client):
     set_vars()
     for x in range(0, 3):
-        result = client.get('/api/get_game_state', data=json.dumps(dict(
+        result = client.get('/api/get_game_state', query_string=dict(
             session_id=session_id[x],
             player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
                                                              (main.games[session_id[x]].player_turn) - 1]
-        )), follow_redirects=True, content_type='application/json')
+        ), follow_redirects=True, content_type='application/json')
         game = result.get_json()
 
         assert game['session_id'] == session_id[x]
@@ -262,11 +262,11 @@ def test_grab_chips(client):
             assert result.get_json() == 'OK'
 
     for x in range(0, 3):
-        result = client.get('/api/get_game_state', data=json.dumps(dict(
+        result = client.get('/api/get_game_state', query_string=dict(
             session_id=session_id[x],
             player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
                                                              (main.games[session_id[x]].player_turn) - 1]
-        )), follow_redirects=True, content_type='application/json')
+        ), follow_redirects=True, content_type='application/json')
         game = result.get_json()
 
         assert game['session_id'] == session_id[x]
@@ -336,11 +336,11 @@ def test_reserve_card(client):
             assert result.get_json() == 'OK'
 
     for x in range(0, 3):
-        result = client.get('/api/get_game_state', data=json.dumps(dict(
+        result = client.get('/api/get_game_state', query_string=dict(
             session_id=session_id[x],
             player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
                                                              (main.games[session_id[x]].player_turn) - 1]
-        )), follow_redirects=True, content_type='application/json')
+        ), follow_redirects=True, content_type='application/json')
         game = result.get_json()
 
         assert game['session_id'] == session_id[x]
@@ -439,11 +439,11 @@ def test_buy_card(client):
             assert result.get_json() == 'OK'
 
     for x in range(0, 3):
-        result = client.get('/api/get_game_state', data=json.dumps(dict(
+        result = client.get('/api/get_game_state', query_string=dict(
             session_id=session_id[x],
             player_id=main.games[session_id[x]].player_order[main.games[session_id[x]].player_order.index
                                                              (main.games[session_id[x]].player_turn) - 1]
-        )), follow_redirects=True, content_type='application/json')
+        ), follow_redirects=True, content_type='application/json')
         game = result.get_json()
 
         assert game['session_id'] == session_id[x]

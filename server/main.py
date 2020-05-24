@@ -127,7 +127,7 @@ def change_username():
 @app.route('/api/is_game_started', methods=['GET'])
 def is_game_started():
     with lock:
-        ret = lobby.is_game_started(request.get_json(), games)
+        ret = lobby.is_game_started(request.args, games)
     return ret
 
 
@@ -151,7 +151,7 @@ def start_game():
 @app.route('/api/get_game_state', methods=['GET'])
 def get_game_state():
     with lock:
-        ret = game.get_game_state(request.get_json(), games)
+        ret = game.get_game_state(request.args, games)
     return ret
 
 

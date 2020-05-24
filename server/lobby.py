@@ -99,9 +99,7 @@ def change_username(args, games):
 
 # check if game has started
 def is_game_started(args, games):
-    if args is None or 'session_id' not in args.keys():
-        return flask.jsonify(exists=False, is_started=False, players={}, host_id=-1)
-    session_id = args['session_id']
+    session_id = args.get('session_id')
 
     if session_id is None or session_id not in games.keys():
         return flask.jsonify(exists=False, is_started=False, players={}, host_id=-1)
