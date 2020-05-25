@@ -3,4 +3,5 @@ server/__pycache__/*
 server/venv/*
 server/.pytest_cache/*
 server/tests/.pytest_cache/*
+server/tests/__pycache__/*
 phaser/node_modules
