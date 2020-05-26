@@ -218,7 +218,7 @@ def get_cards_database():
 
 
 # main
-srv_prt = -1
+srv_prt = 36251  # hardcoded server port given no cmd argument
 if __name__ == '__main__':
     arg_len = len(sys.argv)
     if arg_len >= 2:
@@ -226,8 +226,6 @@ if __name__ == '__main__':
         if srv_prt > 65535 or srv_prt < 1024:
             print("ERROR: Expected port between 1024 and 65535")
             sys.exit(1)
-    else:
-        srv_prt = random.randint(1024, 49151)
 
 try:
     with open("nobles", "r") as file:
