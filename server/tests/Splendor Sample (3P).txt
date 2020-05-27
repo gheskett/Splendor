@@ -1,0 +1,214 @@
+Gregory(0), Zachary(1), John(2)
+
+INIT:
+	Nobles: 5, 8, 2, 1
+	Cards:
+		1: 1, 13, 33, 34
+		2: 53, 61, 41, 49
+		3: 87, 72, 77, 70
+
+_____________________________
+
+0: Grb: W, G, R
+1: Grb: B, G, O
+2: Grb: B, R, O
+_____________________________
+
+0: Grb: E, G, O
+1: Grb: W, B, O
+2: Grb: W, B, O
+_____________________________
+
+0: Buy: 33 (2G, 1R) > 30 (1W, 1R, 3O)
+1: Buy: 1 (2B, 2O) > 23 (1W, 3B, 1G)
+2: Grb: W, G, O
+_____________________________
+
+0: Grb: G, R, O
+1: Grb: B, G, R
+2: Buy: 30 (1W, 1R, 3O) > 4 (3B)
+_____________________________
+
+0: Buy: 13 (1W, 1R, 1G) > 22 (1B, 2R, 2O)
+1: Buy: 34 (1W, 2G) > 5 (1B, 2G, 1R, 1O)
+2: Buy: B, G, O
+_____________________________
+
+0: Grb: B, G, R
+1: Grb: G, R, O
+2: Buy: 4 (3B) > 8 (4R)
+_____________________________
+
+0: Grb: W, G, R
+1: Buy: 22 (1B, 2R, 1O) > 2 (2B, 2G, 1O)
+2: Grb: B, R, O
+_____________________________
+
+0: Buy: 5 (2G, 1R) > 31 (2W, 1G, 2O)
+1: Grb: W, B, O
+2: Grb: W, B, R
+_____________________________
+
+0: Grb: B, G, R
+1: Buy: 31 (1W, 1O) > 29 (1W, 1B, 1G, 1O)
+2: Buy: 53 (2R, 2G, 2W) > 58 (2W, 2R, 3O)
+_____________________________
+
+0: Buy: 29 (1G) > 3 (1B, 1G, 1R, 1O)
+1: Buy: 3 (1B) > 12 (1W, 1G, 2R, 1O)
+2: Grb: W, R, O
+_____________________________
+
+0: Buy: 58 (1W, 1R, 2O) > 66 (1B, 4G, 2R)
+1: Grb: B, G, R
+2: Buy: 12 (1R, 1O) > 7 (3W, 1B, 1O)
+_____________________________
+
+0: Buy: 41 (1W, 2B, 1R) > 59 (3B, 2R, 3O)
+1: Grb: W, B, G
+2: Grb: G, R, O
+_____________________________
+
+0: Grb: W, G, O
+1: Buy: 7 (1W, 1B) > 17 (3R)
+2: Buy: 59 (2B, 1R, 2O) (ALERT: CHEATER!! SHOULD'VE PAID 3O!) > 69 (6O)
+_____________________________
+
+0: Grb: B, R, O
+1: Buy: 66 (1B, 3G, 2R) > 47 (2B, 2G, 3R)
+2: Grb: B, G, R
+_____________________________
+
+0: Buy: 17 (1R) > 6 (2R, 1O)
+1: Grb: B, R, O
+2: Buy: 6 (1B) > 37 (1W, 1B, 1G, 1R)
+_____________________________
+
+0: Buy: 37 > 11 (2G, 2O)
+1: Grb: G, R, O
+2: Grb: G, R, O
+_____________________________
+
+0: Buy: 11 (1G) > 27 (2W, 2R)
+1: Buy: 27 (1R) > 35 (2W, 2B, 1R)
+2: Buy: 35 (1B) > 25 (2W, 1B, 1G, 1B)
+_____________________________
+
+0: Buy: 25 > 0 (4G)
+1: Res: 61 > 42 (1G, 4R, 2O)
+2: Buy: 42 (2R, 1O) > 52 (2W, 3B, 2O)
+_____________________________
+
+0: Buy: 52 (1B) > 57 (6G)
+1: Grb: B, G, O
+2: Grb: W, B, R
+_____________________________
+
+0: Buy: 2 > 32 (4B)
+1: Buy: 47 (2B, 1G, 1R) > 40 (3G, 2R, 2O)
+2: Grb: W, B, R
+_____________________________
+
+0: Grb: B, G, R
+1: Grb: W, B, R
+2: Buy: 8 (2R) > 10 (3O)
+_____________________________
+
+0: Buy: 10 (1O) > 39 (1G, 3R, 1O)
+1: Buy: 39 (1R) > 38 (1W, 2B, 1G, 1R)
+2: Res: 77 > 82 (3W, 5B, 3G, 3O)
+_____________________________
+
+0: Buy: 38 + Noble(2) > 28 (2B, 1G)
+1: Buy: 28 (1B) > 18 (1W, 1B, 1R, 1O)
+2: Buy: 77 (3W, 1B, 1J)
+_____________________________
+
+0: Buy: 18 + Noble(5) > 15 (1W, 2G, 2R)
+1: Grb: B, R, O
+2: Buy: 23 > 21 (2W, 1B)
+_____________________________
+
+0: Grb: W, B, R
+1: Buy: 69 (3O) > 65 (3W, 3G, 2O)
+2: Res: 57 > 68 (5G, 3R)
+_____________________________
+
+0: Buy: 82 (2B) > 86 (3W, 3B, 5G, 3R)
+1: Buy: 61 (1O) + Noble(8)
+2: Buy: 57 (3G, 1J)
+_____________________________
+
+0: Buy: 87 (2R) > 83 (3B, 6G, 3R)
+1: Buy: 21 > 16 (4O)
+2: Buy: 15 > 14 (1W, 3G, 1R)
+
+
+Winner: Gregory(0)
+
+Field:
+	Nobles: 1
+	Cards: 
+		1: 16, 32, 14, 0
+		2: 40, 68, 65, 49
+		3: 83, 72, 86, 70
+	Chips:
+		Diamond: 2
+		Sapphire: 3
+		Emerald: 3
+		Ruby: 4
+		Onyx: 4
+		Joker: 4
+		
+Gregory(0):
+	Nobles: 2, 5
+	Cards: 
+		Diamond: 3
+		Sapphire: 3
+		Emerald: 3
+		Ruby: 4
+		Onyx: 4
+	Chips:
+		Diamond: 2
+		Sapphire: 0
+		Emerald: 1
+		Ruby: 0
+		Onyx: 1
+		Joker: 0
+	Prestige Points: 16
+		
+Zachary(1):
+	Nobles: 8
+	Cards: 
+		Diamond: 3
+		Sapphire: 1
+		Emerald: 2
+		Ruby: 4
+		Onyx: 4
+	Chips:
+		Diamond: 1
+		Sapphire: 1
+		Emerald: 1
+		Ruby: 1
+		Onyx: 0
+		Joker: 1
+	Prestige Points: 11
+		
+John(2):
+	Nobles: None
+	Cards: 
+		Diamond: 3
+		Sapphire: 4
+		Emerald: 3
+		Ruby: 2
+		Onyx: 1
+	Chips:
+		Diamond: 0
+		Sapphire: 1
+		Emerald: 0
+		Ruby: 0
+		Onyx: 0
+		Joker: 0
+	Prestige Points: 13
+	
+81 TOTAL TURNS
