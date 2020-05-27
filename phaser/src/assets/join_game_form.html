@@ -18,14 +18,34 @@
         font-size: 40px;
         color:goldenrod;
     }
-    #usernameEntry {
+    #usernameField {
         font-family: Quintessential;
         background-color: rgb(34, 34, 34);
         border-radius: 8px;
         color: rgb(184, 180, 153);
         caret-color: rgb(184, 180, 153);
         font-size: 34px;
-        width: 650px;
+        width: 458px;
+        border: 3px solid silver;
+        -webkit-transition: 450ms;
+        transition: 450ms;
+        outline: none;
+        padding: 16px 16px;
+        margin: 8px 20px 16px 0px;
+    }
+
+    #usernameField:focus {
+        border: 3px solid gold;
+    }
+
+    #lobbyIdField {
+        font-family: Quintessential;
+        background-color: rgb(34, 34, 34);
+        border-radius: 8px;
+        color: rgb(184, 180, 153);
+        caret-color: rgb(184, 180, 153);
+        font-size: 34px;
+        width: 167px;
         border: 3px solid silver;
         -webkit-transition: 450ms;
         transition: 450ms;
@@ -34,14 +54,14 @@
         margin: 8px 0px 16px;
     }
 
-    #usernameEntry:focus {
+    #lobbyIdField:focus {
         border: 3px solid gold;
     }
 
-    #start {
+    #join {
         width: 375px;
         font-family: Quintessential;
-        background-color: rgb(0, 170, 0);
+        background-color: rgb(28, 160, 221);
         color: white;
         font-size: 26px;
         border-radius: 16px;
@@ -52,16 +72,16 @@
         margin: 0px 20px 0px 0px;
     }
 
-    #start:hover {
-        background-color: rgb(0, 140, 0);
+    #join:hover {
+        background-color: rgb(25, 140, 194);
     }
 
     #cancel:hover {
         background-color: rgb(180, 0, 0);
     }
 
-    #start:active {
-        background-color: rgb(0, 110, 0);
+    #join:active {
+        background-color: rgb(21, 124, 172);
     }
 
     #cancel:active {
@@ -87,8 +107,9 @@
 <div class="container">
     <form id=usernameForm>
         <label for="username" id="username">Enter Username:</label> <br>
-        <input type="text" name="usernameField" id="usernameEntry" maxlength="40"> <br>
-        <input type="button" name="start" id="start" value="Create Lobby">
+        <input type="text" name="usernameField" id="usernameField" maxlength="40">
+        <input type="text" name="lobbyIdField" id="lobbyIdField" maxlength="5" placeholder="Lobby ID"> <br>
+        <input type="button" name="join" id="join" value="Join Lobby">
         <input type="button" name="cancel" id="cancel" value="Cancel">
     </form>
 </div>
