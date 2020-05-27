@@ -47,6 +47,7 @@ class Card:
 # Player object
 class Player:
     def __init__(self):
+        self.room = ""
         self.player_id = 0
         self.username = ""
         self.player_cards = []
@@ -80,6 +81,7 @@ class Game:
             self.noble_order.append(x)
 
         self.session_id = ""
+        self.room = ""
         self.host_id = player.player_id
         self.players = {player.player_id: player}
         self.player_order = [player.player_id]
@@ -223,7 +225,7 @@ def get_cards_database():
 @socketio.on('message')
 def handle_message(message):
     print('received message: ' + message)
-    socketio.send("got the message" + message)
+    socketio.send("got the message: " + message)
 
 
 # main

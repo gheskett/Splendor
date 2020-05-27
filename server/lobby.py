@@ -22,12 +22,15 @@ def new_game(player, args, game, games):
             break
 
     game.session_id = session_id
+    game.room = session_id + "_-1"
     games[session_id] = game
 
     if args is None or 'username' not in args.keys() or args['username'] == "":
         player.username = "Player " + str(player.player_id + 1)
     else:
         player.username = args['username']
+
+    player.room = session_id + "_" + str(player.player_id)
 
     return flask.jsonify(player_id=game.players[player.player_id].player_id, session_id=session_id,
                          most_recent_action=game.most_recent_action)
@@ -60,6 +63,8 @@ def join_game(player, args, games):
     game.player_order.append(player.player_id)
     for y in range(0, 5):
         game.field_chips[y] += 1
+
+    player.room = session_id + "_" + str(player.player_id)
 
     game.most_recent_action = player.username + " joined the game lobby!"
 
