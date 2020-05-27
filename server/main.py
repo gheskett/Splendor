@@ -1,5 +1,4 @@
 import sys
-import random
 import flask
 import lobby
 import game
@@ -16,7 +15,7 @@ games = {}
 nobles = []
 cards = []
 lock = Lock()
-gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "Joker"]
+gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "joker"]
 
 
 # Noble object
@@ -220,10 +219,12 @@ def get_cards_database():
         cards_db[x] = card
     return flask.jsonify(cards_db)
 
+
 @socketio.on('message')
 def handle_message(message):
     print('received message: ' + message)
     socketio.send("got the message" + message)
+
 
 # main
 srv_prt = 36251  # hardcoded server port given no cmd argument
