@@ -3,6 +3,7 @@ import newGame from "./assets/new_game.svg";
 import joinGame from "./assets/join_game.svg";
 import titleLogo from "./assets/title.svg"
 import background from "./assets/pattern-background-frost-texture.jpg"
+import { boardScene } from "./board.mjs"
 
 const config = {
   type: Phaser.AUTO,
@@ -13,10 +14,11 @@ const config = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
-  scene: {
-    preload: preload,
-    create: create
+  scene: [{
+   preload: preload,
+   create: create
   },
+  boardScene],
   dom: {
     createContainer: false,
   }
@@ -25,6 +27,8 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
+  console.log("Orig preload started")
+
   this.load.svg("newGame", newGame);
   this.load.svg("joinGame", joinGame);
   this.load.svg("title", titleLogo);
@@ -32,6 +36,8 @@ function preload() {
 }
 
 function create() {
+
+  console.log("orig create started")
 
   const SELECTED = 1
   const NOT_SELECTED = 0.95
@@ -49,6 +55,10 @@ function create() {
   newGame.on('pointerout',function(pointer){
     newGame.setAlpha(NOT_SELECTED).setScale(1);
   });
+
+  newGame.on("pointerdown", function(pointer){
+    this.scene.start("boardScene");
+  }, this);
 
   joinGame.on('pointerover',function(pointer){
     joinGame.setAlpha(SELECTED).setScale(1.05);
