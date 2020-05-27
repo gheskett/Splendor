@@ -1,6 +1,5 @@
 import random
 import flask
-import json
 
 gems = ["Diamond", "Sapphire", "Emerald", "Ruby", "Onyx", "Joker"]
 gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "joker"]
@@ -17,11 +16,13 @@ def check_victory(game):
         return
 
     for _, value in game.players.items():
+        if value.prestige_points != highest_pp:
+            continue
         tmp = 0
         for x in range(0, 5):
             tmp += value.player_num_gem_cards[x]
-            if lowest_count < 0 or tmp < lowest_count:
-                lowest_count = tmp
+        if lowest_count < 0 or tmp < lowest_count:
+            lowest_count = tmp
 
     for _, value in game.players.items():
         if value.prestige_points != highest_pp:
@@ -29,8 +30,6 @@ def check_victory(game):
         tmp = 0
         for x in range(0, 5):
             tmp += value.player_num_gem_cards[x]
-            if lowest_count < 0 or tmp < lowest_count:
-                lowest_count = tmp
         if tmp == lowest_count:
             game.victory.append(value.player_id)
 
@@ -382,7 +381,7 @@ def reserve_card(args, games):
 
     player_id = int(player_id)
     reserved_card = int(reserved_card)
-	
+
     if session_id not in games.keys():
         return flask.jsonify("ERROR: Could not find game!")
 
