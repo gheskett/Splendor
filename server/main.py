@@ -3,11 +3,15 @@ import random
 import flask
 import lobby
 import game
+import logging
 from threading import Lock
 from flask import request
+from flask_socketio import SocketIO
 
+logging.basicConfig(filename='python_server.log', filemode='w', level=logging.DEBUG)
 app = flask.Flask(__name__)
 # app.config["DEBUG"] = True
+socketio = SocketIO(app, cors_allowed_origins='*')
 games = {}
 nobles = []
 cards = []
@@ -216,6 +220,10 @@ def get_cards_database():
         cards_db[x] = card
     return flask.jsonify(cards_db)
 
+@socketio.on('message')
+def handle_message(message):
+    print('received message: ' + message)
+    socketio.send("got the message" + message)
 
 # main
 srv_prt = 36251  # hardcoded server port given no cmd argument
@@ -224,7 +232,7 @@ if __name__ == '__main__':
     if arg_len >= 2:
         srv_prt = int(sys.argv[1])
         if srv_prt > 65535 or srv_prt < 1024:
-            print("ERROR: Expected port between 1024 and 65535")
+            logging.error("ERROR: Expected port between 1024 and 65535")
             sys.exit(1)
 
 try:
@@ -234,12 +242,12 @@ try:
             if len(ln) == 0:
                 break
             if len(ln) < 13:
-                print("ERROR: Formatting of Nobles database invalid!")
+                logging.error("ERROR: Formatting of Nobles database invalid!")
                 sys.exit(1)
             new_noble = Noble(int(ln[1]), int(ln[3]), int(ln[5]), int(ln[7]), int(ln[9]), int(ln[11]))
             nobles.append(new_noble)
 except IOError:
-    print("ERROR: Cannot locate Nobles database!")
+    logging.error("ERROR: Cannot locate Nobles database!")
     sys.exit(1)
 
 try:
@@ -249,14 +257,15 @@ try:
             if len(ln) == 0:
                 break
             if len(ln) < 17:
-                print("ERROR: Formatting of card database invalid!")
+                logging.error("ERROR: Formatting of card database invalid!")
                 sys.exit(1)
             new_card = Card(int(ln[1]), int(ln[3]), int(ln[5]), int(ln[7]), int(ln[9]), int(ln[11]), int(ln[13]),
                             int(ln[15]))
             cards.append(new_card)
 except IOError:
-    print("ERROR: Cannot locate card database!")
+    logging.error("ERROR: Cannot locate card database!")
     sys.exit(1)
 
 if __name__ == '__main__':
-    app.run(port=srv_prt)
+    print("Running server on port {}".format(srv_prt))
+    socketio.run(app, port=srv_prt)

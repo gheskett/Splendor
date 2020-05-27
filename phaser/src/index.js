@@ -6,6 +6,8 @@ import background from "./assets/pattern-background-frost-texture.jpg"
 import usernameForm from "./assets/username_form.html"
 import blackRectangle from "./assets/black_rectangle.png"
 
+var ioc = require('socket.io-client');
+
 const config = {
   type: Phaser.AUTO,
   parent: "phaser-example",
@@ -103,6 +105,17 @@ function create() {
     var inputText = this.getChildByName("usernameField");
     if (event.target.name === "start") {
       
+      var client = ioc.connect( "http://localhost:" + "36251" );
+
+      client.on("message", (data) =>
+      {
+        console.log("Got message: " + data)
+        client.disconnect();
+      });
+
+      client.send("Hello World", function ( message ) {
+
+      } );
       this.setVisible(false);
       playButtonEnable(true);
       
