@@ -132,7 +132,7 @@ function create() {
     else {
       newGame.disableInteractive();
       joinGame.disableInteractive();
-      dimmingObject.setVisible(true)
+      dimmingObject.setVisible(true);
     }
   }
 
