@@ -50,7 +50,7 @@ function create() {
   const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive().setAlpha(NOT_SELECTED);
   const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
 
-  var usernameForm = this.add.dom(gameWidth / 2, gameHeight / 2).createFromCache("usernameForm").setVisible(false);
+  var usernameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("usernameForm").setVisible(false);
   //#endregion Game Variables
 
   //#region Mouse-button behavior
@@ -113,7 +113,6 @@ function create() {
 
       this.setVisible(false);
       playButtonEnable(true);
-
 
     }
 
