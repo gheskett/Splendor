@@ -17,13 +17,21 @@
         font-family: Quintessential;
         font-size: 40px;
         color:gold;
+        margin-right: 217px;
     }
+
+    #lobbyId {
+        font-family: Quintessential;
+        font-size: 30px;
+        color:gold;
+    }
+
     #usernameField {
         font-family: Quintessential;
         background-color: rgb(34, 34, 34);
         border-radius: 8px;
-        color: rgb(184, 180, 153);
-        caret-color: rgb(184, 180, 153);
+        color: rgb(224, 221, 196);
+        caret-color: rgb(224, 221, 196);
         font-size: 34px;
         width: 458px;
         border: 3px solid silver;
@@ -42,8 +50,8 @@
         font-family: Quintessential;
         background-color: rgb(34, 34, 34);
         border-radius: 8px;
-        color: rgb(184, 180, 153);
-        caret-color: rgb(184, 180, 153);
+        color: rgb(224, 221, 196);
+        caret-color: rgb(224, 221, 196);
         font-size: 34px;
         width: 167px;
         border: 3px solid silver;
@@ -106,9 +114,10 @@
 
 <div class="container">
     <form id=usernameForm>
-        <label for="username" id="username">Enter Username:</label> <br>
+        <label for="username" id="username">Enter Username:</label>
+        <label for="lobbyId" id="lobbyId">Lobby ID:</label> <br>
         <input type="text" name="usernameField" id="usernameField" maxlength="40">
-        <input type="text" name="lobbyIdField" id="lobbyIdField" maxlength="5" placeholder="Lobby ID"> <br>
+        <input type="text" name="lobbyIdField" id="lobbyIdField" maxlength="6"> <br>
         <input type="button" name="join" id="join" value="Join Lobby">
         <input type="button" name="cancel" id="cancel" value="Cancel">
     </form>
