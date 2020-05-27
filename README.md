@@ -5,7 +5,7 @@ To run game API server:
  - Install Python 3.7+ with pip
  - Navigate to /server directory
  - Run `python3 -m pip install -r requirements.txt` to install required dependencies
- - Run `python3 main.py [Port]`
+ - Run `python3 main.py [Port]` (default port: 36251)
 
 To run phaser for frontend client:
  - Install nodejs and npm
