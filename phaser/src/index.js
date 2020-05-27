@@ -4,6 +4,7 @@ import joinGame from "./assets/join_game.svg";
 import titleLogo from "./assets/title.svg"
 import background from "./assets/pattern-background-frost-texture.jpg"
 import usernameForm from "./assets/username_form.html"
+import blackRectangle from "./assets/black_rectangle.png"
 
 const config = {
   type: Phaser.AUTO,
@@ -30,23 +31,26 @@ function preload() {
   this.load.svg("joinGame", joinGame);
   this.load.svg("title", titleLogo);
   this.load.image("bg", background);
+  this.load.image("dimmingObject", blackRectangle);
   this.load.html("usernameForm", usernameForm);
 }
 
 function create() {
   //#region Game Variables
-  const gameWidth = 1440, gameHight = 900;
+  const gameWidth = 1440, gameHeight = 900;
 
   const SELECTED = 1
   const NOT_SELECTED = 0.90
+  const DIM = 0.75
 
   const bg = this.add.image(0, 0, "bg").setOrigin(0).setScale(3);
   const title = this.add.image(gameWidth / 2, 150, "title").setScale(1.5);
+  const dimmingObject = this.add.image(0, 0, "dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
 
   const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive().setAlpha(NOT_SELECTED);
   const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
 
-  var usernameForm = this.add.dom(gameWidth / 2, gameHight / 2).createFromCache("usernameForm").setVisible(false);
+  var usernameForm = this.add.dom(gameWidth / 2, gameHeight / 2).createFromCache("usernameForm").setVisible(false);
   //#endregion Game Variables
 
   //#region Mouse-button behavior
@@ -110,6 +114,7 @@ function create() {
       this.setVisible(false);
       playButtonEnable(true);
 
+
     }
 
   });
@@ -122,10 +127,12 @@ function create() {
     if (enable) {
       newGame.setInteractive();
       joinGame.setInteractive();
+      dimmingObject.setVisible(false);
     } 
     else {
       newGame.disableInteractive();
       joinGame.disableInteractive();
+      dimmingObject.setVisible(true)
     }
   }
 
