@@ -1,11 +1,12 @@
 Zachary(0), Gregory(1)
 
 INIT:
-	Nobles: 2, 3, 7, 9
+	Nobles: 2, 7, 9
 	Cards:
 		1: 6, 23, 11, 16
 		2: 69, 52, 66, 62
 		3: 89, 84, 86, 70
+	IMPORTANT: 5 GEM LIMIT!!!
 
 _____________________________
 
@@ -112,4 +113,7 @@ _____________________________
 0: Grb: 2W
 1: Buy: 81 (2B, 2J)
 
+
 WINNER: Gregory(1)
+
+52 TOTAL TURNS
