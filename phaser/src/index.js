@@ -27,8 +27,6 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-  console.log("Orig preload started")
-
   this.load.svg("newGame", newGame);
   this.load.svg("joinGame", joinGame);
   this.load.svg("title", titleLogo);
@@ -36,9 +34,6 @@ function preload() {
 }
 
 function create() {
-
-  console.log("orig create started")
-
   const SELECTED = 1
   const NOT_SELECTED = 0.95
 

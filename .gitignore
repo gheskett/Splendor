@@ -6,4 +6,3 @@ server/tests/.pytest_cache/*
 phaser/node_modules
 venv
 .idea
-package-lock.json
