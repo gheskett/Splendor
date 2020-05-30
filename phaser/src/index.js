@@ -3,7 +3,8 @@ import newGame from "./assets/new_game.svg";
 import joinGame from "./assets/join_game.svg";
 import titleLogo from "./assets/title.svg"
 import background from "./assets/pattern-background-frost-texture.jpg"
-import usernameForm from "./assets/username_form.html"
+import newGameForm from "./assets/new_game_form.html"
+import joinGameForm from "./assets/join_game_form.html"
 import blackRectangle from "./assets/black_rectangle.png"
 
 var ioc = require('socket.io-client');
@@ -34,7 +35,8 @@ function preload() {
   this.load.svg("title", titleLogo);
   this.load.image("bg", background);
   this.load.image("dimmingObject", blackRectangle);
-  this.load.html("usernameForm", usernameForm);
+  this.load.html("newGameForm", newGameForm);
+  this.load.html("joinGameForm", joinGameForm)
 }
 
 function create() {
@@ -52,7 +54,8 @@ function create() {
   const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive().setAlpha(NOT_SELECTED);
   const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
 
-  var usernameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("usernameForm").setVisible(false);
+  var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
+  var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
   //#endregion Game Variables
 
   //#region Mouse-button behavior
@@ -89,20 +92,23 @@ function create() {
   newGame.on('pointerup', function() {
     this.setAlpha(NOT_SELECTED).setScale(1);
     this.clearTint();
-    usernameForm.setVisible(true);
+    newGameForm.setVisible(true);
     playButtonEnable(false);
   });
 
   joinGame.on('pointerup', function() {
     this.setAlpha(NOT_SELECTED).setScale(1);
     this.clearTint();
+    joinGameForm.setVisible(true);
+    playButtonEnable(false);
   });
   //#endregion Button Click Behavior
 
-  usernameForm.addListener("click");
-  usernameForm.on("click", function (event) {
+  //#region Form Behavior
+  newGameForm.addListener("click");
+  newGameForm.on("click", function (event) {
 
-    var inputText = this.getChildByName("usernameField");
+    var username = this.getChildByName("usernameField");
     if (event.target.name === "start") {
       
       var client = ioc.connect( "http://localhost:" + "36251" );
@@ -130,6 +136,31 @@ function create() {
     }
 
   });
+
+  joinGameForm.addListener("click");
+  joinGameForm.on("click", function (event) {
+
+    var username = this.getChildByName("usernameField");
+    var lobbyID = this.getChildByName("lobbyIdField");
+
+    if (event.target.name === "join") {
+      
+      this.setVisible(false);
+      playButtonEnable(true);
+      
+    }
+
+    //Enable play buttons and remove username form on cancel
+    if (event.target.name === "cancel") {
+
+      this.setVisible(false);
+      playButtonEnable(true);
+
+    }
+
+  });
+  //#endregion Form Behavior
+
 
   /**
    * @param {boolean} enable
