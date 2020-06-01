@@ -8,7 +8,7 @@ import joinGameForm from "./assets/join_game_form.html"
 import blackRectangle from "./assets/black_rectangle.png"
 
 var ioc = require('socket.io-client');
-var client
+var client = ioc.connect( "http://localhost:" + "36251" );
 var playerRoomID = null
 var gameRoomID = null
 
@@ -59,8 +59,6 @@ function create() {
 
   var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
   var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
-
-  client = ioc.connect( "http://localhost:" + "36251" );
   //#endregion Game Variables
 
   //#region Mouse-button behavior

@@ -231,7 +231,7 @@ def handle_new_game(args):
         ret = lobby.new_game(player, args, gm, games).get_json()
     join_room(player.room)
     join_room(gm.room)
-    socketio.emit('new_game', ret, room=player.room)
+    socketio.emit('new_game', ret, room=request.sid)
 
     socketio.emit('updateLobby', lobby.is_game_started({'session_id': gm.session_id}, games).get_json(),
                   room=games[gm.session_id].room)
@@ -243,20 +243,19 @@ def handle_join_game(args):
     session_id = args
     if session_id is None or 'session_id' not in session_id.keys():
         ret = flask.jsonify(player_id=-1, session_id=None).get_json()
-        socketio.emit('join_game', ret)
+        socketio.emit('join_game', ret, room=request.sid)
         return
     session_id = session_id['session_id']
     if session_id is None or session_id not in games.keys():
         ret = flask.jsonify(player_id=-1, session_id=None).get_json()
-        socketio.emit('join_game', ret)
+        socketio.emit('join_game', ret, room=request.sid)
         return
     player = Player()
     with lock:
         ret = lobby.join_game(player, args, games).get_json()
     join_room(player.room)
     join_room(games[session_id].room)
-    rm = games[ret['session_id']].players[ret['player_id']].room
-    socketio.emit('join_game', ret, room=rm)
+    socketio.emit('join_game', ret, room=request.sid)
 
     socketio.emit('updateLobby', lobby.is_game_started({'session_id': session_id}, games).get_json(),
                   room=games[session_id].room)
@@ -264,7 +263,7 @@ def handle_join_game(args):
 
 @socketio.on('connect')
 def test_connect():
-    socketio.emit('connect', "Connected.")
+    socketio.emit('connect', "Connected.", room=request.sid)
     # print('Client connected.', flush=True)
 
 
@@ -317,4 +316,4 @@ except IOError:
 
 if __name__ == '__main__':
     print("Running server on port {}".format(srv_prt))
-    socketio.run(app, port=srv_prt)
+    socketio.run(app, host='0.0.0.0', port=srv_prt)
