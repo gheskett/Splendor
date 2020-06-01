@@ -84,6 +84,8 @@ export class BoardScene extends Phaser.Scene {
     var width = 731 * this.scales;
     var height = 1024 * this.scales;
 
+    this.cameras.main.setBackgroundColor('#FFFFFF')
+
     var flippedCardStartX = this.centerX - width * (numColumns / 2) + .5 * width;
     var flippedCardStartY = 30 + .5 * height;
     
