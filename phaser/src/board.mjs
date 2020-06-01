@@ -1,9 +1,11 @@
-import { card } from "./card.mjs"
+import { card } from "./Card.mjs"
+import { ServerManager } from "./ServerManager.mjs";
+import { noble } from "./Noble.mjs";
 
 const numRows = 3;
 const numColumns = 4;
 
-export class boardScene extends Phaser.Scene {
+export class BoardScene extends Phaser.Scene {
   constructor()
   {
     super('boardScene')
@@ -14,6 +16,22 @@ export class boardScene extends Phaser.Scene {
     //TODO: this should be auto-detected
     this.centerX = 720;
     this.centerY = 450;
+    this.server = new ServerManager();
+    this.nobles = [];
+    
+    this.tokenSprites = {
+      "diamond": "white",
+      "sapphire": "blue",
+      "emerald": "green",
+      "ruby": "red",
+      "onyx": "brown",
+      "joker": "gold"
+  };
+
+    for (var i in this.tokenSprites)
+    {
+      this.tokenSprites[i] += "_token_x64"
+    }
   }
 
   preload() {
@@ -71,7 +89,9 @@ export class boardScene extends Phaser.Scene {
     
     for (var row = 0; row < numRows; row++)
     {
-      this.add.sprite(flippedCardStartX - width, flippedCardStartY + height * row, "cardback_r" + (row + 1) + "_731x1024").setScale(this.scales);
+      //Display backwards cards
+      //TODO: empty cards
+      this.add.sprite(flippedCardStartX - width, flippedCardStartY + height * row, "cardback_r" + (3 - row) + "_731x1024").setScale(this.scales);
 
       for (var column = 0; column < numColumns; column++)
       {
@@ -87,27 +107,24 @@ export class boardScene extends Phaser.Scene {
     var numNobles = 5;
     var scale = (height * numRows) / (numNobles * 731);
     var nobleHeight = 731 * scale;
-    console.log("scale: " + scale);
     for (var i = 0; i < numNobles; i++)
     {
-      this.add.sprite(flippedCardStartX + numColumns * width - width * .5 + nobleHeight * .5,
-         flippedCardStartY + i * nobleHeight + nobleHeight * .5 - height * .5, "noble_front").setScale(scale);
+      //TODO: get data from server
+      this.nobles[i] = new noble(this, 0);
+      this.nobles[i].drawNoble(flippedCardStartX + numColumns * width - width * .5 + nobleHeight * .5,
+        flippedCardStartY + i * nobleHeight + nobleHeight * .5 - height * .5, nobleHeight, scale);
     }
-  }
 
-  lookUpCard(cardId)
-  {
-    //TODO: actual numbers
-    return {
-      "card_id" : 0,
-      "rank" : 1,
-      "prestige_points" : 2,
-      "gem_type" : "diamond",
-      "diamond" : 0,
-      "sapphire" : 1,
-      "emerald" : 2,
-      "ruby" : 0,
-      "onyx" : 0
+    const chipHeight = 64;
+
+    var tokenX = this.centerX - width * 3 - chipHeight * .5;
+    var tokenY = 30 + chipHeight * .5;
+    for (var chip in this.tokenSprites)
+    {
+      var num = this.server.lookUpFieldChips(chip);
+      this.add.sprite(tokenX, tokenY, this.tokenSprites[chip]);
+      this.add.sprite(tokenX, tokenY, num + "x64");
+      tokenY += chipHeight;
     }
   }
 }

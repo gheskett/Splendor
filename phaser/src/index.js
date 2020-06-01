@@ -3,7 +3,7 @@ import newGame from "./assets/new_game.svg";
 import joinGame from "./assets/join_game.svg";
 import titleLogo from "./assets/title.svg"
 import background from "./assets/pattern-background-frost-texture.jpg"
-import { boardScene } from "./board.mjs"
+import { BoardScene } from "./board.mjs"
 
 const config = {
   type: Phaser.AUTO,
@@ -18,7 +18,7 @@ const config = {
    preload: preload,
    create: create
   },
-  boardScene],
+  BoardScene],
   dom: {
     createContainer: false,
   }
