@@ -8,6 +8,9 @@ import joinGameForm from "./assets/join_game_form.html"
 import blackRectangle from "./assets/black_rectangle.png"
 
 var ioc = require('socket.io-client');
+var client
+var playerRoomID = null
+var gameRoomID = null
 
 const config = {
   type: Phaser.AUTO,
@@ -56,6 +59,8 @@ function create() {
 
   var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
   var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
+
+  client = ioc.connect( "http://localhost:" + "36251" );
   //#endregion Game Variables
 
   //#region Mouse-button behavior
@@ -105,23 +110,29 @@ function create() {
   //#endregion Button Click Behavior
 
   //#region Form Behavior
+
   newGameForm.addListener("click");
+
   newGameForm.on("click", function (event) {
 
-    var username = this.getChildByName("usernameField");
+    var username = this.getChildByName("usernameField").value;
     if (event.target.name === "start") {
       
-      var client = ioc.connect( "http://localhost:" + "36251" );
+      // var client = ioc.connect( "http://localhost:" + "36251" );
 
-      client.on("message", (data) =>
-      {
-        console.log("Got message: " + data)
-        client.disconnect();
+      // client.on("message", (data) =>
+      // {
+      //   console.log("Got message: " + data)
+      //   // client.disconnect();
+      // });
+
+      // client.send("Hello World", function ( message ) {
+
+      // } );
+
+      client.emit('new_game', { username: username }, function ( message ) {
+
       });
-
-      client.send("Hello World", function ( message ) {
-
-      } );
       this.setVisible(false);
       playButtonEnable(true);
       
@@ -140,10 +151,14 @@ function create() {
   joinGameForm.addListener("click");
   joinGameForm.on("click", function (event) {
 
-    var username = this.getChildByName("usernameField");
-    var lobbyID = this.getChildByName("lobbyIdField");
+    var username = this.getChildByName("usernameField").value;
+    var lobbyID = this.getChildByName("lobbyIdField").value;
 
     if (event.target.name === "join") {
+
+      client.emit('join_game', { username: username, session_id: lobbyID }, function ( message ) {
+
+      });
       
       this.setVisible(false);
       playButtonEnable(true);
@@ -160,6 +175,40 @@ function create() {
 
   });
   //#endregion Form Behavior
+
+  //#region Server Listeners
+    
+  client.on("connect", (data) =>
+  {
+    console.log(String(data))
+    // client.disconnect();
+  });
+    
+  client.on("new_game", (data) =>
+  {
+    console.log(data)
+    // client.disconnect();
+  });
+
+  client.on("join_game", (data) =>
+  {
+    console.log(data)
+    if (data.player_id > 0) {
+      // TODO: success
+    }
+    else {
+      // TODO: bad input
+    }
+    // client.disconnect();
+  });
+
+  client.on("updateLobby", (data) =>
+  {
+    console.log(data)
+    // client.disconnect();
+  });
+
+  //#endregion Server Listeners
 
 
   /**

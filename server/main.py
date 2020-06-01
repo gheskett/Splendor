@@ -5,7 +5,7 @@ import game
 import logging
 from threading import Lock
 from flask import request
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 
 logging.basicConfig(filename='python_server.log', filemode='w', level=logging.DEBUG)
 app = flask.Flask(__name__)
@@ -222,10 +222,56 @@ def get_cards_database():
     return flask.jsonify(cards_db)
 
 
-@socketio.on('message')
-def handle_message(message):
-    print('received message: ' + message)
-    socketio.send("got the message: " + message)
+@socketio.on('new_game')
+def handle_new_game(args):
+    # print(args, flush=True)
+    player = Player()
+    gm = Game(player)
+    with lock:
+        ret = lobby.new_game(player, args, gm, games).get_json()
+    join_room(player.room)
+    join_room(gm.room)
+    socketio.emit('new_game', ret, room=player.room)
+
+    socketio.emit('updateLobby', lobby.is_game_started({'session_id': gm.session_id}, games).get_json(),
+                  room=games[gm.session_id].room)
+
+
+@socketio.on('join_game')
+def handle_join_game(args):
+    # print(args, flush=True)
+    session_id = args
+    if session_id is None or 'session_id' not in session_id.keys():
+        ret = flask.jsonify(player_id=-1, session_id=None).get_json()
+        socketio.emit('join_game', ret)
+        return
+    session_id = session_id['session_id']
+    if session_id is None or session_id not in games.keys():
+        ret = flask.jsonify(player_id=-1, session_id=None).get_json()
+        socketio.emit('join_game', ret)
+        return
+    player = Player()
+    with lock:
+        ret = lobby.join_game(player, args, games).get_json()
+    join_room(player.room)
+    join_room(games[session_id].room)
+    rm = games[ret['session_id']].players[ret['player_id']].room
+    socketio.emit('join_game', ret, room=rm)
+
+    socketio.emit('updateLobby', lobby.is_game_started({'session_id': session_id}, games).get_json(),
+                  room=games[session_id].room)
+
+
+@socketio.on('connect')
+def test_connect():
+    socketio.emit('connect', "Connected.")
+    # print('Client connected.', flush=True)
+
+
+@socketio.on('disconnect')
+def test_disconnect():
+    return
+    # print('Client disconnected.', flush=True)
 
 
 # main
