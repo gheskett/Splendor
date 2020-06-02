@@ -6,9 +6,11 @@ import logging
 from threading import Lock
 from flask import request
 from flask_socketio import SocketIO, join_room, leave_room
+from flask_cors import cross_origin
 
 logging.basicConfig(filename='python_server.log', filemode='w', level=logging.DEBUG)
 app = flask.Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
 # app.config["DEBUG"] = True
 socketio = SocketIO(app, cors_allowed_origins='*')
 games = {}
@@ -97,6 +99,7 @@ class Game:
 
 # create new game
 @app.route('/api/new_game', methods=['POST'])
+@cross_origin(origin="*")
 def new_game():
     player = Player()
     gm = Game(player)
@@ -107,6 +110,7 @@ def new_game():
 
 # join existing game
 @app.route('/api/join_game', methods=['POST'])
+@cross_origin(origin="*")
 def join_game():
     session_id = request.get_json()
     if session_id is None or 'session_id' not in session_id.keys():
@@ -122,6 +126,7 @@ def join_game():
 
 # change username
 @app.route('/api/change_username', methods=['POST'])
+@cross_origin(origin="*")
 def change_username():
     with lock:
         ret = lobby.change_username(request.get_json(), games)
@@ -130,6 +135,7 @@ def change_username():
 
 # check if game has started
 @app.route('/api/is_game_started', methods=['GET'])
+@cross_origin(origin="*")
 def is_game_started():
     with lock:
         ret = lobby.is_game_started(request.args, games)
@@ -138,6 +144,7 @@ def is_game_started():
 
 # drop out of game
 @app.route('/api/drop_out', methods=['POST'])
+@cross_origin(origin="*")
 def drop_out():
     with lock:
         ret = lobby.drop_out(request.get_json(), games)
@@ -146,6 +153,7 @@ def drop_out():
 
 # start game
 @app.route('/api/start_game', methods=['POST'])
+@cross_origin(origin="*")
 def start_game():
     with lock:
         ret = game.start_game(request.get_json(), games)
@@ -154,6 +162,7 @@ def start_game():
 
 # get current status of game
 @app.route('/api/get_game_state', methods=['GET'])
+@cross_origin(origin="*")
 def get_game_state():
     with lock:
         ret = game.get_game_state(request.args, games)
@@ -162,6 +171,7 @@ def get_game_state():
 
 # player grabs chips from field
 @app.route('/api/grab_chips', methods=['POST'])
+@cross_origin(origin="*")
 def grab_chips():
     with lock:
         ret = game.grab_chips(request.get_json(), games)
@@ -170,6 +180,7 @@ def grab_chips():
 
 # player reserves card from field
 @app.route('/api/reserve_card', methods=['POST'])
+@cross_origin(origin="*")
 def reserve_card():
     with lock:
         ret = game.reserve_card(request.get_json(), games)
@@ -178,6 +189,7 @@ def reserve_card():
 
 # player buys card from field
 @app.route('/api/buy_card', methods=['POST'])
+@cross_origin(origin="*")
 def buy_card():
     with lock:
         ret = game.buy_card(request.get_json(), games, cards, nobles)
@@ -186,6 +198,7 @@ def buy_card():
 
 # get nobles being used with server
 @app.route('/api/get_nobles_database', methods=['GET'])
+@cross_origin(origin="*")
 def get_nobles_database():
     nobles_db = {}
     for x in range(0, len(nobles)):
@@ -204,6 +217,7 @@ def get_nobles_database():
 
 # get cards being used with server
 @app.route('/api/get_cards_database', methods=['GET'])
+@cross_origin(origin="*")
 def get_cards_database():
     cards_db = {}
     for x in range(0, len(cards)):
@@ -262,13 +276,13 @@ def handle_join_game(args):
 
 
 @socketio.on('connect')
-def test_connect():
+def io_connect():
     socketio.emit('connect', "Connected.", room=request.sid)
     # print('Client connected.', flush=True)
 
 
 @socketio.on('disconnect')
-def test_disconnect():
+def io_disconnect():
     return
     # print('Client disconnected.', flush=True)
 

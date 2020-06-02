@@ -35,6 +35,8 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "fetch-api": "0.0.2",
     "phaser": "^3.20.1"
   }
 }

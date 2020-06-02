@@ -8,9 +8,14 @@ import joinGameForm from "./assets/join_game_form.html"
 import blackRectangle from "./assets/black_rectangle.png"
 
 var ioc = require('socket.io-client');
-var client = ioc.connect( "http://localhost:" + "36251" );
-var playerRoomID = null
-var gameRoomID = null
+const ip = "http://localhost"
+const port = 36251
+const fullAddr = ip + ":" + port
+const headers = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*"
+}
+var client = ioc.connect( fullAddr );
 
 const config = {
   type: Phaser.AUTO,
@@ -115,22 +120,17 @@ function create() {
 
     var username = this.getChildByName("usernameField").value;
     if (event.target.name === "start") {
-      
-      // var client = ioc.connect( "http://localhost:" + "36251" );
 
-      // client.on("message", (data) =>
-      // {
-      //   console.log("Got message: " + data)
-      //   // client.disconnect();
-      // });
+      var args = {username: username};
+      fetch(fullAddr + "/api/new_game", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(args)
+      }).then(response => response.json()
+      ).then(result => {
+        console.log(result);
+      })
 
-      // client.send("Hello World", function ( message ) {
-
-      // } );
-
-      client.emit('new_game', { username: username }, function ( message ) {
-
-      });
       this.setVisible(false);
       playButtonEnable(true);
       
@@ -154,9 +154,15 @@ function create() {
 
     if (event.target.name === "join") {
 
-      client.emit('join_game', { username: username, session_id: lobbyID }, function ( message ) {
-
-      });
+      var args = {username: username, session_id: lobbyID};
+      fetch(fullAddr + "/api/join_game", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(args)
+      }).then(response => response.json()
+      ).then(result => {
+        console.log(result);
+      })
       
       this.setVisible(false);
       playButtonEnable(true);
