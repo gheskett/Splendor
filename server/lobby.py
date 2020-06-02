@@ -107,7 +107,7 @@ def is_game_started(args, games):
     session_id = args.get('session_id')
 
     if session_id is None or session_id not in games.keys():
-        return flask.jsonify(exists=False, is_started=False, players={}, host_id=-1)
+        return flask.jsonify(exists=False, is_started=False, players={}, host_id=-1, session_id=None)
 
     game = games[session_id]
     players = {}
@@ -122,7 +122,7 @@ def is_game_started(args, games):
         started = True
 
     return flask.jsonify(exists=True, is_started=started, players=players, host_id=game.host_id,
-                         most_recent_action=game.most_recent_action)
+                         most_recent_action=game.most_recent_action, session_id=game.session_id)
 
 
 # drop out of game

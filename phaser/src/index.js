@@ -178,7 +178,7 @@ function create() {
     
   client.on("connect", (data) =>
   {
-    console.log(String(data))
+    console.log(data)
     // client.disconnect();
   });
     

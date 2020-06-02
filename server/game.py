@@ -181,6 +181,7 @@ def get_game_state(args, games):
         return_game["is_started"] = False
         return_game["exists"] = True
         return_game["host_id"] = game.host_id
+        return_game["session_id"] = game.session_id
 
         players = {}
         for _, value in game.players.items():
