@@ -22,7 +22,7 @@ def new_game(player, args, game, games):
             break
 
     game.session_id = session_id
-    game.room = session_id + "_-1"
+    game.room = session_id
     games[session_id] = game
 
     if args is None or 'username' not in args.keys() or args['username'] == "":

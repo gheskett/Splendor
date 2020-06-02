@@ -15,7 +15,7 @@ const headers = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*"
 }
-var client = ioc.connect( fullAddr );
+var client
 
 const config = {
   type: Phaser.AUTO,
@@ -48,6 +48,8 @@ function preload() {
 }
 
 function create() {
+  client = ioc.connect( fullAddr );
+
   //#region Game Variables
   const gameWidth = 1440, gameHeight = 900;
 
@@ -65,6 +67,28 @@ function create() {
   var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
   var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
   //#endregion Game Variables
+
+  //#region Server Listeners
+    
+  // called immediately when connection is made between the client and python server
+  client.on("connect", (data) =>
+  {
+    // connected, yay!
+  });
+
+  // called whenever lobby specific elements are updated ('/api/is_game_started')
+  client.on("updateLobby", (data) =>
+  {
+    console.log(data)
+  });
+
+  // Called whenever game elements are updated ('/api/get_game_state')
+  client.on("updateGame", (data) =>
+  {
+    console.log(data)
+  });
+
+  //#endregion Server Listeners
 
   //#region Mouse-button behavior
   newGame.on('pointerover', function() {
@@ -121,7 +145,10 @@ function create() {
     var username = this.getChildByName("usernameField").value;
     if (event.target.name === "start") {
 
-      var args = {username: username};
+      var args = {
+        sid: client.id,
+        username: username
+      }
       fetch(fullAddr + "/api/new_game", {
         method: "POST",
         headers: headers,
@@ -154,7 +181,11 @@ function create() {
 
     if (event.target.name === "join") {
 
-      var args = {username: username, session_id: lobbyID};
+      var args = {
+        sid: client.id,
+        username: username,
+        session_id: lobbyID
+      }
       fetch(fullAddr + "/api/join_game", {
         method: "POST",
         headers: headers,
@@ -179,40 +210,6 @@ function create() {
 
   });
   //#endregion Form Behavior
-
-  //#region Server Listeners
-    
-  client.on("connect", (data) =>
-  {
-    console.log(data)
-    // client.disconnect();
-  });
-    
-  client.on("new_game", (data) =>
-  {
-    console.log(data)
-    // client.disconnect();
-  });
-
-  client.on("join_game", (data) =>
-  {
-    console.log(data)
-    if (data.player_id > 0) {
-      // TODO: success
-    }
-    else {
-      // TODO: bad input
-    }
-    // client.disconnect();
-  });
-
-  client.on("updateLobby", (data) =>
-  {
-    console.log(data)
-    // client.disconnect();
-  });
-
-  //#endregion Server Listeners
 
 
   /**

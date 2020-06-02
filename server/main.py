@@ -6,11 +6,12 @@ import logging
 from threading import Lock
 from flask import request
 from flask_socketio import SocketIO, join_room, leave_room
-from flask_cors import cross_origin
+from flask_cors import CORS, cross_origin
 
 logging.basicConfig(filename='python_server.log', filemode='w', level=logging.DEBUG)
 app = flask.Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 # app.config["DEBUG"] = True
 socketio = SocketIO(app, cors_allowed_origins='*')
 games = {}
@@ -97,45 +98,84 @@ class Game:
         self.most_recent_action = "New lobby created successfully!"
 
 
+# emit unique game updates to each client in a game
+def emit_game_states(session_id):  # TODO: does this actually work?
+    game_ret = game.get_game_state({'session_id': session_id, 'player_id': -1}, games).get_json()
+    for _, value in games[session_id].players.items():
+        game_ret["players"][str(value.player_id)]["private_reserved_cards"] = value.private_reserved_cards
+        socketio.emit('updateGame', game.get_game_state({'session_id': session_id, 'player_id': value.player_id}, games)
+                      .get_json(), room=value.room)
+
+
 # create new game
 @app.route('/api/new_game', methods=['POST'])
-@cross_origin(origin="*")
 def new_game():
+    args = request.get_json()
+    if args is None or 'sid' not in args.keys():
+        return flask.jsonify(player_id=-1, session_id=None)
+    request.sid = args['sid']
+    request.namespace = "/"
     player = Player()
     gm = Game(player)
     with lock:
-        ret = lobby.new_game(player, request.get_json(), gm, games)
+        ret = lobby.new_game(player, args, gm, games)
+
+    join_room(player.room)
+    join_room(gm.room)
+    socketio.emit('updateLobby', lobby.is_game_started({'session_id': gm.session_id}, games).get_json(),
+                  room=games[gm.session_id].room)
+
     return ret
 
 
 # join existing game
 @app.route('/api/join_game', methods=['POST'])
-@cross_origin(origin="*")
 def join_game():
-    session_id = request.get_json()
-    if session_id is None or 'session_id' not in session_id.keys():
+    args = request.get_json()
+    if args is None or 'sid' not in args.keys():
         return flask.jsonify(player_id=-1, session_id=None)
-    session_id = session_id['session_id']
+    request.sid = args['sid']
+    request.namespace = "/"
+    if args is None or 'session_id' not in args.keys():
+        return flask.jsonify(player_id=-1, session_id=None)
+    session_id = args['session_id']
     if session_id is None or session_id not in games.keys():
         return flask.jsonify(player_id=-1, session_id=None)
     player = Player()
     with lock:
-        ret = lobby.join_game(player, request.get_json(), games)
+        ret = lobby.join_game(player, args, games)
+
+    if ret.get_json()['player_id'] < 0:
+        return ret
+
+    join_room(player.room)
+    join_room(games[session_id].room)
+    socketio.emit('updateLobby', lobby.is_game_started({'session_id': session_id}, games).get_json(),
+                  room=games[session_id].room)
+
     return ret
 
 
 # change username
 @app.route('/api/change_username', methods=['POST'])
-@cross_origin(origin="*")
 def change_username():
     with lock:
         ret = lobby.change_username(request.get_json(), games)
+    if ret.get_json() != 'OK':
+        return ret
+
+    session_id = request.get_json()['session_id']
+    if games[session_id].player_turn >= 0:
+        emit_game_states(session_id)
+    else:
+        socketio.emit('updateLobby', lobby.is_game_started({'session_id': session_id}, games).get_json(),
+                      room=games[session_id].room)
+
     return ret
 
 
 # check if game has started
 @app.route('/api/is_game_started', methods=['GET'])
-@cross_origin(origin="*")
 def is_game_started():
     with lock:
         ret = lobby.is_game_started(request.args, games)
@@ -144,7 +184,6 @@ def is_game_started():
 
 # drop out of game
 @app.route('/api/drop_out', methods=['POST'])
-@cross_origin(origin="*")
 def drop_out():
     with lock:
         ret = lobby.drop_out(request.get_json(), games)
@@ -153,7 +192,6 @@ def drop_out():
 
 # start game
 @app.route('/api/start_game', methods=['POST'])
-@cross_origin(origin="*")
 def start_game():
     with lock:
         ret = game.start_game(request.get_json(), games)
@@ -162,7 +200,6 @@ def start_game():
 
 # get current status of game
 @app.route('/api/get_game_state', methods=['GET'])
-@cross_origin(origin="*")
 def get_game_state():
     with lock:
         ret = game.get_game_state(request.args, games)
@@ -171,7 +208,6 @@ def get_game_state():
 
 # player grabs chips from field
 @app.route('/api/grab_chips', methods=['POST'])
-@cross_origin(origin="*")
 def grab_chips():
     with lock:
         ret = game.grab_chips(request.get_json(), games)
@@ -180,7 +216,6 @@ def grab_chips():
 
 # player reserves card from field
 @app.route('/api/reserve_card', methods=['POST'])
-@cross_origin(origin="*")
 def reserve_card():
     with lock:
         ret = game.reserve_card(request.get_json(), games)
@@ -189,7 +224,6 @@ def reserve_card():
 
 # player buys card from field
 @app.route('/api/buy_card', methods=['POST'])
-@cross_origin(origin="*")
 def buy_card():
     with lock:
         ret = game.buy_card(request.get_json(), games, cards, nobles)
@@ -198,7 +232,6 @@ def buy_card():
 
 # get nobles being used with server
 @app.route('/api/get_nobles_database', methods=['GET'])
-@cross_origin(origin="*")
 def get_nobles_database():
     nobles_db = {}
     for x in range(0, len(nobles)):
@@ -217,7 +250,6 @@ def get_nobles_database():
 
 # get cards being used with server
 @app.route('/api/get_cards_database', methods=['GET'])
-@cross_origin(origin="*")
 def get_cards_database():
     cards_db = {}
     for x in range(0, len(cards)):
@@ -236,49 +268,9 @@ def get_cards_database():
     return flask.jsonify(cards_db)
 
 
-@socketio.on('new_game')
-def handle_new_game(args):
-    # print(args, flush=True)
-    player = Player()
-    gm = Game(player)
-    with lock:
-        ret = lobby.new_game(player, args, gm, games).get_json()
-    join_room(player.room)
-    join_room(gm.room)
-    socketio.emit('new_game', ret, room=request.sid)
-
-    socketio.emit('updateLobby', lobby.is_game_started({'session_id': gm.session_id}, games).get_json(),
-                  room=games[gm.session_id].room)
-
-
-@socketio.on('join_game')
-def handle_join_game(args):
-    # print(args, flush=True)
-    session_id = args
-    if session_id is None or 'session_id' not in session_id.keys():
-        ret = flask.jsonify(player_id=-1, session_id=None).get_json()
-        socketio.emit('join_game', ret, room=request.sid)
-        return
-    session_id = session_id['session_id']
-    if session_id is None or session_id not in games.keys():
-        ret = flask.jsonify(player_id=-1, session_id=None).get_json()
-        socketio.emit('join_game', ret, room=request.sid)
-        return
-    player = Player()
-    with lock:
-        ret = lobby.join_game(player, args, games).get_json()
-    join_room(player.room)
-    join_room(games[session_id].room)
-    socketio.emit('join_game', ret, room=request.sid)
-
-    socketio.emit('updateLobby', lobby.is_game_started({'session_id': session_id}, games).get_json(),
-                  room=games[session_id].room)
-
-
 @socketio.on('connect')
 def io_connect():
-    socketio.emit('connect', "Connected.", room=request.sid)
-    # print('Client connected.', flush=True)
+    socketio.emit('connect', room=request.sid)
 
 
 @socketio.on('disconnect')
