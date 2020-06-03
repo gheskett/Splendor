@@ -70,20 +70,21 @@ function create() {
 
   //#region Server Listeners
     
-  // called immediately when connection is made between the client and python server
-  client.on("connect", (data) =>
+  // Called immediately when connection is made between the client and python server
+  client.on("connect", () =>
   {
-    // connected, yay!
+    // Connected, yay!
   });
 
-  // called whenever lobby specific elements are updated ('/api/is_game_started')
-  client.on("updateLobby", (data) =>
+  // Called whenever lobby specific elements are updated ('/api/is_game_started')
+  client.on("/api/is_game_started", (data) =>
   {
     console.log(data)
+    // TODO: if is_started is true, start game
   });
 
   // Called whenever game elements are updated ('/api/get_game_state')
-  client.on("updateGame", (data) =>
+  client.on("/api/get_game_state", (data) =>
   {
     console.log(data)
   });

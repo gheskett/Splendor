@@ -6,7 +6,7 @@ import logging
 from threading import Lock
 from flask import request
 from flask_socketio import SocketIO, join_room, leave_room
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 logging.basicConfig(filename='python_server.log', filemode='w', level=logging.DEBUG)
 app = flask.Flask(__name__)
@@ -14,11 +14,15 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 # app.config["DEBUG"] = True
 socketio = SocketIO(app, cors_allowed_origins='*')
+
+lock = Lock()
+
+gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "joker"]
+
+clients = {}
 games = {}
 nobles = []
 cards = []
-lock = Lock()
-gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "joker"]
 
 
 # Noble object
@@ -50,7 +54,7 @@ class Card:
 # Player object
 class Player:
     def __init__(self):
-        self.room = ""
+        self.sid = ""
         self.player_id = 0
         self.username = ""
         self.player_cards = []
@@ -98,13 +102,24 @@ class Game:
         self.most_recent_action = "New lobby created successfully!"
 
 
-# emit unique game updates to each client in a game
-def emit_game_states(session_id):  # TODO: does this actually work?
-    game_ret = game.get_game_state({'session_id': session_id, 'player_id': -1}, games).get_json()
-    for _, value in games[session_id].players.items():
+# emit updates to each client in a game lobby
+def emit_game_started(session_id):
+    with lock:
+        ret = lobby.is_game_started({'session_id': session_id}, games).get_json()
+    socketio.emit('/api/is_game_started', ret, room=games[session_id].room)
+
+
+# emit unique updates to each client in an active game
+def emit_game_state(session_id):
+    with lock:
+        game_ret = game.get_game_state({'session_id': session_id, 'player_id': -1}, games).get_json()
+    gm = games[session_id]
+
+    # socketio.emit('/api/get_game_state', game_ret, room=gm.room+"_sp")  # future spectator functionality?
+
+    for _, value in gm.players.items():
         game_ret["players"][str(value.player_id)]["private_reserved_cards"] = value.private_reserved_cards
-        socketio.emit('updateGame', game.get_game_state({'session_id': session_id, 'player_id': value.player_id}, games)
-                      .get_json(), room=value.room)
+        socketio.emit('/api/get_game_state', game_ret, room=value.sid)
 
 
 # create new game
@@ -112,18 +127,28 @@ def emit_game_states(session_id):  # TODO: does this actually work?
 def new_game():
     args = request.get_json()
     if args is None or 'sid' not in args.keys():
-        return flask.jsonify(player_id=-1, session_id=None)
-    request.sid = args['sid']
-    request.namespace = "/"
+        return flask.jsonify(player_id=-1, session_id=None,
+                             most_recent_action="ERROR: missing 'sid' argument!")
+
+    sid = args['sid']
+    if sid not in clients.keys():
+        print("ERROR: sid not present in clients dictionary!")
+        return flask.jsonify(player_id=-1, session_id=None,
+                             most_recent_action="ERROR: Internal server error, please see server for more info!")
+
+    if clients[sid]['session_id'] is not None:
+        return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
+                             most_recent_action="ERROR: Player cannot join two games at once!")
+
     player = Player()
     gm = Game(player)
     with lock:
         ret = lobby.new_game(player, args, gm, games)
 
-    join_room(player.room)
-    join_room(gm.room)
-    socketio.emit('updateLobby', lobby.is_game_started({'session_id': gm.session_id}, games).get_json(),
-                  room=games[gm.session_id].room)
+    with lock:
+        clients[sid] = {'player_id': player.player_id, 'session_id': gm.session_id}
+    join_room(gm.room, sid, "/")
+    emit_game_started(gm.session_id)
 
     return ret
 
@@ -133,25 +158,41 @@ def new_game():
 def join_game():
     args = request.get_json()
     if args is None or 'sid' not in args.keys():
-        return flask.jsonify(player_id=-1, session_id=None)
-    request.sid = args['sid']
-    request.namespace = "/"
+        return flask.jsonify(player_id=-1, session_id=None,
+                             most_recent_action="ERROR: missing 'sid' argument!")
+
+    sid = args['sid']
+    if sid not in clients.keys():
+        print("ERROR: sid not present in clients dictionary!")
+        return flask.jsonify(player_id=-1, session_id=None,
+                             most_recent_action="ERROR: Internal server error, please see server for more info!")
+
     if args is None or 'session_id' not in args.keys():
-        return flask.jsonify(player_id=-1, session_id=None)
+        return flask.jsonify(player_id=-1, session_id=None,
+                             most_recent_action="ERROR: missing 'session_id' argument!")
+
+    if clients[sid]['session_id'] is not None:
+        return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
+                             most_recent_action="ERROR: Player cannot join two games at once!")
+
     session_id = args['session_id']
     if session_id is None or session_id not in games.keys():
-        return flask.jsonify(player_id=-1, session_id=None)
+        return flask.jsonify(player_id=-1, session_id=None,
+                             most_recent_action="ERROR: Could not find game!")
+
     player = Player()
     with lock:
         ret = lobby.join_game(player, args, games)
 
-    if ret.get_json()['player_id'] < 0:
+    ret_json = ret.get_json()
+    if ret_json['player_id'] < 0:
         return ret
 
-    join_room(player.room)
-    join_room(games[session_id].room)
-    socketio.emit('updateLobby', lobby.is_game_started({'session_id': session_id}, games).get_json(),
-                  room=games[session_id].room)
+    with lock:
+        clients[sid] = {'player_id': player.player_id, 'session_id': ret_json['session_id']}
+
+    join_room(games[session_id].room, sid, "/")
+    emit_game_started(session_id)
 
     return ret
 
@@ -166,10 +207,9 @@ def change_username():
 
     session_id = request.get_json()['session_id']
     if games[session_id].player_turn >= 0:
-        emit_game_states(session_id)
+        emit_game_state(session_id)
     else:
-        socketio.emit('updateLobby', lobby.is_game_started({'session_id': session_id}, games).get_json(),
-                      room=games[session_id].room)
+        emit_game_started(session_id)
 
     return ret
 
@@ -186,7 +226,16 @@ def is_game_started():
 @app.route('/api/drop_out', methods=['POST'])
 def drop_out():
     with lock:
-        ret = lobby.drop_out(request.get_json(), games)
+        ret = lobby.drop_out(request.get_json(), games, clients)
+    if ret.get_json() != 'OK':
+        return ret
+
+    session_id = request.get_json()['session_id']
+    if games[session_id].player_turn >= 0:
+        emit_game_state(session_id)
+    else:
+        emit_game_started(session_id)
+
     return ret
 
 
@@ -195,6 +244,14 @@ def drop_out():
 def start_game():
     with lock:
         ret = game.start_game(request.get_json(), games)
+
+    if ret.get_json() != 'OK':
+        return ret
+
+    session_id = request.get_json()['session_id']
+    emit_game_started(session_id)
+    emit_game_state(session_id)
+
     return ret
 
 
@@ -203,6 +260,13 @@ def start_game():
 def get_game_state():
     with lock:
         ret = game.get_game_state(request.args, games)
+
+    if ret.get_json() != 'OK':
+        return ret
+
+    session_id = request.get_json()['session_id']
+    emit_game_state(session_id)
+
     return ret
 
 
@@ -211,6 +275,13 @@ def get_game_state():
 def grab_chips():
     with lock:
         ret = game.grab_chips(request.get_json(), games)
+
+    if ret.get_json() != 'OK':
+        return ret
+
+    session_id = request.get_json()['session_id']
+    emit_game_state(session_id)
+
     return ret
 
 
@@ -219,6 +290,13 @@ def grab_chips():
 def reserve_card():
     with lock:
         ret = game.reserve_card(request.get_json(), games)
+
+    if ret.get_json() != 'OK':
+        return ret
+
+    session_id = request.get_json()['session_id']
+    emit_game_state(session_id)
+
     return ret
 
 
@@ -227,6 +305,13 @@ def reserve_card():
 def buy_card():
     with lock:
         ret = game.buy_card(request.get_json(), games, cards, nobles)
+
+    if ret.get_json() != 'OK':
+        return ret
+
+    session_id = request.get_json()['session_id']
+    emit_game_state(session_id)
+
     return ret
 
 
@@ -270,12 +355,23 @@ def get_cards_database():
 
 @socketio.on('connect')
 def io_connect():
+    with lock:
+        clients[request.sid] = {'player_id': -1, 'session_id': None}
     socketio.emit('connect', room=request.sid)
 
 
 @socketio.on('disconnect')
 def io_disconnect():
-    return
+    cli = clients[request.sid]
+    if cli['session_id'] is not None:
+        gm = games[cli['session_id']]
+        g_room = gm.room
+        leave_room(g_room)
+        with lock:
+            lobby.drop_out(cli, games, clients)
+    with lock:
+        del clients[request.sid]
+
     # print('Client disconnected.', flush=True)
 
 
