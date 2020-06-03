@@ -132,11 +132,13 @@ def new_game():
 
     sid = args['sid']
     if sid not in clients.keys():
-        print("ERROR: sid not present in clients dictionary!")
-        return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: Internal server error, please see server for more info!")
+        if sid == 'debug':
+            clients[sid] = {'player_id': -1, 'session_id': None}
+        else:
+            return flask.jsonify(player_id=-1, session_id=None,
+                                 most_recent_action="ERROR: sid not present in clients dictionary!")
 
-    if clients[sid]['session_id'] is not None:
+    if clients[sid]['session_id'] is not None and sid != 'debug':
         return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
                              most_recent_action="ERROR: Player cannot join two games at once!")
 
@@ -163,15 +165,17 @@ def join_game():
 
     sid = args['sid']
     if sid not in clients.keys():
-        print("ERROR: sid not present in clients dictionary!")
-        return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: Internal server error, please see server for more info!")
+        if sid == 'debug':
+            clients[sid] = {'player_id': -1, 'session_id': None}
+        else:
+            return flask.jsonify(player_id=-1, session_id=None,
+                                 most_recent_action="ERROR: sid not present in clients dictionary!")
 
     if args is None or 'session_id' not in args.keys():
         return flask.jsonify(player_id=-1, session_id=None,
                              most_recent_action="ERROR: missing 'session_id' argument!")
 
-    if clients[sid]['session_id'] is not None:
+    if clients[sid]['session_id'] is not None and sid != 'debug':
         return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
                              most_recent_action="ERROR: Player cannot join two games at once!")
 
