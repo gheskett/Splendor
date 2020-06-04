@@ -146,9 +146,8 @@ def new_game():
     gm = Game(player)
     with lock:
         ret = lobby.new_game(player, args, gm, games)
-
-    with lock:
         clients[sid] = {'player_id': player.player_id, 'session_id': gm.session_id}
+
     join_room(gm.room, sid, "/")
     emit_game_started(gm.session_id)
 
