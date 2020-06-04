@@ -160,6 +160,8 @@ def start_game(args, games):
 
     game.most_recent_action = "The game has started! " + game.players[game.player_turn].username + " will go first."
 
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
+
     return flask.jsonify("OK")
 
 
@@ -362,6 +364,8 @@ def grab_chips(args, games):
 
     next_turn(game)
 
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
+
     return flask.jsonify("OK")
 
 
@@ -470,6 +474,8 @@ def reserve_card(args, games):
             player.player_chips -= returned_chips[x]
 
     next_turn(game)
+
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
 
     return flask.jsonify("OK")
 
@@ -664,5 +670,7 @@ def buy_card(args, games, cards, nobles):
     game.most_recent_action += "!"
 
     next_turn(game)
+
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
 
     return flask.jsonify("OK")

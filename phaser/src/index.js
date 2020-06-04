@@ -86,15 +86,21 @@ function create() {
     // TODO: send connection error message to client, return to homepage, clear out old game variables
   });
 
-  // Called whenever lobby specific elements are updated ('/api/is_game_started')
-  client.on("/api/is_game_started", (data) =>
+  // Called whenever lobby specific elements are updated ('/api/is_game_started' equivalent)
+  client.on("/io/update_lobby/", (data) =>
   {
     console.log(data)
     // TODO: if is_started is true, start game
   });
 
-  // Called whenever game elements are updated ('/api/get_game_state')
-  client.on("/api/get_game_state", (data) =>
+  // Called whenever game elements are updated ('/api/get_game_state' equivalent)
+  client.on("/io/update_game/", (data) =>
+  {
+    console.log(data)
+  });
+
+  // Called whenever somebody sends a message to the server ('/api/get_messages' equivalent)
+  client.on("/io/update_chat/", (data) =>
   {
     console.log(data)
   });
@@ -160,7 +166,7 @@ function create() {
         sid: client.id,
         username: username
       }
-      fetch(fullAddr + "/api/new_game", {
+      fetch(fullAddr + "/api/new_game/", {
         method: "POST",
         headers: headers,
         body: JSON.stringify(args)
@@ -197,7 +203,7 @@ function create() {
         username: username,
         session_id: lobbyID
       }
-      fetch(fullAddr + "/api/join_game", {
+      fetch(fullAddr + "/api/join_game/", {
         method: "POST",
         headers: headers,
         body: JSON.stringify(args)

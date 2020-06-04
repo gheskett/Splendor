@@ -100,30 +100,39 @@ class Game:
         self.field_nobles = []
         self.victory = []
         self.most_recent_action = "New lobby created successfully!"
+        self.messages = []
 
 
 # emit updates to each client in a game lobby
-def emit_game_started(session_id):
+def emit_update_lobby(session_id):
     with lock:
         ret = lobby.is_game_started({'session_id': session_id}, games).get_json()
-    socketio.emit('/api/is_game_started', ret, room=games[session_id].room)
+    socketio.emit('/io/update_lobby/', ret, room=games[session_id].room)
 
 
 # emit unique updates to each client in an active game
-def emit_game_state(session_id):
+def emit_update_game(session_id):
     with lock:
         game_ret = game.get_game_state({'session_id': session_id, 'player_id': -1}, games).get_json()
     gm = games[session_id]
 
-    # socketio.emit('/api/get_game_state', game_ret, room=gm.room+"_sp")  # future spectator functionality?
+    # socketio.emit('/io/update_game/', game_ret, room=gm.room+"_sp")  # future spectator functionality?
 
     for _, value in gm.players.items():
         game_ret["players"][str(value.player_id)]["private_reserved_cards"] = value.private_reserved_cards
-        socketio.emit('/api/get_game_state', game_ret, room=value.sid)
+        socketio.emit('/io/update_game/', game_ret, room=value.sid)
+
+
+# emit chat message updates to game session
+def emit_update_chat(session_id):
+    gm = games[session_id]
+    ret = gm.messages[-1]
+    socketio.emit('/io/update_chat/', ret, room=gm.room)
+    # socketio.emit('/io/update_chat/', ret, room=gm.room+"_sp")  # future spectator functionality?
 
 
 # create new game
-@app.route('/api/new_game', methods=['POST'])
+@app.route('/api/new_game/', strict_slashes=False, methods=['POST'])
 def new_game():
     args = request.get_json()
     if args is None or 'sid' not in args.keys():
@@ -140,7 +149,7 @@ def new_game():
 
     if clients[sid]['session_id'] is not None and sid != 'debug':
         return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
-                             most_recent_action="ERROR: Player cannot join two games at once!")
+                             most_recent_action="ERROR: Player cannot be present in two games at once!")
 
     player = Player()
     gm = Game(player)
@@ -149,13 +158,14 @@ def new_game():
         clients[sid] = {'player_id': player.player_id, 'session_id': gm.session_id}
 
     join_room(gm.room, sid, "/")
-    emit_game_started(gm.session_id)
+    emit_update_lobby(gm.session_id)
+    emit_update_chat(gm.session_id)
 
     return ret
 
 
 # join existing game
-@app.route('/api/join_game', methods=['POST'])
+@app.route('/api/join_game/', strict_slashes=False, methods=['POST'])
 def join_game():
     args = request.get_json()
     if args is None or 'sid' not in args.keys():
@@ -176,7 +186,7 @@ def join_game():
 
     if clients[sid]['session_id'] is not None and sid != 'debug':
         return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
-                             most_recent_action="ERROR: Player cannot join two games at once!")
+                             most_recent_action="ERROR: Player cannot be present in two games at once!")
 
     session_id = args['session_id']
     if session_id is None or session_id not in games.keys():
@@ -195,13 +205,14 @@ def join_game():
         clients[sid] = {'player_id': player.player_id, 'session_id': ret_json['session_id']}
 
     join_room(games[session_id].room, sid, "/")
-    emit_game_started(session_id)
+    emit_update_lobby(session_id)
+    emit_update_chat(session_id)
 
     return ret
 
 
 # change username
-@app.route('/api/change_username', methods=['POST'])
+@app.route('/api/change_username/', strict_slashes=False, methods=['POST'])
 def change_username():
     with lock:
         ret = lobby.change_username(request.get_json(), games)
@@ -210,15 +221,17 @@ def change_username():
 
     session_id = request.get_json()['session_id']
     if games[session_id].player_turn >= 0:
-        emit_game_state(session_id)
+        emit_update_game(session_id)
     else:
-        emit_game_started(session_id)
+        emit_update_lobby(session_id)
+
+    emit_update_chat(session_id)
 
     return ret
 
 
 # check if game has started
-@app.route('/api/is_game_started', methods=['GET'])
+@app.route('/api/is_game_started/', strict_slashes=False, methods=['GET'])
 def is_game_started():
     with lock:
         ret = lobby.is_game_started(request.args, games)
@@ -226,7 +239,7 @@ def is_game_started():
 
 
 # drop out of game
-@app.route('/api/drop_out', methods=['POST'])
+@app.route('/api/drop_out/', strict_slashes=False, methods=['POST'])
 def drop_out():
     with lock:
         ret = lobby.drop_out(request.get_json(), games, clients)
@@ -235,15 +248,17 @@ def drop_out():
 
     session_id = request.get_json()['session_id']
     if games[session_id].player_turn >= 0:
-        emit_game_state(session_id)
+        emit_update_game(session_id)
     else:
-        emit_game_started(session_id)
+        emit_update_lobby(session_id)
+
+    emit_update_chat(session_id)
 
     return ret
 
 
 # start game
-@app.route('/api/start_game', methods=['POST'])
+@app.route('/api/start_game/', strict_slashes=False, methods=['POST'])
 def start_game():
     with lock:
         ret = game.start_game(request.get_json(), games)
@@ -252,29 +267,23 @@ def start_game():
         return ret
 
     session_id = request.get_json()['session_id']
-    emit_game_started(session_id)
-    emit_game_state(session_id)
+    emit_update_lobby(session_id)
+    emit_update_game(session_id)
+    emit_update_chat(session_id)
 
     return ret
 
 
 # get current status of game
-@app.route('/api/get_game_state', methods=['GET'])
+@app.route('/api/get_game_state/', strict_slashes=False, methods=['GET'])
 def get_game_state():
     with lock:
         ret = game.get_game_state(request.args, games)
-
-    if ret.get_json() != 'OK':
-        return ret
-
-    session_id = request.get_json()['session_id']
-    emit_game_state(session_id)
-
     return ret
 
 
 # player grabs chips from field
-@app.route('/api/grab_chips', methods=['POST'])
+@app.route('/api/grab_chips/', strict_slashes=False, methods=['POST'])
 def grab_chips():
     with lock:
         ret = game.grab_chips(request.get_json(), games)
@@ -283,13 +292,14 @@ def grab_chips():
         return ret
 
     session_id = request.get_json()['session_id']
-    emit_game_state(session_id)
+    emit_update_game(session_id)
+    emit_update_chat(session_id)
 
     return ret
 
 
 # player reserves card from field
-@app.route('/api/reserve_card', methods=['POST'])
+@app.route('/api/reserve_card/', strict_slashes=False, methods=['POST'])
 def reserve_card():
     with lock:
         ret = game.reserve_card(request.get_json(), games)
@@ -298,13 +308,14 @@ def reserve_card():
         return ret
 
     session_id = request.get_json()['session_id']
-    emit_game_state(session_id)
+    emit_update_game(session_id)
+    emit_update_chat(session_id)
 
     return ret
 
 
 # player buys card from field
-@app.route('/api/buy_card', methods=['POST'])
+@app.route('/api/buy_card/', strict_slashes=False, methods=['POST'])
 def buy_card():
     with lock:
         ret = game.buy_card(request.get_json(), games, cards, nobles)
@@ -313,13 +324,14 @@ def buy_card():
         return ret
 
     session_id = request.get_json()['session_id']
-    emit_game_state(session_id)
+    emit_update_game(session_id)
+    emit_update_chat(session_id)
 
     return ret
 
 
 # get nobles being used with server
-@app.route('/api/get_nobles_database', methods=['GET'])
+@app.route('/api/get_nobles_database/', strict_slashes=False, methods=['GET'])
 def get_nobles_database():
     nobles_db = {}
     for x in range(0, len(nobles)):
@@ -337,7 +349,7 @@ def get_nobles_database():
 
 
 # get cards being used with server
-@app.route('/api/get_cards_database', methods=['GET'])
+@app.route('/api/get_cards_database/', strict_slashes=False, methods=['GET'])
 def get_cards_database():
     cards_db = {}
     for x in range(0, len(cards)):
@@ -354,6 +366,29 @@ def get_cards_database():
         }
         cards_db[x] = card
     return flask.jsonify(cards_db)
+
+
+# send chat message to game session
+@app.route('/api/send_message/', strict_slashes=False, methods=['POST'])
+def send_message():
+    with lock:
+        ret = lobby.send_message(request.get_json(), games)
+
+    if ret.get_json() != 'OK':
+        return ret
+
+    session_id = request.get_json()['session_id']
+    emit_update_chat(session_id)
+
+    return ret
+
+
+# get chat messages from a game session
+@app.route('/api/get_messages/', strict_slashes=False, methods=['GET'])
+def get_messages():
+    with lock:
+        ret = lobby.get_messages(request.args, games)
+    return ret
 
 
 @socketio.on('connect')
