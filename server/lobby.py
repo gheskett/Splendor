@@ -225,13 +225,14 @@ def send_message(args, games):
 
 def get_messages(args, games):
     session_id = args.get('session_id')
-    print(str(session_id), flush=True)
     if session_id is None or session_id not in games.keys():
         return flask.jsonify([])
 
-    num_messages = int(args.get('num_messages'))
-    if 'num_messages' is None:
+    num_messages = args.get('num_messages')
+    if num_messages is None:
         num_messages = -1
+    else:
+        num_messages = int(num_messages)
 
     game = games[session_id]
 
@@ -239,12 +240,8 @@ def get_messages(args, games):
     if num_messages < 0 or num_messages > msg_len:
         num_messages = msg_len
 
-    print("OI", flush=True)
-
     if num_messages == 0:
         return flask.jsonify([])
-
-    print("OI", flush=True)
 
     ret = game.messages[slice(msg_len - num_messages, msg_len)]
 
