@@ -54,13 +54,15 @@ def buy(client, pid, p_crd, r_chips, noble):
 
 def init_2P(client):
     result = client.post('/api/new_game', data=json.dumps(dict(
-        username="Zachary"
+        username="Zachary",
+        sid='debug'
     )), follow_redirects=True, content_type='application/json')
     global session_id
     session_id = result.get_json()['session_id']
     client.post('/api/join_game', data=json.dumps(dict(
         session_id=session_id,
-        username="Gregory"
+        username="Gregory",
+        sid='debug'
     )), follow_redirects=True, content_type='application/json')
     client.post('/api/start_game', data=json.dumps(dict(
         session_id=session_id,
@@ -173,17 +175,20 @@ def init_2P(client):
 
 def init_3P(client):
     result = client.post('/api/new_game', data=json.dumps(dict(
-        username="Gregory"
+        username="Gregory",
+        sid='debug'
     )), follow_redirects=True, content_type='application/json')
     global session_id
     session_id = result.get_json()['session_id']
     client.post('/api/join_game', data=json.dumps(dict(
         session_id=session_id,
-        username="Zachary"
+        username="Zachary",
+        sid='debug'
     )), follow_redirects=True, content_type='application/json')
     client.post('/api/join_game', data=json.dumps(dict(
         session_id=session_id,
-        username="John"
+        username="John",
+        sid='debug'
     )), follow_redirects=True, content_type='application/json')
     client.post('/api/start_game', data=json.dumps(dict(
         session_id=session_id,

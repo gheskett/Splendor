@@ -16,7 +16,8 @@ def client():
 def test_new_game(client):
     for x in range(0, 3):
         result = client.post('/api/new_game', data=json.dumps(dict(
-            username="Bob"
+            username="Bob",
+            sid="debug"
         )), follow_redirects=True, content_type='application/json')
         game = result.get_json()
         assert game['player_id'] == 0
@@ -36,7 +37,8 @@ def test_join_game(client):
 
             result = client.post('/api/join_game', data=json.dumps(dict(
                 session_id=session_id[x],
-                username=username
+                username=username,
+                sid="debug"
             )), follow_redirects=True, content_type='application/json')
             game = result.get_json()
             assert game['session_id'] == session_id[x]
@@ -77,7 +79,8 @@ def test_leave_lobby(client):
 
         result = client.post('/api/join_game', data=json.dumps(dict(
             session_id=session_id[x],
-            username=''
+            username='',
+            sid='debug'
         )), follow_redirects=True, content_type='application/json')
         game = result.get_json()
         assert game['session_id'] == session_id[x]
