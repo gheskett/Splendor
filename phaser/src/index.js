@@ -20,8 +20,8 @@ var client
 const config = {
   type: Phaser.AUTO,
   parent: "phaser-example",
-  width: 1440,
-  height: 900,
+  width: 1920,
+  height: 1080,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
@@ -51,7 +51,7 @@ function create() {
   client = ioc.connect( fullAddr );
 
   //#region Game Variables
-  const gameWidth = 1440, gameHeight = 900;
+  const gameWidth = config.width, gameHeight = config.height;
 
   const SELECTED = 1
   const NOT_SELECTED = 0.90
@@ -73,7 +73,17 @@ function create() {
   // Called immediately when connection is made between the client and python server
   client.on("connect", () =>
   {
+    console.log("Connected to API server!")
     // Connected, yay!
+  });
+  
+  // Called immediately if client loses connection with server
+  client.on('disconnect', () =>
+  {
+    console.log("Lost connection to API server!")
+    // Disconnected, oh no!
+
+    // TODO: send connection error message to client, return to homepage, clear out old game variables
   });
 
   // Called whenever lobby specific elements are updated ('/api/is_game_started')
