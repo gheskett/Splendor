@@ -1,11 +1,12 @@
-import Phaser from "phaser";
-import newGame from "./assets/new_game.svg";
-import joinGame from "./assets/join_game.svg";
+import Phaser from "phaser"
+import newGame from "./assets/new_game.svg"
+import joinGame from "./assets/join_game.svg"
 import titleLogo from "./assets/title.svg"
 import background from "./assets/pattern-background-frost-texture.jpg"
 import newGameForm from "./assets/new_game_form.html"
 import joinGameForm from "./assets/join_game_form.html"
 import blackRectangle from "./assets/black_rectangle.png"
+import mainMenu from "./scenes/mainMenu.js"
 
 var ioc = require('socket.io-client');
 const ip = "http://localhost"
@@ -36,6 +37,7 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+game.scene.add("mainMenu", mainMenu);
 
 function preload() {
   this.load.svg("newGame", newGame);
@@ -48,6 +50,7 @@ function preload() {
 }
 
 function create() {
+  this.scene.start("mainMenu");
   client = ioc.connect( fullAddr );
 
   //#region Game Variables
