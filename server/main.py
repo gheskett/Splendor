@@ -137,7 +137,7 @@ def new_game():
     args = request.get_json()
     if args is None or 'sid' not in args.keys():
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: missing 'sid' argument!")
+                             most_recent_action="ERROR: missing 'sid' argument!", username=None)
 
     sid = args['sid']
     if sid not in clients.keys():
@@ -145,11 +145,12 @@ def new_game():
             clients[sid] = {'player_id': -1, 'session_id': None}
         else:
             return flask.jsonify(player_id=-1, session_id=None,
-                                 most_recent_action="ERROR: sid not present in clients dictionary!")
+                                 most_recent_action="ERROR: sid not present in clients dictionary!", username=None)
 
     if clients[sid]['session_id'] is not None and sid != 'debug':
         return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
-                             most_recent_action="ERROR: Player cannot be present in two games at once!")
+                             most_recent_action="ERROR: Player cannot be present in two games at once!",
+                             username=clients[sid]['username'])
 
     player = Player()
     gm = Game(player)
@@ -170,7 +171,7 @@ def join_game():
     args = request.get_json()
     if args is None or 'sid' not in args.keys():
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: missing 'sid' argument!")
+                             most_recent_action="ERROR: missing 'sid' argument!", username=None)
 
     sid = args['sid']
     if sid not in clients.keys():
@@ -178,20 +179,21 @@ def join_game():
             clients[sid] = {'player_id': -1, 'session_id': None}
         else:
             return flask.jsonify(player_id=-1, session_id=None,
-                                 most_recent_action="ERROR: sid not present in clients dictionary!")
+                                 most_recent_action="ERROR: sid not present in clients dictionary!", username=None)
 
     if args is None or 'session_id' not in args.keys():
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: missing 'session_id' argument!")
+                             most_recent_action="ERROR: missing 'session_id' argument!", username=None)
 
     if clients[sid]['session_id'] is not None and sid != 'debug':
         return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
-                             most_recent_action="ERROR: Player cannot be present in two games at once!")
+                             most_recent_action="ERROR: Player cannot be present in two games at once!",
+                             username=clients[sid]['username'])
 
     session_id = args['session_id']
     if session_id is None or session_id not in games.keys():
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: Could not find game!")
+                             most_recent_action="ERROR: Could not find game!", username=None)
 
     player = Player()
     with lock:

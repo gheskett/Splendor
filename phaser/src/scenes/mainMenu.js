@@ -120,6 +120,7 @@ export default class mainMenu extends Phaser.Scene {
         newGameForm.on("click", function (event) {
 
             var username = this.getChildByName("usernameField").value;
+
             if (event.target.name === "start") {
 
                 var args = {
@@ -134,7 +135,8 @@ export default class mainMenu extends Phaser.Scene {
                 .then(result => {
                     console.log(result);
                     if (result.player_id !== -1) {
-                        enterLobby(result.player_id, result.session_id, username);
+                        this.getChildByName("usernameField").value = "";
+                        enterLobby(result.player_id, result.session_id, result.username);
                     } else {
                         console.warn(result.most_recent_action);
                     }
@@ -150,8 +152,10 @@ export default class mainMenu extends Phaser.Scene {
             //Enable play buttons and remove username form on cancel
             if (event.target.name === "cancel") {
 
-            this.setVisible(false);
-            playButtonEnable(true);
+                this.getChildByName("usernameField").value = "";
+
+                this.setVisible(false);
+                playButtonEnable(true);
 
             }
 
@@ -178,7 +182,9 @@ export default class mainMenu extends Phaser.Scene {
                 .then(result => {
                     console.log(result);
                     if (result.player_id !== -1) {
-                        enterLobby(result.player_id, result.session_id, username);
+                        this.getChildByName("usernameField").value = "";
+                        this.getChildByName("lobbyIdField").value = "";
+                        enterLobby(result.player_id, result.session_id, result.username);
                     } else {
                         console.warn(result.most_recent_action);
                     }
@@ -194,8 +200,10 @@ export default class mainMenu extends Phaser.Scene {
             //Enable play buttons and remove username form on cancel
             if (event.target.name === "cancel") {
 
-            this.setVisible(false);
-            playButtonEnable(true);
+                this.getChildByName("usernameField").value = "";
+
+                this.setVisible(false);
+                playButtonEnable(true);
 
             }
 

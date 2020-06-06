@@ -87,6 +87,7 @@ export default class lobby extends Phaser.Scene {
                 .then(result => {
                     console.log(result);
                     if (result === "OK") {
+                        thisLobby.username = newName
                         console.log("Username Changed to " + newName);
                     } else {
                         console.warn("Username Change Failed", result);
@@ -102,6 +103,7 @@ export default class lobby extends Phaser.Scene {
 
             //Enable play buttons and remove username form on cancel
             if (event.target.name === "cancel") {
+                this.getChildByName("usernameField").value = thisLobby.username;
 
                 this.setVisible(false);
                 //toggleLobbyElements(true);
@@ -152,6 +154,7 @@ export default class lobby extends Phaser.Scene {
                             //toggleLobbyElements(false);
                         }
                     });
+                    changeUsernameForm.getChildByName("usernameField").value = currentUsername;
                 }
 
                 lobbyBoxes[i].getChildByID("usernameValue").innerHTML = currentUsername;

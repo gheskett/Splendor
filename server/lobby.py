@@ -32,10 +32,11 @@ def new_game(player, args, game, games):
 
     player.sid = args['sid']
 
-    game.messages.append({'player_id': player.player_id, 'message': game.most_recent_action, 'is_game_event': True})
+    game.messages.append({'player_id': player.player_id, 'message': game.most_recent_action, 'is_game_event': True,
+                          'index': len(game.messages)})
 
     return flask.jsonify(player_id=game.players[player.player_id].player_id, session_id=session_id,
-                         most_recent_action=game.most_recent_action)
+                         most_recent_action=game.most_recent_action, username=player.username)
 
 
 # join existing game
@@ -45,10 +46,10 @@ def join_game(player, args, games):
     game = games[session_id]
     if game.player_turn >= 0:
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: Current game is already started!")
+                             most_recent_action="ERROR: Current game is already started!", username=None)
     if len(game.players) >= 4:
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: Current game is full!")
+                             most_recent_action="ERROR: Current game is full!", username=None)
 
     x = 0
     while True:
@@ -77,9 +78,11 @@ def join_game(player, args, games):
 
     game.most_recent_action = player.username + " joined the game lobby!"
 
-    game.messages.append({'player_id': player.player_id, 'message': game.most_recent_action, 'is_game_event': True})
+    game.messages.append({'player_id': player.player_id, 'message': game.most_recent_action, 'is_game_event': True,
+                          'index': len(game.messages)})
 
-    return flask.jsonify(player_id=player.player_id, session_id=session_id, most_recent_action=game.most_recent_action)
+    return flask.jsonify(player_id=player.player_id, session_id=session_id, most_recent_action=game.most_recent_action,
+                         username=player.username)
 
 
 # change username
@@ -116,7 +119,8 @@ def change_username(args, games):
         return flask.jsonify("UNCHANGED")
 
     game.most_recent_action = tmp + " changed their username to " + game.players[player_id].username + "!"
-    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True,
+                          'index': len(game.messages)})
 
     return flask.jsonify("OK")
 
@@ -206,7 +210,8 @@ def drop_out(args, games, clients):
                                                                                           "so this means they win the" \
                                                                                           " game!"
 
-    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True,
+                          'index': len(game.messages)})
 
     if len(game.players) == 0:
         del games[session_id]
@@ -241,7 +246,8 @@ def send_message(args, games):
         return flask.jsonify("ERROR: Could not find player in game!")  # disable to allow for spectators to chat
         # player_id = -1
 
-    game.messages.append({'player_id': player_id, 'message': message, 'is_game_event': False})
+    game.messages.append({'player_id': player_id, 'message': message, 'is_game_event': False,
+                          'index': len(game.messages)})
 
     return flask.jsonify("OK")
 
