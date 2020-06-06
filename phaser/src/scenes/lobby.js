@@ -132,27 +132,33 @@ export default class lobby extends Phaser.Scene {
 
         function updateLobby(data) {
             console.log(data);
+            for (var i = 0; i < lobbyBoxes.length; i++) {
+                lobbyBoxes[i].destroy();
+            }
             lobbyBoxes = [];
              for (var i = 0; i < Object.keys(data.players).length; i++) {
+
+                var currentPlayerID = data.players[Object.keys(data.players)[i]].player_id;
+                var currentUsername = data.players[Object.keys(data.players)[i]].username;
                 lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * (gameWidth / 2)), (i >= 2 ? 300 : 0) + 200).createFromCache("lobbyBox").setOrigin(0).setDepth(0);
 
-                if (data.host_id === i) {
+                if (data.host_id === currentPlayerID) {
                     lobbyBoxes[i].getChildByID("host").style.display = "inline-block";
                 }
 
-                if (thisLobby.playerID === i) {
+                if (thisLobby.playerID === currentPlayerID) {
                     lobbyBoxes[i].getChildByID("pencil").style.display = "inline-block";
                     lobbyBoxes[i].getChildByID("userContainer").style.border = "10px solid gold";
                     lobbyBoxes[i].addListener("click");
                     lobbyBoxes[i].on("click", function(event) {
-                        if (event.target.id = "pencil") {
+                        if (event.target.id === "pencil") {
                             changeUsernameForm.setVisible(true);
                             //toggleLobbyElements(false);
                         }
                     });
                 }
 
-                lobbyBoxes[i].getChildByID("usernameValue").innerHTML = data.players[Object.keys(data.players)[i]].username;
+                lobbyBoxes[i].getChildByID("usernameValue").innerHTML = currentUsername;
                 lobbyBoxes[i].getChildByID("playerValue").innerHTML = i + 1;
                 lobbyBoxes[i].getChildByID("userContainer").style.background = lobbyColors[i];
             }
