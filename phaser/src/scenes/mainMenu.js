@@ -1,13 +1,12 @@
 import Phaser from "phaser"
-import newGame from "../assets/new_game.svg"
-import joinGame from "../assets/join_game.svg"
-import titleLogo from "../assets/title.svg"
-import background from "../assets/pattern-background-frost-texture.jpg"
-import newGameForm from "../assets/new_game_form.html"
-import joinGameForm from "../assets/join_game_form.html"
-import blackRectangle from "../assets/black_rectangle.png"
 
-
+import newGame from "../assets/images/new_game.svg"
+import joinGame from "../assets/images//join_game.svg"
+import titleLogo from "../assets/images/title.svg"
+import background from "../assets/images/pattern-background-frost-texture.jpg"
+import newGameForm from "../assets/html/new_game_form.html"
+import joinGameForm from "../assets/html/join_game_form.html"
+import blackRectangle from "../assets/images/black_rectangle.png"
 
 export default class mainMenu extends Phaser.Scene {
     constructor(config) {
@@ -32,11 +31,9 @@ export default class mainMenu extends Phaser.Scene {
     }
 
     create() {
-        console.log(this.client);
         var thisMainMenu = this;
 
         //#region Game Variables
-        this.add.text(20, 20, "test");
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
 
         const SELECTED = 1
@@ -47,21 +44,14 @@ export default class mainMenu extends Phaser.Scene {
         const title = this.add.image(gameWidth / 2, 150, "title").setScale(1.5);
         const dimmingObject = this.add.image(0, 0, "dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
 
-        const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive().setAlpha(NOT_SELECTED);
-        const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
+        const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
+        const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
 
         var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
         var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
         //#endregion Game Variables
 
         //#region Server Listeners
-
-        // Called whenever lobby specific elements are updated ('/api/is_game_started' equivalent)
-        this.client.on("/io/update_lobby/", (data) =>
-        {
-            console.log(data)
-            // TODO: if is_started is true, start game
-        });
 
         // Called whenever game elements are updated ('/api/get_game_state' equivalent)
         this.client.on("/io/update_game/", (data) =>
@@ -140,10 +130,17 @@ export default class mainMenu extends Phaser.Scene {
                     method: "POST",
                     headers: thisMainMenu.headers,
                     body: JSON.stringify(args)
-                }).then(response => response.json()
-                ).then(result => {
+                }).then(handleErrors)
+                .then(result => {
                     console.log(result);
-                })
+                    if (result.player_id !== -1) {
+                        enterLobby(result.player_id, result.session_id, username);
+                    } else {
+                        console.warn(result.most_recent_action);
+                    }
+                }).catch(error => {
+                    console.error("Error: ", error);
+                });
 
                 this.setVisible(false);
                 playButtonEnable(true);
@@ -167,8 +164,6 @@ export default class mainMenu extends Phaser.Scene {
             var lobbyID = this.getChildByName("lobbyIdField").value;
 
             if (event.target.name === "join") {
-            
-                console.log(thisMainMenu.client);
 
                 var args = {
                     sid: thisMainMenu.client.id,
@@ -179,10 +174,17 @@ export default class mainMenu extends Phaser.Scene {
                     method: "POST",
                     headers: thisMainMenu.headers,
                     body: JSON.stringify(args)
-                }).then(response => response.json()
-                ).then(result => {
+                }).then(handleErrors)
+                .then(result => {
                     console.log(result);
-                })
+                    if (result.player_id !== -1) {
+                        enterLobby(result.player_id, result.session_id, username);
+                    } else {
+                        console.warn(result.most_recent_action);
+                    }
+                }).catch(error => {
+                    console.error("Error: ", error);
+                });
                 
                 this.setVisible(false);
                 playButtonEnable(true);
@@ -207,8 +209,8 @@ export default class mainMenu extends Phaser.Scene {
          */
         function playButtonEnable(enable) {
             if (enable) {
-            newGame.setInteractive();
-            joinGame.setInteractive();
+            newGame.setInteractive({useHandCursor: true});
+            joinGame.setInteractive({useHandCursor: true});
             dimmingObject.setVisible(false);
             } 
             else {
@@ -217,6 +219,32 @@ export default class mainMenu extends Phaser.Scene {
             dimmingObject.setVisible(true);
             }
         }
+
+        function handleErrors(response) {
+            if (!response.ok) {
+                throw Error(response.statusText);
             }
+            return response.json();
+        }
+
+        /**
+         * @param {integer} playerID 
+         * @param {string} sessionID 
+         * @param {string} name 
+         * Enters a game lobby
+         */
+        function enterLobby(playerID, sessionID, name) {
+            var sceneData = {
+                client: thisMainMenu.client, 
+                fullAddr: thisMainMenu.fullAddr, 
+                headers: thisMainMenu.headers,
+                playerID: playerID,
+                lobbyID: sessionID,
+                username: name
+            };
+            thisMainMenu.scene.start("lobby", sceneData)
+        }
+
+    }
 
 }

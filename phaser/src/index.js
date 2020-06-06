@@ -1,5 +1,7 @@
 import Phaser from "phaser"
+
 import mainMenu from "./scenes/mainMenu.js"
+import lobby from "./scenes/lobby.js"
 
 const config = {
   type: Phaser.AUTO,
@@ -34,6 +36,7 @@ const game = new Phaser.Game(config);
 function preload() {
   client = ioc.connect( fullAddr );
   game.scene.add("mainMenu", mainMenu);
+  game.scene.add("lobby", lobby);
 }
 
 function create() {
@@ -56,23 +59,23 @@ function create() {
   });
 
   // Called whenever lobby specific elements are updated ('/api/is_game_started' equivalent)
-  this.client.on("/io/update_lobby/", (data) =>
+  /* client.on("/io/update_lobby/", (data) =>
   {
       console.log(data)
       // TODO: if is_started is true, start game
   });
 
   // Called whenever game elements are updated ('/api/get_game_state' equivalent)
-  this.client.on("/io/update_game/", (data) =>
+  client.on("/io/update_game/", (data) =>
   {
       console.log(data)
   });
 
   // Called whenever somebody sends a message to the server ('/api/get_messages' equivalent)
-  this.client.on("/io/update_chat/", (data) =>
+  client.on("/io/update_chat/", (data) =>
   {
       console.log(data)
-  });
+  }); */
 
   //#endregion Server Listeners
 
