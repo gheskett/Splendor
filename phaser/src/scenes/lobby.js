@@ -142,10 +142,6 @@ export default class lobby extends Phaser.Scene {
                 var currentUsername = data.players[Object.keys(data.players)[i]].username;
                 lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * (gameWidth / 2)), (i >= 2 ? 300 : 0) + 200).createFromCache("lobbyBox").setOrigin(0).setDepth(0);
 
-                if (data.host_id === currentPlayerID) {
-                    lobbyBoxes[i].getChildByID("host").style.display = "inline-block";
-                }
-
                 if (thisLobby.playerID === currentPlayerID) {
                     lobbyBoxes[i].getChildByID("pencil").style.display = "inline-block";
                     lobbyBoxes[i].getChildByID("userContainer").style.border = "10px solid gold";
@@ -161,6 +157,11 @@ export default class lobby extends Phaser.Scene {
                 lobbyBoxes[i].getChildByID("usernameValue").innerHTML = currentUsername;
                 lobbyBoxes[i].getChildByID("playerValue").innerHTML = i + 1;
                 lobbyBoxes[i].getChildByID("userContainer").style.background = lobbyColors[currentPlayerID];
+
+                if (data.host_id === currentPlayerID) {
+                    lobbyBoxes[i].getChildByID("host").style.display = "inline-block";
+                    lobbyBoxes[i].getChildByID("playerValue").innerHTML += " (Host)";
+                }
             }
             numOfPlayers = Object.keys(data.players).length;
         }
