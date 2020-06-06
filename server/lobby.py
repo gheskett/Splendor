@@ -103,7 +103,12 @@ def change_username(args, games):
     tmp = game.players[player_id].username
 
     if 'username' not in args.keys() or args['username'] is None or args['username'] == "":
-        game.players[player_id].username = "Player " + str(game.players[player_id].player_id + 1)
+        count = 0
+        for key, value in sorted(game.players.items(), key=lambda i: i[0]):
+            count += 1
+            if key == player_id:
+                value.username = "Player " + str(count)
+                break
     else:
         game.players[player_id].username = args['username']
 
