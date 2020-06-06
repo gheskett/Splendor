@@ -159,8 +159,8 @@ export default class lobby extends Phaser.Scene {
                 }
 
                 lobbyBoxes[i].getChildByID("usernameValue").innerHTML = currentUsername;
-                lobbyBoxes[i].getChildByID("playerValue").innerHTML = i + 1;
-                lobbyBoxes[i].getChildByID("userContainer").style.background = lobbyColors[i];
+                lobbyBoxes[i].getChildByID("playerValue").innerHTML = currentPlayerID + 1;
+                lobbyBoxes[i].getChildByID("userContainer").style.background = lobbyColors[currentPlayerID];
             }
             numOfPlayers = Object.keys(data.players).length;
         }
