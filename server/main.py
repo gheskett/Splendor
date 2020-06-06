@@ -401,14 +401,24 @@ def io_connect():
 @socketio.on('disconnect')
 def io_disconnect():
     cli = clients[request.sid]
+    session_id = None
     if cli['session_id'] is not None:
-        gm = games[cli['session_id']]
+        session_id = cli['session_id']
+        gm = games[session_id]
         g_room = gm.room
         leave_room(g_room)
         with lock:
             lobby.drop_out(cli, games, clients)
     with lock:
         del clients[request.sid]
+
+    if session_id is not None and session_id in games.keys():
+        if games[session_id].player_turn >= 0:
+            emit_update_game(session_id)
+        else:
+            emit_update_lobby(session_id)
+
+        emit_update_chat(session_id)
 
     # print('Client disconnected.', flush=True)
 
