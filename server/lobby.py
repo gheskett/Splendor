@@ -126,7 +126,8 @@ def is_game_started(args, games):
     session_id = args.get('session_id')
 
     if session_id is None or session_id not in games.keys():
-        return flask.jsonify(exists=False, is_started=False, players={}, host_id=-1, session_id=None)
+        return flask.jsonify(exists=False, is_started=False, players={}, host_id=-1, session_id=None,
+                             most_recent_action="ERROR: Could not find game!")
 
     game = games[session_id]
     players = {}

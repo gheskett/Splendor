@@ -171,7 +171,8 @@ def get_game_state(args, games):
     session_id = args.get('session_id')
 
     return_game = {
-        "exists": False
+        "exists": False,
+        "most_recent_action": "ERROR: Could not find game!"
     }
 
     if session_id is None or session_id not in games.keys():
@@ -184,6 +185,7 @@ def get_game_state(args, games):
         return_game["exists"] = True
         return_game["host_id"] = game.host_id
         return_game["session_id"] = game.session_id
+        return_game["most_recent_action"] = game.most_recent_action
 
         players = {}
         for _, value in game.players.items():
