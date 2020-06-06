@@ -217,6 +217,8 @@ def change_username():
     with lock:
         ret = lobby.change_username(request.get_json(), games)
     if ret.get_json() != 'OK':
+        if ret.get_json() == 'UNCHANGED':
+            return flask.jsonify("OK")
         return ret
 
     session_id = request.get_json()['session_id']

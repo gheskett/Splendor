@@ -60,12 +60,20 @@ def join_game(player, args, games):
         player.username = "Player " + str(player.player_id + 1)
     else:
         player.username = args['username']
+
     game.players[player.player_id] = player
     game.player_order.append(player.player_id)
     for y in range(0, 5):
         game.field_chips[y] += 1
 
     player.sid = args['sid']
+
+    count = 0
+    for _, value in sorted(game.players.items(), key=lambda i: i[0]):
+        count += 1
+        if value.username == "Player 1" or value.username == "Player 2" or value.username == "Player 3" or \
+                value.username == "Player 4":
+            value.username = "Player " + str(count)
 
     game.most_recent_action = player.username + " joined the game lobby!"
 
@@ -99,9 +107,10 @@ def change_username(args, games):
     else:
         game.players[player_id].username = args['username']
 
-    if tmp != game.players[player_id].username:
-        game.most_recent_action = tmp + " changed their username to " + game.players[player_id].username + "!"
+    if tmp == game.players[player_id].username:
+        return flask.jsonify("UNCHANGED")
 
+    game.most_recent_action = tmp + " changed their username to " + game.players[player_id].username + "!"
     game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
 
     return flask.jsonify("OK")
@@ -170,6 +179,14 @@ def drop_out(args, games, clients):
     sid = game.players[player_id].sid
 
     del game.players[player_id]
+
+    if game.player_turn < 0:
+        count = 0
+        for _, value in sorted(game.players.items(), key=lambda i: i[0]):
+            count += 1
+            if value.username == "Player 1" or value.username == "Player 2" or value.username == "Player 3" or \
+                    value.username == "Player 4":
+                value.username = "Player " + str(count)
 
     game.most_recent_action = tmp + " left the game"
     if game.player_turn == -3:
