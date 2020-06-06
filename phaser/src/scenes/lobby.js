@@ -33,7 +33,11 @@ export default class lobby extends Phaser.Scene {
         const DIM = 0.75
 
         var numOfPlayers = -1;
-        const lobbyColors = ["red", "rgb(0, 119, 255)", "rgb(200, 0, 200)", "rgb(0, 185, 0)"]
+        const lobbyColors = ['linear-gradient(to top, rgb(207, 0, 0), rgb(255, 47, 47))',
+                             'linear-gradient(to top, rgb(0, 95, 207), rgb(47, 143, 255))',
+                             'linear-gradient(to top, rgb(207, 0, 207), rgb(255, 47, 255))',
+                             'linear-gradient(to top, rgb(0, 161, 0), rgb(47, 209, 47))']
+        // "rgb(0, 119, 255)", "rgb(200, 0, 200)", "rgb(0, 185, 0)"]
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
         var lobbyIDText = this.add.dom(gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
         var lobbyBoxes = [];
