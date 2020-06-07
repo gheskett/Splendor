@@ -247,7 +247,7 @@ def is_game_started():
 def drop_out():
     with lock:
         ret = lobby.drop_out(request.get_json(), games, clients)
-    if ret.get_json() != 'OK':
+    if ret.get_json() != 'OK' or request.get_json()['session_id'] not in games.keys():
         return ret
 
     session_id = request.get_json()['session_id']
