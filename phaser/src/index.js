@@ -2,6 +2,7 @@ import Phaser from "phaser"
 
 import mainMenu from "./scenes/mainMenu.js"
 import lobby from "./scenes/lobby.js"
+import {eventManger} from "./scenes/eventHandler.js"
 
 const config = {
   type: Phaser.AUTO,
@@ -29,55 +30,15 @@ const headers = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*"
 }
-var client;
 
 const game = new Phaser.Game(config);
 
 function preload() {
-  client = ioc.connect( fullAddr );
-  game.scene.add("mainMenu", mainMenu);
-  game.scene.add("lobby", lobby);
+  this.scene.add("mainMenu", mainMenu);
+  this.scene.add("lobby", lobby);
+  this.scene.add("eventManager", eventManger);
 }
 
 function create() {
-  //#region Server Listeners
-
-  // Called immediately when connection is made between the client and python server
-  client.on("connect", () =>
-  {
-      console.log("Connected to API server!")
-      // Connected, yay!
-  });
-  
-  // Called immediately if client loses connection with server
-  client.on('disconnect', () =>
-  {
-      console.log("Lost connection to API server!")
-      // Disconnected, oh no!
-
-      // TODO: send connection error message to client, return to homepage, clear out old game variables
-  });
-
-  // Called whenever lobby specific elements are updated ('/api/is_game_started' equivalent)
-  /* client.on("/io/update_lobby/", (data) =>
-  {
-      console.log(data)
-      // TODO: if is_started is true, start game
-  });
-
-  // Called whenever game elements are updated ('/api/get_game_state' equivalent)
-  client.on("/io/update_game/", (data) =>
-  {
-      console.log(data)
-  });
-
-  // Called whenever somebody sends a message to the server ('/api/get_messages' equivalent)
-  client.on("/io/update_chat/", (data) =>
-  {
-      console.log(data)
-  }); */
-
-  //#endregion Server Listeners
-
-  this.scene.start("mainMenu", {client: client, fullAddr: fullAddr, headers:headers});
+  this.scene.start("eventManager", {ioc: ioc, fullAddr: fullAddr, headers: headers});
 }

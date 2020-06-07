@@ -1,4 +1,5 @@
 import Phaser from "phaser"
+import eventHandler from "./eventHandler.js"
 
 import newGame from "../assets/images/new_game.svg"
 import joinGame from "../assets/images//join_game.svg"
@@ -17,7 +18,6 @@ export default class mainMenu extends Phaser.Scene {
         this.client = data.client;
         this.fullAddr = data.fullAddr;
         this.headers = data.headers;
-        console.log(this.client);
     }
 
     preload() {
@@ -31,9 +31,12 @@ export default class mainMenu extends Phaser.Scene {
     }
 
     create() {
-        var thisMainMenu = this;
 
-        //#region Game Variables
+        this.scene.setVisible(false);
+        this.scene.sendToBack();
+
+        //#region Initial Variables
+        const thisMainMenu = this;
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
 
         const SELECTED = 1
@@ -49,23 +52,26 @@ export default class mainMenu extends Phaser.Scene {
 
         var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
         var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
-        //#endregion Game Variables
 
-        //#region Server Listeners
-
-        // Called whenever game elements are updated ('/api/get_game_state' equivalent)
-        this.client.on("/io/update_game/", (data) =>
-        {
-            console.log(data)
+        var HTMLgroup = this.add.group([newGameForm, joinGameForm]);
+        HTMLgroup.getChildren().forEach(element => {
+            element.setVisible(false);
         });
 
-        // Called whenever somebody sends a message to the server ('/api/get_messages' equivalent)
-        this.client.on("/io/update_chat/", (data) =>
-        {
-            console.log(data)
+        //#endregion Initial Variables
+
+        eventHandler.on("new_main_menu", function() {
+            thisMainMenu.scene.setVisible(true);
+            thisMainMenu.scene.bringToTop();
         });
 
-        //#endregion Server Listeners
+        eventHandler.on("terminate_main_menu", function() {
+            thisMainMenu.scene.setVisible(false);
+            HTMLgroup.getChildren().forEach(element => {
+                element.setVisible(false);
+            });
+            thisMainMenu.scene.sendToBack();
+        });
 
         //#region Mouse-button behavior
         newGame.on('pointerover', function() {
@@ -116,7 +122,6 @@ export default class mainMenu extends Phaser.Scene {
         //#region Form Behavior
 
         newGameForm.addListener("click");
-
         newGameForm.on("click", function (event) {
 
             var username = this.getChildByName("usernameField").value;
@@ -136,7 +141,8 @@ export default class mainMenu extends Phaser.Scene {
                     console.log(result);
                     if (result.player_id !== -1) {
                         this.getChildByName("usernameField").value = "";
-                        enterLobby(result.player_id, result.session_id, result.username);
+                        eventHandler.emit("terminate_main_menu");
+                        eventHandler.emit("new_lobby", {lobbyID: result.session_id, playerID: result.player_id});
                     } else {
                         console.warn(result.most_recent_action);
                     }
@@ -235,23 +241,7 @@ export default class mainMenu extends Phaser.Scene {
             return response.json();
         }
 
-        /**
-         * @param {integer} playerID 
-         * @param {string} sessionID 
-         * @param {string} name 
-         * Enters a game lobby
-         */
-        function enterLobby(playerID, sessionID, name) {
-            var sceneData = {
-                client: thisMainMenu.client, 
-                fullAddr: thisMainMenu.fullAddr, 
-                headers: thisMainMenu.headers,
-                playerID: playerID,
-                lobbyID: sessionID,
-                username: name
-            };
-            thisMainMenu.scene.start("lobby", sceneData)
-        }
+        eventHandler.emit("incremint_ready");
 
     }
 
