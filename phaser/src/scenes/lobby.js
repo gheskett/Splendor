@@ -2,8 +2,10 @@ import Phaser from "phaser"
 import sessionIDText from "../assets/html/session_id_text.html"
 import lobbyBox from "../assets/html/lobby_box.html"
 import changeUsernameForm from "../assets/html/change_username_form.html"
+import confirmForm from "../assets/html/confirm_form.html"
 
-import blackRectangle from "../assets/images/black_rectangle.png"
+import exitButton from "../assets/images/exit.svg"
+import blackRectangleHTML from "../assets/html/dim.html"
 
 export default class lobby extends Phaser.Scene {
     constructor(config) {
@@ -23,7 +25,9 @@ export default class lobby extends Phaser.Scene {
         this.load.html("lobbyIDText", sessionIDText);
         this.load.html("lobbyBox", lobbyBox);
         this.load.html("changeUsernameForm", changeUsernameForm);
-        this.load.image("dimmingObject", blackRectangle);
+        this.load.html("dimmingObject", blackRectangleHTML);
+        this.load.html("confirmForm", confirmForm);
+        this.load.svg("exitButton", exitButton);
     }
 
     create() {
@@ -39,14 +43,85 @@ export default class lobby extends Phaser.Scene {
                              'linear-gradient(to top, rgb(0, 161, 0), rgb(47, 209, 47))']
         // "rgb(0, 119, 255)", "rgb(200, 0, 200)", "rgb(0, 185, 0)"]
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
-        var lobbyIDText = this.add.dom(gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
+        const lobbyIDText = this.add.dom(gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
         var lobbyBoxes = [];
         lobbyIDText.getChildByID("idValue").innerHTML = this.lobbyID;
 
-        const dimmingObject = this.add.image(0, 0, "dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
-        var changeUsernameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("changeUsernameForm").setVisible(false).setDepth(2);
+        const dimmingObject = this.add.dom(0, 0).createFromCache("dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
+        const changeUsernameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("changeUsernameForm").setVisible(false).setDepth(2);
+        var leaveConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
+        leaveConfirmation.getChildByID("confirmationText").innerHTML = "Leave Game?";
+        const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
 
         //#endregion Game Variables
+
+        //#region Exit Button Behavior
+
+        exitLobby.on('pointerover', function() {
+            this.setTint(0xdfdfdf).setScale(1.05);
+        });
+
+        exitLobby.on('pointerdown', function() {
+            this.setTint(0xcccccc).setScale(.95);
+        });
+
+        exitLobby.on('pointerout', function() {
+            this.setScale(1);
+            this.clearTint();
+        });
+
+        exitLobby.on('pointerup', function() {
+            this.setScale(1);
+            this.clearTint();
+            leaveConfirmation.setVisible(true);
+            toggleLobbyElements(false);
+        });
+
+        leaveConfirmation.addListener("click");
+        leaveConfirmation.on("click", function (event) {
+
+            if (event.target.name === "confirm") {
+
+                var args = {
+                    session_id: thisLobby.lobbyID,
+                    player_id: thisLobby.playerID
+                }
+                fetch(thisLobby.fullAddr + "/api/drop_out/", {
+                    method: "POST",
+                    headers: thisLobby.headers,
+                    body: JSON.stringify(args)
+                }).then(handleErrors)
+                .then(result => {
+                    console.log(result);
+                    if (result === "OK") {
+                        thisLobby.scene.start("mainMenu");
+                    } else {
+                        console.warn(result.most_recent_action);
+                    }
+                }).catch(error => {
+                    console.error(error);
+                });
+
+                this.setVisible(false);
+                toggleLobbyElements(true);
+            
+            }
+
+            //Enable play buttons and remove username form on cancel
+            if (event.target.name === "cancel") {
+
+                this.setVisible(false);
+                toggleLobbyElements(true);
+
+            }
+
+        });
+
+
+        //#endregion Exit Button Behavior
+
+
+        //#region Update Lobby on join
 
         fetch(this.fullAddr + "/api/is_game_started?" + new URLSearchParams({
             session_id: thisLobby.lobbyID,
@@ -60,6 +135,8 @@ export default class lobby extends Phaser.Scene {
         }).catch(error => {
             console.error("Error: ", error);
         });
+
+        //#endregion Update Lobby on join
 
         //#region Server Listeners
 
@@ -110,7 +187,7 @@ export default class lobby extends Phaser.Scene {
                 this.getChildByName("usernameField").value = thisLobby.username;
 
                 this.setVisible(false);
-                //toggleLobbyElements(true);
+                toggleLobbyElements(true);
 
             }
         });
@@ -123,15 +200,9 @@ export default class lobby extends Phaser.Scene {
          */
         function toggleLobbyElements(enable) {
             if (enable) {
-                for (var i = 0; i < lobbyBoxes.length; i++) {
-                    lobbyBoxes[i].setInteractive();
-                }
                 dimmingObject.setVisible(false);
             } 
             else {
-                for (var i = 0; i < lobbyBoxes.length; i++) {
-                    lobbyBoxes[i].disableInteractive();
-                }
                 dimmingObject.setVisible(true);
             }
         }
@@ -155,7 +226,7 @@ export default class lobby extends Phaser.Scene {
                     lobbyBoxes[i].on("click", function(event) {
                         if (event.target.id === "pencil") {
                             changeUsernameForm.setVisible(true);
-                            //toggleLobbyElements(false);
+                            toggleLobbyElements(false);
                         }
                     });
                     changeUsernameForm.getChildByName("usernameField").value = currentUsername;
