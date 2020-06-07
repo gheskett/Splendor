@@ -7,6 +7,7 @@ import changeUsernameForm from "../assets/html/change_username_form.html"
 import confirmForm from "../assets/html/confirm_form.html"
 
 import exitButton from "../assets/images/exit.svg"
+import startGame from "../assets/images/start_game.png"
 import blackRectangleHTML from "../assets/html/dim.html"
 
 export default class lobby extends Phaser.Scene {
@@ -27,6 +28,10 @@ export default class lobby extends Phaser.Scene {
         this.load.html("dimmingObject", blackRectangleHTML);
         this.load.html("confirmForm", confirmForm);
         this.load.svg("exitButton", exitButton);
+        this.load.spritesheet("startGame", startGame, {
+            frameWidth: 400,
+            frameHeight: 120
+        });
     }
 
     create() {
@@ -46,14 +51,19 @@ export default class lobby extends Phaser.Scene {
         lobbyIDText.getChildByID("idValue").innerHTML = this.lobbyID;
 
         var lobbyBoxUserIDs = [];
+        var hostID;
 
         var dimmingObject = this.add.dom(0, 0).createFromCache("dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
         var changeUsernameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("changeUsernameForm").setVisible(false).setDepth(2);
         var leaveConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
         leaveConfirmation.getChildByID("confirmationText").innerHTML = "Leave Game?";
-        const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
+        var startConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
+        startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
-        var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation]);
+        const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
+        var startGame = this.add.image(gameWidth / 2, gameHeight - 150, "startGame", 1).setDepth(0);
+
+        var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation, startConfirmation]);
         
         HTMLgroup.getChildren().forEach(element => {
             element.setVisible(false);
@@ -82,6 +92,14 @@ export default class lobby extends Phaser.Scene {
                     }
                 });
                 changeUsernameForm.getChildByName("usernameField").value = thisLobby.username;
+            }
+
+            if (thisLobby.playerID === hostID && lobbyBoxUserIDs.length > 1) {
+                startGame.setFrame(0);
+                startGame.setInteractive({useHandCursor: true});
+            } else {
+                startGame.setFrame(1);
+                startGame.disableInteractive();
             }
 
             /* fetch(thisLobby.fullAddr + "/api/is_game_started?" + new URLSearchParams({
@@ -136,6 +154,16 @@ export default class lobby extends Phaser.Scene {
                     lobbyBoxes[i].getChildByID("playerValue").innerHTML += " (Host)";
                 }
             }
+
+            hostID = data.host_id;
+            if (thisLobby.playerID === hostID && lobbyBoxUserIDs.length > 1) {
+                startGame.setFrame(0);
+                startGame.setInteractive({useHandCursor: true});
+            } else {
+                startGame.setFrame(1);
+                startGame.disableInteractive();
+            }
+
         });
 
         eventHandler.on("terminate_lobby", function() {
@@ -215,6 +243,70 @@ export default class lobby extends Phaser.Scene {
         });
 
         //#endregion Exit Button Behavior
+
+        //#region Start Game Button Behavior
+
+        startGame.on('pointerover', function() {
+            this.setTint(0xdfdfdf).setScale(1.05);
+        });
+
+        startGame.on('pointerdown', function() {
+            this.setTint(0xcccccc).setScale(.95);
+        });
+
+        startGame.on('pointerout', function() {
+            this.setScale(1);
+            this.clearTint();
+        });
+
+        startGame.on('pointerup', function() {
+            this.setScale(1);
+            this.clearTint();
+            startConfirmation.setVisible(true);
+            toggleLobbyElements(false);
+        });
+
+        startConfirmation.addListener("click");
+        startConfirmation.on("click", function (event) {
+
+            if (event.target.name === "confirm") {
+
+                var args = {
+                    player_id: thisLobby.playerID,
+                    session_id: thisLobby.lobbyID,
+                }
+                fetch(thisLobby.fullAddr + "/api/start_game/", {
+                    method: "POST",
+                    headers: thisLobby.headers,
+                    body: JSON.stringify(args)
+                }).then(handleErrors)
+                .then(result => {
+                    console.log(result);
+                    if (result === "OK") {
+                        eventHandler.emit("new_main_menu");
+                        eventHandler.emit("terminate_lobby");
+                    } else {
+                        console.warn(result);
+                    }
+                }).catch(error => {
+                    console.error(error);
+                });
+
+                this.setVisible(false);
+                toggleLobbyElements(true);
+            
+            }
+
+            if (event.target.name === "cancel") {
+
+                this.setVisible(false);
+                toggleLobbyElements(true);
+
+            }
+
+        });
+
+        //#endregion Start Game Button Behavior
 
         //#region Form Behavior
 
