@@ -24,11 +24,8 @@ export class eventManger extends Phaser.Scene {
         this.scene.launch("mainMenu", {client: events.client, fullAddr: events.fullAddr, headers: events.headers});
         this.scene.launch("lobby", {client: events.client, fullAddr: events.fullAddr, headers: events.headers});
 
-        eventHandler.on("incremint_ready", function() {
-            scenesReady++;
-            if (scenesReady >= 2) {
-                eventHandler.emit("new_main_menu");
-            }
+        eventHandler.on("main_menu_ready", function() {
+            eventHandler.emit("new_main_menu");
         });
     
         //#region Server Listeners
@@ -49,7 +46,7 @@ export class eventManger extends Phaser.Scene {
 
         // Called whenever lobby specific elements are updated ('/api/is_game_started' equivalent)
         this.client.on("/io/update_lobby/", (data) => {
-            console.log(data);
+            //console.log(data);
             eventHandler.emit("update_lobby", data);
         });
 
@@ -61,7 +58,7 @@ export class eventManger extends Phaser.Scene {
 
         // Called whenever somebody sends a message to the server ('/api/get_messages' equivalent)
         this.client.on("/io/update_chat/", (data) => {
-            console.log(data);
+            //console.log(data);
             eventHandler.emit("update_chat", data);
         });
 

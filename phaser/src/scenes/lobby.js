@@ -284,8 +284,6 @@ export default class lobby extends Phaser.Scene {
             return response.json();
         }
 
-        eventHandler.emit("incremint_ready");
-
     }
 
 }

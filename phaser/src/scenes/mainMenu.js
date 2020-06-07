@@ -138,7 +138,7 @@ export default class mainMenu extends Phaser.Scene {
                     body: JSON.stringify(args)
                 }).then(handleErrors)
                 .then(result => {
-                    console.log(result);
+                    //console.log(result);
                     if (result.player_id !== -1) {
                         this.getChildByName("usernameField").value = "";
                         eventHandler.emit("terminate_main_menu");
@@ -186,7 +186,7 @@ export default class mainMenu extends Phaser.Scene {
                     body: JSON.stringify(args)
                 }).then(handleErrors)
                 .then(result => {
-                    console.log(result);
+                    //console.log(result);
                     if (result.player_id !== -1) {
                         this.getChildByName("usernameField").value = "";
                         this.getChildByName("lobbyIdField").value = "";
@@ -242,7 +242,7 @@ export default class mainMenu extends Phaser.Scene {
             return response.json();
         }
 
-        eventHandler.emit("incremint_ready");
+        eventHandler.emit("main_menu_ready");
 
     }
 
