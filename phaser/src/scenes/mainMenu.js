@@ -142,12 +142,12 @@ export default class mainMenu extends Phaser.Scene {
                     if (result.player_id !== -1) {
                         this.getChildByName("usernameField").value = "";
                         eventHandler.emit("terminate_main_menu");
-                        eventHandler.emit("new_lobby", {lobbyID: result.session_id, playerID: result.player_id});
+                        eventHandler.emit("new_lobby", {lobbyID: result.session_id, playerID: result.player_id, username: username});
                     } else {
                         console.warn(result.most_recent_action);
                     }
                 }).catch(error => {
-                    console.error("Error: ", error);
+                    console.error(error);
                 });
 
                 this.setVisible(false);
@@ -190,7 +190,8 @@ export default class mainMenu extends Phaser.Scene {
                     if (result.player_id !== -1) {
                         this.getChildByName("usernameField").value = "";
                         this.getChildByName("lobbyIdField").value = "";
-                        enterLobby(result.player_id, result.session_id, result.username);
+                        eventHandler.emit("terminate_main_menu");
+                        eventHandler.emit("new_lobby", {lobbyID: result.session_id, playerID: result.player_id, username: username});
                     } else {
                         console.warn(result.most_recent_action);
                     }
