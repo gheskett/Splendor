@@ -1,6 +1,5 @@
 import random
 import flask
-import json
 
 gems = ["Diamond", "Sapphire", "Emerald", "Ruby", "Onyx", "Joker"]
 gem_ids = ["diamond", "sapphire", "emerald", "ruby", "onyx", "joker"]
@@ -17,11 +16,13 @@ def check_victory(game):
         return
 
     for _, value in game.players.items():
+        if value.prestige_points != highest_pp:
+            continue
         tmp = 0
         for x in range(0, 5):
             tmp += value.player_num_gem_cards[x]
-            if lowest_count < 0 or tmp < lowest_count:
-                lowest_count = tmp
+        if lowest_count < 0 or tmp < lowest_count:
+            lowest_count = tmp
 
     for _, value in game.players.items():
         if value.prestige_points != highest_pp:
@@ -29,8 +30,6 @@ def check_victory(game):
         tmp = 0
         for x in range(0, 5):
             tmp += value.player_num_gem_cards[x]
-            if lowest_count < 0 or tmp < lowest_count:
-                lowest_count = tmp
         if tmp == lowest_count:
             game.victory.append(value.player_id)
 
@@ -161,6 +160,8 @@ def start_game(args, games):
 
     game.most_recent_action = "The game has started! " + game.players[game.player_turn].username + " will go first."
 
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
+
     return flask.jsonify("OK")
 
 
@@ -182,6 +183,7 @@ def get_game_state(args, games):
         return_game["is_started"] = False
         return_game["exists"] = True
         return_game["host_id"] = game.host_id
+        return_game["session_id"] = game.session_id
 
         players = {}
         for _, value in game.players.items():
@@ -362,6 +364,8 @@ def grab_chips(args, games):
 
     next_turn(game)
 
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
+
     return flask.jsonify("OK")
 
 
@@ -382,7 +386,7 @@ def reserve_card(args, games):
 
     player_id = int(player_id)
     reserved_card = int(reserved_card)
-	
+
     if session_id not in games.keys():
         return flask.jsonify("ERROR: Could not find game!")
 
@@ -470,6 +474,8 @@ def reserve_card(args, games):
             player.player_chips -= returned_chips[x]
 
     next_turn(game)
+
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
 
     return flask.jsonify("OK")
 
@@ -664,5 +670,7 @@ def buy_card(args, games, cards, nobles):
     game.most_recent_action += "!"
 
     next_turn(game)
+
+    game.messages.append({'player_id': player_id, 'message': game.most_recent_action, 'is_game_event': True})
 
     return flask.jsonify("OK")
