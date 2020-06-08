@@ -15,7 +15,8 @@ def client():
 
 def test_lobby_new_game(client):
     result = client.post('/api/new_game', data=json.dumps(dict(
-        username=""
+        username="",
+        sid='debug'
     )), follow_redirects=True, content_type='application/json')
     game = result.get_json()
     assert game['player_id'] == 0

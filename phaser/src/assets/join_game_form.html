@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<link href='https://fonts.googleapis.com/css?family=Quintessential' rel='stylesheet'>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .container {
+        padding: 44px;
+        border: 4px solid rgb(248, 248, 248);
+        border-radius: 16px;
+        background-color: black;
+    }
+
+    #username {
+        font-family: Quintessential;
+        font-size: 40px;
+        color:gold;
+        margin-right: 217px;
+    }
+
+    #lobbyId {
+        font-family: Quintessential;
+        font-size: 30px;
+        color:gold;
+    }
+
+    #usernameField {
+        font-family: Quintessential;
+        background-color: rgb(34, 34, 34);
+        border-radius: 8px;
+        color: rgb(224, 221, 196);
+        caret-color: rgb(224, 221, 196);
+        font-size: 34px;
+        width: 458px;
+        border: 3px solid silver;
+        -webkit-transition: 850ms;
+        transition: 850ms;
+        outline: none;
+        padding: 16px 16px;
+        margin: 8px 20px 16px 0px;
+    }
+
+    #usernameField:focus {
+        border: 3px solid gold;
+    }
+
+    #lobbyIdField {
+        font-family: Quintessential;
+        background-color: rgb(34, 34, 34);
+        border-radius: 8px;
+        color: rgb(224, 221, 196);
+        caret-color: rgb(224, 221, 196);
+        font-size: 34px;
+        width: 167px;
+        border: 3px solid silver;
+        -webkit-transition: 850ms;
+        transition: 850ms;
+        outline: none;
+        padding: 16px 16px;
+        margin: 8px 0px 16px;
+    }
+
+    #lobbyIdField:focus {
+        border: 3px solid gold;
+    }
+
+    #join {
+        width: 375px;
+        font-family: Quintessential;
+        background-color: rgb(28, 160, 221);
+        color: white;
+        font-size: 26px;
+        border-radius: 16px;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        padding: 4px 0px;
+        margin: 0px 20px 0px 0px;
+    }
+
+    #join:hover {
+        background-color: rgb(25, 140, 194);
+    }
+
+    #cancel:hover {
+        background-color: rgb(180, 0, 0);
+    }
+
+    #join:active {
+        background-color: rgb(21, 124, 172);
+    }
+
+    #cancel:active {
+        background-color: rgb(140, 0, 0);
+    }
+
+    #cancel {
+        width: 252px;
+        font-family: Quintessential;
+        background-color: rgb(228, 0, 0);
+        color: white;
+        font-size: 26px;
+        border-radius: 16px;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        padding: 4px 0px;
+        margin: 0px 0px 0px 0px;
+    }
+
+</style>
+
+<div class="container">
+    <form id=usernameForm>
+        <label for="username" id="username">Enter Username:</label>
+        <label for="lobbyId" id="lobbyId">Lobby ID:</label> <br>
+        <input type="text" name="usernameField" id="usernameField" maxlength="40">
+        <input type="text" name="lobbyIdField" id="lobbyIdField" maxlength="6"> <br>
+        <input type="button" name="join" id="join" value="Join Lobby">
+        <input type="button" name="cancel" id="cancel" value="Cancel">
+    </form>
+</div>

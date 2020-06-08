@@ -3,6 +3,8 @@ server/__pycache__/*
 server/venv/*
 server/.pytest_cache/*
 server/tests/.pytest_cache/*
+server/tests/__pycache__/*
+server/python_server.log
 phaser/node_modules
 venv
 .idea
