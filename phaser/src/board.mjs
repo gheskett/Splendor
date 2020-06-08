@@ -1,15 +1,17 @@
 import { card } from "./Card.mjs"
 import { ServerManager } from "./ServerManager.mjs";
 import { noble } from "./Noble.mjs";
+import * as constants from "./Constants.mjs";
 
 const numRows = 3;
 const numColumns = 4;
 
 export class BoardScene extends Phaser.Scene {
-  constructor()
+  constructor(fullAddr)
   {
     super('boardScene')
 
+    this.fullAddr = fullAddr;
     this.cards = [[], [], []];
     this.scales = .1875;
 
@@ -40,7 +42,7 @@ export class BoardScene extends Phaser.Scene {
     const sizes = ["64", "128", "256"];
     const colors = ["blue", "brown", "green", "red", "white", "gold"];
 
-    this.load.path = "src/assets_tmp/"
+    this.load.path = "src/assets/"
 
     for (var size of sizes)
     {

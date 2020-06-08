@@ -7,15 +7,9 @@ import { BoardScene } from "./board.mjs"
 import newGameForm from "./assets/new_game_form.html"
 import joinGameForm from "./assets/join_game_form.html"
 import blackRectangle from "./assets/black_rectangle.png"
+import * as constants from "./Constants.mjs"
 
 var ioc = require('socket.io-client');
-const ip = "http://localhost"
-const port = 36251
-const fullAddr = ip + ":" + port
-const headers = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*"
-}
 var client;
 
 const config = {
@@ -50,7 +44,7 @@ function preload() {
 }
 
 function create() {
-  client = ioc.connect( fullAddr );
+  client = ioc.connect( constants.fullAddr );
 
   //#region Game Variables
   const gameWidth = config.width, gameHeight = config.height;
@@ -169,9 +163,9 @@ function create() {
         sid: client.id,
         username: username
       }
-      fetch(fullAddr + "/api/new_game/", {
+      fetch(constants.fullAddr + "/api/new_game/", {
         method: "POST",
-        headers: headers,
+        headers: constants.headers,
         body: JSON.stringify(args)
       }).then(response => response.json()
       ).then(result => {
@@ -206,9 +200,9 @@ function create() {
         username: username,
         session_id: lobbyID
       }
-      fetch(fullAddr + "/api/join_game/", {
+      fetch(constants.fullAddr + "/api/join_game/", {
         method: "POST",
-        headers: headers,
+        headers: constants.headers,
         body: JSON.stringify(args)
       }).then(response => response.json()
       ).then(result => {
