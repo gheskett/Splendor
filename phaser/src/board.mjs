@@ -11,7 +11,7 @@ export class BoardScene extends Phaser.Scene {
     super('boardScene')
 
     this.cards = [[], [], []];
-    this.scales = .19;
+    this.scales = .1875;
 
     //TODO: this should be auto-detected
     this.centerX = 720;
@@ -81,45 +81,53 @@ export class BoardScene extends Phaser.Scene {
   }
     
   create() {
+    const spacingX = 16;
+    const spacingY = 8;
+
     var width = 731 * this.scales;
     var height = 1024 * this.scales;
 
+    var spacedWidth = width + spacingX;
+    var spacedHeight = height + spacingY;
+
     this.cameras.main.setBackgroundColor('#FFFFFF')
 
-    var flippedCardStartX = this.centerX - width * (numColumns / 2) + .5 * width;
-    var flippedCardStartY = 30 + .5 * height;
+    var flippedCardStartX = this.centerX - spacedWidth * (numColumns / 2) + .5 * spacedWidth - 8;
+    var flippedCardStartY = 30 + .5 * spacedHeight;
     
     for (var row = 0; row < numRows; row++)
     {
       //Display backwards cards
       //TODO: empty cards
-      this.add.sprite(flippedCardStartX - width, flippedCardStartY + height * row, "cardback_r" + (3 - row) + "_731x1024").setScale(this.scales);
+      this.add.sprite(flippedCardStartX - spacedWidth, flippedCardStartY + spacedHeight * row, "cardback_r" + (3 - row) + "_731x1024").setScale(this.scales);
 
       for (var column = 0; column < numColumns; column++)
       {
         //just display jnk data for now
         this.cards[row][column] = new card(this, 0);
 
-        this.cards[row][column].drawCard(flippedCardStartX + width * column, 
-          flippedCardStartY + height * row, width, height);
+        this.cards[row][column].drawCard(flippedCardStartX + spacedWidth * column, 
+          flippedCardStartY + spacedHeight * row, width, height);
       }
     }
 
     //TODO: get numbers from server
     var numNobles = 5;
-    var scale = (height * numRows) / (numNobles * 731);
+    var scale = this.scales;
+    console.log(scale);
     var nobleHeight = 731 * scale;
     for (var i = 0; i < numNobles; i++)
     {
       //TODO: get data from server
       this.nobles[i] = new noble(this, 0);
+      //TODO: fix me
       this.nobles[i].drawNoble(flippedCardStartX + numColumns * width - width * .5 + nobleHeight * .5,
         flippedCardStartY + i * nobleHeight + nobleHeight * .5 - height * .5, nobleHeight, scale);
     }
 
-    const chipHeight = 64;
+    const chipHeight = 64 + 32;
 
-    var tokenX = this.centerX - width * 3 - chipHeight * .5;
+    var tokenX = this.centerX - spacedWidth * 3 - chipHeight * .5;
     var tokenY = 30 + chipHeight * .5;
     for (var chip in this.tokenSprites)
     {

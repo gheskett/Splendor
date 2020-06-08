@@ -12,7 +12,7 @@ export function drawCost(x, y, serverCost, gemToSprite, board, scale)
         console.log("Mapping: " + gemtype);
         console.log(gemToSprite[gemtype]);
         board.add.sprite(x + 16, y - 16, gemToSprite[gemtype]).setScale(scale);
-        board.add.sprite(x + 16, y - 16, cost + "x64").setScale(scale);
+        board.add.sprite(x + 16, y - 16, cost + "x128").setScale(scale / 2);
 
         //TODO: this probably needs to be spaced better
         y -= 64 * scale;
@@ -48,20 +48,26 @@ export class card {
     drawCard(x, y, width, height) {
         var dicEntry = this.board.server.lookUpCard(this.cardID);
         
+        const gemScale = 48 / 128;
+        const gemLength = 128 * gemScale;
+        const gemHalfLength = gemLength / 2;
+
         var upperCornerX = x - width * .5;
         var upperCornerY = y - height * .5;
         
         var cardColor = this.cardMap[dicEntry["gem_type"]];
         this.board.add.sprite(x, y, this.getCardName(cardColor)).setScale(this.board.scales);
-        this.board.add.sprite(upperCornerX + width - 64 * this.board.scales - 5, upperCornerY + 64 * this.board.scales + 5, cardColor + "_circle_x128")
-            .setScale(this.board.scales);
+        this.board.add.sprite(upperCornerX + width - gemHalfLength - 5, 
+            upperCornerY + gemHalfLength + 5, cardColor + "_symbol_x128")
+            .setScale(gemScale);
 
         var prestige = dicEntry["prestige_points"];
         if (prestige != 0)
         {
-            this.board.add.sprite(upperCornerX + 15, upperCornerY + 20, prestige + "x128").setScale(this.board.scales);
+            var numHalfLength = 64 / 2;
+            this.board.add.sprite(upperCornerX + numHalfLength, upperCornerY + numHalfLength, prestige + "x128").setScale(64 / 128);
         }
 
-        drawCost(upperCornerX, upperCornerY + height, dicEntry, this.spriteCostMap, this.board, .4);
+        drawCost(upperCornerX, upperCornerY + height, dicEntry, this.spriteCostMap, this.board, 30 / 64);
     }
 }
