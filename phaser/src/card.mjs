@@ -1,5 +1,7 @@
 export function drawCost(x, y, serverCost, gemToSprite, board, scale)
 {
+    x += 4;
+    y -= 4;
     for (var gemtype in gemToSprite)
     {
         console.log("Drawing: " + gemtype);
@@ -9,13 +11,11 @@ export function drawCost(x, y, serverCost, gemToSprite, board, scale)
             continue;
         }
 
-        console.log("Mapping: " + gemtype);
-        console.log(gemToSprite[gemtype]);
         board.add.sprite(x + 16, y - 16, gemToSprite[gemtype]).setScale(scale);
         board.add.sprite(x + 16, y - 16, cost + "x128").setScale(scale / 2);
 
         //TODO: this probably needs to be spaced better
-        y -= 64 * scale;
+        y -= 64 * scale + 8;
     }
 }
 

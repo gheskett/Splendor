@@ -1,7 +1,7 @@
 import * as constants from "./Constants.mjs"
 
 export class ServerManager {
-  function lookUpCard(cardId)
+  lookUpCard(cardId)
   {
     //TODO: actual numbers
     return {
@@ -17,7 +17,7 @@ export class ServerManager {
     }
   }
 
-  function lookUpNoble(nobleID)
+  lookUpNoble(nobleID)
   {
     //TODO: actual numbers
     return {
@@ -33,18 +33,8 @@ export class ServerManager {
     }
   }
 
-  function lookUpFieldChips(chipType)
+  lookUpFieldChips(chipType)
   {
     return 1;
-  }
-
-  async function getAssetNames()
-  {
-    let response = await fetch(constants.fullAddr + "/api/get_assets/", {
-      method: "GET",
-      headers: constants.headers
-    });
-    let data = await response.json();
-    return data;
   }
 }

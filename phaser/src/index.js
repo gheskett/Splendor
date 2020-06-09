@@ -60,6 +60,8 @@ function create() {
   const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive().setAlpha(NOT_SELECTED);
   const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
 
+  const dbg = this.add.image(gameWidth / 2, 680, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
+
   var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
   var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
   //#endregion Game Variables
@@ -144,11 +146,14 @@ function create() {
   joinGame.on('pointerup', function() {
     this.setAlpha(NOT_SELECTED).setScale(1);
     this.clearTint();
-    //joinGameForm.setVisible(true);
-    //playButtonEnable(false);
-    this.scene.start("boardScene"); //TODO: actual debug button
+    joinGameForm.setVisible(true);
+    playButtonEnable(false);
   });
   //#endregion Button Click Behavior
+
+  dbg.on("pointerup", function() {
+    game.scene.start("boardScene"); //TODO: actual debug button
+  });
 
   //#region Form Behavior
 
