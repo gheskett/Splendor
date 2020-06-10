@@ -3,6 +3,11 @@ import Phaser from "phaser"
 import mainMenu from "./scenes/mainMenu.js"
 import lobby from "./scenes/lobby.js"
 import {eventManger} from "./scenes/eventHandler.js"
+import Phaser from "phaser";
+
+import { BoardScene } from "./board.mjs"
+import * as constants from "./Constants.mjs"
+
 
 const config = {
   type: Phaser.AUTO,
@@ -37,6 +42,7 @@ function preload() {
   this.scene.add("mainMenu", mainMenu);
   this.scene.add("lobby", lobby);
   this.scene.add("eventManager", eventManger);
+  this.scene.add("board", BoardScene);
 }
 
 function create() {
