@@ -3,19 +3,14 @@ import newGame from "./assets/new_game.svg";
 import joinGame from "./assets/join_game.svg";
 import titleLogo from "./assets/title.svg"
 import background from "./assets/pattern-background-frost-texture.jpg"
+import { BoardScene } from "./board.mjs"
 import newGameForm from "./assets/new_game_form.html"
 import joinGameForm from "./assets/join_game_form.html"
 import blackRectangle from "./assets/black_rectangle.png"
+import * as constants from "./Constants.mjs"
 
 var ioc = require('socket.io-client');
-const ip = "http://localhost"
-const port = 36251
-const fullAddr = ip + ":" + port
-const headers = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*"
-}
-var client
+var client;
 
 const config = {
   type: Phaser.AUTO,
@@ -26,10 +21,11 @@ const config = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
-  scene: {
-    preload: preload,
-    create: create
+  scene: [{
+   preload: preload,
+   create: create
   },
+  BoardScene],
   dom: {
     createContainer: true,
   }
@@ -48,7 +44,7 @@ function preload() {
 }
 
 function create() {
-  client = ioc.connect( fullAddr );
+  client = ioc.connect( constants.fullAddr );
 
   //#region Game Variables
   const gameWidth = config.width, gameHeight = config.height;
@@ -63,6 +59,8 @@ function create() {
 
   const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive().setAlpha(NOT_SELECTED);
   const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
+
+  const dbg = this.add.image(gameWidth / 2, 680, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
 
   var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
   var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
@@ -153,6 +151,10 @@ function create() {
   });
   //#endregion Button Click Behavior
 
+  dbg.on("pointerup", function() {
+    game.scene.start("boardScene"); //TODO: actual debug button
+  });
+
   //#region Form Behavior
 
   newGameForm.addListener("click");
@@ -166,9 +168,9 @@ function create() {
         sid: client.id,
         username: username
       }
-      fetch(fullAddr + "/api/new_game/", {
+      fetch(constants.fullAddr + "/api/new_game/", {
         method: "POST",
-        headers: headers,
+        headers: constants.headers,
         body: JSON.stringify(args)
       }).then(response => response.json()
       ).then(result => {
@@ -203,9 +205,9 @@ function create() {
         username: username,
         session_id: lobbyID
       }
-      fetch(fullAddr + "/api/join_game/", {
+      fetch(constants.fullAddr + "/api/join_game/", {
         method: "POST",
-        headers: headers,
+        headers: constants.headers,
         body: JSON.stringify(args)
       }).then(response => response.json()
       ).then(result => {
