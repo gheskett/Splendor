@@ -1,5 +1,6 @@
 import Phaser from "phaser"
 import eventHandler from "./eventHandler.js"
+import * as constants from "../constants.js"
 
 import newGame from "../assets/images/new_game.svg"
 import joinGame from "../assets/images//join_game.svg"
@@ -16,8 +17,6 @@ export default class mainMenu extends Phaser.Scene {
     
     init(data) {
         this.client = data.client;
-        this.fullAddr = data.fullAddr;
-        this.headers = data.headers;
     }
 
     preload() {
@@ -50,12 +49,18 @@ export default class mainMenu extends Phaser.Scene {
         const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
         const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
 
+        const dbg = this.add.image(gameWidth / 2, 680, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
+
         var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
         var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
 
         var HTMLgroup = this.add.group([newGameForm, joinGameForm]);
         HTMLgroup.getChildren().forEach(element => {
             element.setVisible(false);
+        });
+
+        dbg.on("pointerup", function() {
+            thisMainMenu.scene.start("board"); //TODO: actual debug button
         });
 
         //#endregion Initial Variables
@@ -132,9 +137,9 @@ export default class mainMenu extends Phaser.Scene {
                     sid: thisMainMenu.client.id,
                     username: username
                 }
-                fetch(thisMainMenu.fullAddr + "/api/new_game/", {
+                fetch(constants.fullAddr + "/api/new_game/", {
                     method: "POST",
-                    headers: thisMainMenu.headers,
+                    headers: constants.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
                 .then(result => {
@@ -180,9 +185,9 @@ export default class mainMenu extends Phaser.Scene {
                     username: username,
                     session_id: lobbyID
                 }
-                fetch(thisMainMenu.fullAddr + "/api/join_game/", {
+                fetch(constants.fullAddr + "/api/join_game/", {
                     method: "POST",
-                    headers: thisMainMenu.headers,
+                    headers: constants.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
                 .then(result => {

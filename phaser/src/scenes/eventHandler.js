@@ -1,4 +1,5 @@
 import Phaser from "phaser"
+import * as constants from "../constants.js"
 
 const eventHandler = new Phaser.Events.EventEmitter();
 export default eventHandler;
@@ -9,20 +10,17 @@ export class eventManger extends Phaser.Scene {
         super({key: "eventManager"})
     }
 
-    init(data) {
-        this.ioc = data.ioc;
-        this.client = data.ioc.connect( data.fullAddr );
-        this.fullAddr = data.fullAddr;
-        this.headers = data.headers;
+    init() {
+        this.client = constants.ioc.connect( constants.fullAddr );
     }
 
-    create(serverData) {
+    create() {
 
         const events = this;
-        var scenesReady = 0;
 
-        this.scene.launch("mainMenu", {client: events.client, fullAddr: events.fullAddr, headers: events.headers});
-        this.scene.launch("lobby", {client: events.client, fullAddr: events.fullAddr, headers: events.headers});
+        this.scene.launch("mainMenu", {client: events.client});
+        this.scene.launch("lobby");
+        this.scene.launch("board");
 
         eventHandler.on("main_menu_ready", function() {
             eventHandler.emit("new_main_menu");

@@ -1,5 +1,6 @@
 import Phaser from "phaser"
-import eventHandler, { eventManger } from "./eventHandler.js"
+import eventHandler from "./eventHandler.js"
+import * as constants from "../constants.js"
 
 import sessionIDText from "../assets/html/session_id_text.html"
 import lobbyBox from "../assets/html/lobby_box.html"
@@ -13,12 +14,6 @@ import blackRectangleHTML from "../assets/html/dim.html"
 export default class lobby extends Phaser.Scene {
     constructor(config) {
         super(config);
-    }
-
-    init(data) {
-        this.client = data.client;
-        this.fullAddr = data.fullAddr;
-        this.headers = data.headers;
     }
 
     preload() {
@@ -101,21 +96,6 @@ export default class lobby extends Phaser.Scene {
                 startGame.setFrame(1);
                 startGame.disableInteractive();
             }
-
-            /* fetch(thisLobby.fullAddr + "/api/is_game_started?" + new URLSearchParams({
-                session_id: thisLobby.lobbyID,
-            }))
-            .then(handleErrors)
-            .then(result => {
-                if (result.exists) {
-                    eventHandler.emit("update_lobby", result);
-                } else {
-                    console.warn(result);
-                }
-            })
-            .catch(error => {
-                console.error(error);
-            }); */
         });
 
         eventHandler.on("update_lobby", function (data) {
@@ -211,9 +191,9 @@ export default class lobby extends Phaser.Scene {
                     player_id: thisLobby.playerID,
                     session_id: thisLobby.lobbyID,
                 }
-                fetch(thisLobby.fullAddr + "/api/drop_out/", {
+                fetch(constants.fullAddr + "/api/drop_out/", {
                     method: "POST",
-                    headers: thisLobby.headers,
+                    headers: constants.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
                 .then(result => {
@@ -275,9 +255,9 @@ export default class lobby extends Phaser.Scene {
                     player_id: thisLobby.playerID,
                     session_id: thisLobby.lobbyID,
                 }
-                fetch(thisLobby.fullAddr + "/api/start_game/", {
+                fetch(constants.fullAddr + "/api/start_game/", {
                     method: "POST",
-                    headers: thisLobby.headers,
+                    headers: constants.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
                 .then(result => {
@@ -323,9 +303,9 @@ export default class lobby extends Phaser.Scene {
                     username: newName,
                     session_id: thisLobby.lobbyID
                 }
-                fetch(thisLobby.fullAddr + "/api/change_username/", {
+                fetch(constants.fullAddr + "/api/change_username/", {
                     method: "POST",
-                    headers: thisLobby.headers,
+                    headers: constants.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
                 .then(result => {
