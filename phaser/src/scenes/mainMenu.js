@@ -30,8 +30,6 @@ export default class mainMenu extends Phaser.Scene {
     }
 
     create() {
-
-        this.scene.setVisible(false);
         this.scene.sendToBack();
 
         //#region Initial Variables
@@ -48,8 +46,8 @@ export default class mainMenu extends Phaser.Scene {
 
         const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
         const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
-
-        const dbg = this.add.image(gameWidth / 2, 680, "joinGame").setInteractive().setAlpha(NOT_SELECTED);
+        const debugButton = this.add.text(gameWidth / 2, 660, "Enter Board (No Players will be active)", 
+            {fontFamily: "serif", color: "#ff00ff", fontSize: "40px"}).setInteractive({useHandCursor: true}).setOrigin(0.5);
 
         var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
         var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
@@ -59,21 +57,26 @@ export default class mainMenu extends Phaser.Scene {
             element.setVisible(false);
         });
 
-        dbg.on("pointerup", function() {
-            thisMainMenu.scene.start("board"); //TODO: actual debug button
+        var interactiveGroup = this.add.group([newGame, joinGame, debugButton]);
+        interactiveGroup.getChildren().forEach(element => {
+            element.disableInteractive();
         });
 
         //#endregion Initial Variables
 
         eventHandler.on("new_main_menu", function() {
-            thisMainMenu.scene.setVisible(true);
             thisMainMenu.scene.bringToTop();
+            interactiveGroup.getChildren().forEach(element => {
+                element.setInteractive({useHandCursor: true});
+            });
         });
 
         eventHandler.on("terminate_main_menu", function() {
-            thisMainMenu.scene.setVisible(false);
             HTMLgroup.getChildren().forEach(element => {
                 element.setVisible(false);
+            });
+            interactiveGroup.getChildren().forEach(element => {
+                element.disableInteractive();
             });
             thisMainMenu.scene.sendToBack();
         });
@@ -121,6 +124,11 @@ export default class mainMenu extends Phaser.Scene {
             this.clearTint();
             joinGameForm.setVisible(true);
             playButtonEnable(false);
+        });
+
+        debugButton.on('pointerup', function() {
+            eventHandler.emit("terminate_main_menu");
+            eventHandler.emit("new_board", {lobbyID: null, playerID: null, username: null});
         });
         //#endregion Button Click Behavior
 

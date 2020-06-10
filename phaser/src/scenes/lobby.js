@@ -9,6 +9,7 @@ import confirmForm from "../assets/html/confirm_form.html"
 
 import exitButton from "../assets/images/exit.svg"
 import startGame from "../assets/images/start_game.png"
+import background from "../assets/images/lobby_bg.png"
 import blackRectangleHTML from "../assets/html/dim.html"
 
 export default class lobby extends Phaser.Scene {
@@ -27,6 +28,7 @@ export default class lobby extends Phaser.Scene {
             frameWidth: 400,
             frameHeight: 120
         });
+        this.load.image("lobbyBackground", background);
     }
 
     create() {
@@ -34,12 +36,13 @@ export default class lobby extends Phaser.Scene {
         this.scene.sendToBack();
 
         //#region Initial Variables
+        var lobbyOn = false;
         const thisLobby = this;
         const DIM = 0.75
         const lobbyColors = ['linear-gradient(to top, rgb(175, 0, 0), rgb(255, 60, 55))',
                              'linear-gradient(to top, rgb(0, 90, 200), rgb(47, 143, 255))',
                              'linear-gradient(to top, rgb(190, 0, 190), rgb(255, 47, 255))',
-                             'linear-gradient(to top, rgb(0, 161, 0), rgb(47, 209, 47))']
+                             'linear-gradient(to top, rgb(0, 161, 0), rgb(47, 209, 47))'];
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
         var lobbyIDText = this.add.dom(gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
         var lobbyBoxes = [];
@@ -48,6 +51,7 @@ export default class lobby extends Phaser.Scene {
         var lobbyBoxUserIDs = [];
         var hostID;
 
+        const background = thisLobby.add.image(0, 0, "lobbyBackground").setOrigin(0).setDepth(-1);
         var dimmingObject = this.add.dom(0, 0).createFromCache("dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
         var changeUsernameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("changeUsernameForm").setVisible(false).setDepth(2);
         var leaveConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
@@ -56,97 +60,65 @@ export default class lobby extends Phaser.Scene {
         startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
         const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
-        var startGame = this.add.image(gameWidth / 2, gameHeight - 150, "startGame", 1).setDepth(0);
+        const startGame = this.add.image(gameWidth / 2, gameHeight - 150, "startGame", 1).setDepth(0);
 
         var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation, startConfirmation]);
-        
+        var interactiveGroup = thisLobby.add.group([startGame, exitLobby]);
+
         HTMLgroup.getChildren().forEach(element => {
             element.setVisible(false);
         });
+        interactiveGroup.getChildren().forEach(element => {
+            element.disableInteractive();
+        });
+
 
         //#endregion Initial Variables
 
         eventHandler.on("new_lobby", function(data) {
+            lobbyOn = true;
             thisLobby.lobbyID = data.lobbyID;
             thisLobby.playerID = data.playerID;
             thisLobby.username = data.username;
             lobbyIDText.getChildByID("idValue").innerHTML = thisLobby.lobbyID;
             lobbyIDText.setVisible(true);
             thisLobby.scene.setVisible(true);
+            exitLobby.setInteractive({useHandCursor: true});
             thisLobby.scene.bringToTop();
 
-            if (lobbyBoxes.length > 0 && lobbyBoxes.length === lobbyBoxUserIDs.length) {
-                var loc = lobbyBoxUserIDs.indexOf(thisLobby.playerID);
-                lobbyBoxes[loc].getChildByID("pencil").style.display = "inline-block";
-                lobbyBoxes[loc].getChildByID("userContainer").style.border = "10px solid gold";
-                lobbyBoxes[loc].addListener("click");
-                lobbyBoxes[loc].on("click", function(event) {
-                    if (event.target.id === "pencil") {
-                        changeUsernameForm.setVisible(true);
-                        toggleLobbyElements(false);
-                    }
-                });
-                changeUsernameForm.getChildByName("usernameField").value = thisLobby.username;
-            }
-
-            if (thisLobby.playerID === hostID && lobbyBoxUserIDs.length > 1) {
-                startGame.setFrame(0);
-                startGame.setInteractive({useHandCursor: true});
-            } else {
-                startGame.setFrame(1);
-                startGame.disableInteractive();
-            }
+            fetch(constants.fullAddr + "/api/is_game_started?" + new URLSearchParams({
+                session_id: thisLobby.lobbyID,
+            }))
+            .then(handleErrors)
+            .then(result => {
+                if (result.exists) {
+                    eventHandler.emit("update_lobby", result);
+                } else {
+                    console.warn(result);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
         });
 
         eventHandler.on("update_lobby", function (data) {
-            console.log("test:", data);
-            for (var i = 0; i < lobbyBoxes.length; i++) {
-                lobbyBoxes[i].destroy();
+            if (lobbyOn) {
+                createLobbyBoxes(data);
             }
-            lobbyBoxes = [];
-            lobbyBoxUserIDs = [];
-             for (var i = 0; i < Object.keys(data.players).length; i++) {
+        });
 
-                var currentPlayerID = data.players[Object.keys(data.players)[i]].player_id;
-                var currentUsername = data.players[Object.keys(data.players)[i]].username;
-                lobbyBoxUserIDs[i] = currentPlayerID;
-                lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * (gameWidth / 2)), (i >= 2 ? 300 : 0) + 200).createFromCache("lobbyBox").setOrigin(0).setDepth(0);
+        eventHandler.on("update_game", function(data) {
 
-                if (thisLobby.playerID === currentPlayerID) {
-                    lobbyBoxes[i].getChildByID("pencil").style.display = "inline-block";
-                    lobbyBoxes[i].getChildByID("userContainer").style.border = "10px solid gold";
-                    lobbyBoxes[i].addListener("click");
-                    lobbyBoxes[i].on("click", function(event) {
-                        if (event.target.id === "pencil") {
-                            changeUsernameForm.setVisible(true);
-                            toggleLobbyElements(false);
-                        }
-                    });
-                    changeUsernameForm.getChildByName("usernameField").value = currentUsername;
-                }
-
-                lobbyBoxes[i].getChildByID("usernameValue").innerHTML = currentUsername;
-                lobbyBoxes[i].getChildByID("playerValue").innerHTML = i + 1;
-                lobbyBoxes[i].getChildByID("userContainer").style.background = lobbyColors[currentPlayerID];
-
-                if (data.host_id === currentPlayerID) {
-                    lobbyBoxes[i].getChildByID("host").style.display = "inline-block";
-                    lobbyBoxes[i].getChildByID("playerValue").innerHTML += " (Host)";
-                }
-            }
-
-            hostID = data.host_id;
-            if (thisLobby.playerID === hostID && lobbyBoxUserIDs.length > 1) {
-                startGame.setFrame(0);
-                startGame.setInteractive({useHandCursor: true});
-            } else {
-                startGame.setFrame(1);
-                startGame.disableInteractive();
+            if (data.exists && data.is_started && lobbyOn) {
+                eventHandler.emit("terminate_lobby");
+                eventHandler.emit("new_board", {lobbyID: thisLobby.lobbyID, playerID: thisLobby.playerID, username: thisLobby.username});
             }
 
         });
 
         eventHandler.on("terminate_lobby", function() {
+            lobbyOn = false;
             for (var i = 0; i < lobbyBoxes.length; i++) {
                 lobbyBoxes[i].destroy();
             }
@@ -155,7 +127,9 @@ export default class lobby extends Phaser.Scene {
             HTMLgroup.getChildren().forEach(element => {
                 element.setVisible(false);
             });
-            //thisLobby.scene.setVisible(false);
+            interactiveGroup.getChildren().forEach(element => {
+                element.disableInteractive();
+            });
             thisLobby.scene.sendToBack();
         });
 
@@ -261,11 +235,7 @@ export default class lobby extends Phaser.Scene {
                     body: JSON.stringify(args)
                 }).then(handleErrors)
                 .then(result => {
-                    console.log(result);
-                    if (result === "OK") {
-                        eventHandler.emit("new_main_menu");
-                        eventHandler.emit("terminate_lobby");
-                    } else {
+                    if (result !== "OK") {
                         console.warn(result);
                     }
                 }).catch(error => {
@@ -311,7 +281,7 @@ export default class lobby extends Phaser.Scene {
                 .then(result => {
                     console.log(result);
                     if (result === "OK") {
-                        thisLobby.username = newName
+                        thisLobby.username = newName;
                         console.log("Username Changed to " + newName);
                     } else {
                         console.warn("Username Change Failed", result);
@@ -335,6 +305,52 @@ export default class lobby extends Phaser.Scene {
         });
 
         //#endregion Form Behavior
+
+        function createLobbyBoxes (data) {
+            for (var i = 0; i < lobbyBoxes.length; i++) {
+                lobbyBoxes[i].destroy();
+            }
+            lobbyBoxes = [];
+            lobbyBoxUserIDs = [];
+             for (var i = 0; i < Object.keys(data.players).length; i++) {
+
+                var currentPlayerID = data.players[Object.keys(data.players)[i]].player_id;
+                var currentUsername = data.players[Object.keys(data.players)[i]].username;
+                lobbyBoxUserIDs[i] = currentPlayerID;
+                lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * (gameWidth / 2)), (i >= 2 ? 300 : 0) + 200).createFromCache("lobbyBox").setOrigin(0).setDepth(0);
+
+                if (thisLobby.playerID === currentPlayerID) {
+                    lobbyBoxes[i].getChildByID("pencil").style.display = "inline-block";
+                    lobbyBoxes[i].getChildByID("userContainer").style.border = "10px solid gold";
+                    lobbyBoxes[i].addListener("click");
+                    lobbyBoxes[i].on("click", function(event) {
+                        if (event.target.id === "pencil") {
+                            changeUsernameForm.setVisible(true);
+                            toggleLobbyElements(false);
+                        }
+                    });
+                    changeUsernameForm.getChildByName("usernameField").value = currentUsername;
+                }
+
+                lobbyBoxes[i].getChildByID("usernameValue").innerHTML = currentUsername;
+                lobbyBoxes[i].getChildByID("playerValue").innerHTML = i + 1;
+                lobbyBoxes[i].getChildByID("userContainer").style.background = lobbyColors[currentPlayerID];
+
+                if (data.host_id === currentPlayerID) {
+                    lobbyBoxes[i].getChildByID("host").style.display = "inline-block";
+                    lobbyBoxes[i].getChildByID("playerValue").innerHTML += " (Host)";
+                }
+            }
+
+            hostID = data.host_id;
+            if (thisLobby.playerID === hostID && lobbyBoxUserIDs.length > 1) {
+                startGame.setFrame(0);
+                startGame.setInteractive({useHandCursor: true});
+            } else {
+                startGame.setFrame(1);
+                startGame.disableInteractive();
+            }
+        }
 
         /**
          * @param {boolean} enable

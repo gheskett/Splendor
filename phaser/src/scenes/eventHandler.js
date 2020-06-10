@@ -1,5 +1,6 @@
 import Phaser from "phaser"
 import * as constants from "../constants.js"
+import coverGame from "../assets/images/lobby_bg.png"
 
 const eventHandler = new Phaser.Events.EventEmitter();
 export default eventHandler;
@@ -14,9 +15,15 @@ export class eventManger extends Phaser.Scene {
         this.client = constants.ioc.connect( constants.fullAddr );
     }
 
+    preload() {
+        this.load.image("coverGame", coverGame);
+    }
+
     create() {
 
         const events = this;
+
+        const coverGame = this.add.image(0, 0, "coverGame").setOrigin(0);
 
         this.scene.launch("mainMenu", {client: events.client});
         this.scene.launch("lobby");
@@ -24,6 +31,7 @@ export class eventManger extends Phaser.Scene {
 
         eventHandler.on("main_menu_ready", function() {
             eventHandler.emit("new_main_menu");
+            coverGame.setVisible(false);
         });
     
         //#region Server Listeners
