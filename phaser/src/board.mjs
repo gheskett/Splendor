@@ -16,8 +16,8 @@ export class BoardScene extends Phaser.Scene {
     this.scales = .1875;
 
     //TODO: this should be auto-detected
-    this.centerX = 960;
-    this.centerY = 540;
+    this.centerX = 1012;
+    this.centerY = 575;
     this.server = new ServerManager();
     this.nobles = [];
     
@@ -103,7 +103,7 @@ export class BoardScene extends Phaser.Scene {
     {
       //Display backwards cards
       //TODO: empty cards
-      this.add.sprite(flippedCardStartX - spacedWidth - 4, flippedCardStartY + spacedHeight * row, "cardback_r" + (3 - row) + "_731x1024").setScale(this.scales);
+      this.add.sprite(flippedCardStartX - spacedWidth - 16, flippedCardStartY + spacedHeight * row, "cardback_r" + (3 - row) + "_731x1024").setScale(this.scales);
 
       for (var column = 0; column < numColumns; column++)
       {
@@ -120,19 +120,19 @@ export class BoardScene extends Phaser.Scene {
     var scale = this.scales;
     console.log(scale);
     var nobleHeight = 731 * scale;
-    let nobleX = this.centerX + spacedWidth * (numColumns / 2) + .5 * nobleHeight + 12;
+    let nobleX = this.centerX + spacedWidth * (numColumns / 2) + .5 * nobleHeight + 20;
     let nobleY = cardMid - (numNobles / 2 * nobleHeight) + nobleHeight / 2;
     for (var i = 0; i < numNobles; i++)
     {
       //TODO: get data from server
       this.nobles[i] = new noble(this, 0);
       this.nobles[i].drawNoble(nobleX,
-        nobleY + i * nobleHeight, nobleHeight, scale);
+        nobleY + i * nobleHeight, nobleHeight, scale * 0.934);
     }
 
     const chipHeight = 64 + 32;
 
-    var tokenX = flippedCardStartX - spacedWidth * 1.5 - chipHeight * .5 - 4;
+    var tokenX = flippedCardStartX - spacedWidth * 1.5 - chipHeight * .5 - 24;
     var tokenY = cardMid + chipHeight * .5 - chipHeight * 3;
     for (var chip in this.tokenSprites)
     {

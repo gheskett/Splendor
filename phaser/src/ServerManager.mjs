@@ -23,12 +23,12 @@ export class ServerManager {
     return {
       "card_id" : 0,
       "rank" : 1,
-      "prestige_points" : 2,
+      "prestige_points" : 3,
       "gem_type" : "diamond",
       "diamond" : 0,
       "sapphire" : 1,
       "emerald" : 2,
-      "ruby" : 0,
+      "ruby" : 3,
       "onyx" : 0
     }
   }
