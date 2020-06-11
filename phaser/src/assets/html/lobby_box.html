@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<link href='https://fonts.googleapis.com/css?family=Quintessential' rel='stylesheet'>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    #host {
+        position: absolute;
+        height: 32px;
+        width: 32px;
+        align-self: flex-start;
+        display: none;
+    }
+
+    #userContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 940px;
+        height: 280px;
+        padding: 25px;
+        border: 10px solid silver;
+        border-radius: 50px;
+        background-color: darksalmon;
+        margin: 10px 10px;
+    }
+
+    .playerNum{
+        font-family: Quintessential;
+        font-size: 40px;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    #usernameValue {
+        font-family: Quintessential;
+        font-size: 65px;
+        max-width: 800px;
+        color: white;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #pencil {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        top: auto;
+        margin: 34px 0px 0px 10px;
+        box-sizing: content-box;
+        display: none;
+    }
+
+</style>
+
+<div id="userContainer">
+    <img src="/src/assets/images/host_symbol.svg" alt="Host" title="Host" id="host">
+     <div>
+        <label id="usernameValue">undefined</label>
+        <img src="/src/assets/images/pencil.svg" alt="Pencil" title="Change Username" id="pencil" name="pencil">
+     </div>
+    <div>
+        <label id="playerText" class="playerNum">Player: </label> 
+        <label id="playerValue" class="playerNum">X</label>
+    </div>
+    
+    
+</div>

@@ -137,7 +137,7 @@ def new_game():
     args = request.get_json()
     if args is None or 'sid' not in args.keys():
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: missing 'sid' argument!")
+                             most_recent_action="ERROR: missing 'sid' argument!", username=None)
 
     sid = args['sid']
     if sid not in clients.keys():
@@ -145,11 +145,12 @@ def new_game():
             clients[sid] = {'player_id': -1, 'session_id': None}
         else:
             return flask.jsonify(player_id=-1, session_id=None,
-                                 most_recent_action="ERROR: sid not present in clients dictionary!")
+                                 most_recent_action="ERROR: sid not present in clients dictionary!", username=None)
 
     if clients[sid]['session_id'] is not None and sid != 'debug':
         return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
-                             most_recent_action="ERROR: Player cannot be present in two games at once!")
+                             most_recent_action="ERROR: Player cannot be present in two games at once!",
+                             username=clients[sid]['username'])
 
     player = Player()
     gm = Game(player)
@@ -170,7 +171,7 @@ def join_game():
     args = request.get_json()
     if args is None or 'sid' not in args.keys():
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: missing 'sid' argument!")
+                             most_recent_action="ERROR: missing 'sid' argument!", username=None)
 
     sid = args['sid']
     if sid not in clients.keys():
@@ -178,20 +179,21 @@ def join_game():
             clients[sid] = {'player_id': -1, 'session_id': None}
         else:
             return flask.jsonify(player_id=-1, session_id=None,
-                                 most_recent_action="ERROR: sid not present in clients dictionary!")
+                                 most_recent_action="ERROR: sid not present in clients dictionary!", username=None)
 
     if args is None or 'session_id' not in args.keys():
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: missing 'session_id' argument!")
+                             most_recent_action="ERROR: missing 'session_id' argument!", username=None)
 
     if clients[sid]['session_id'] is not None and sid != 'debug':
         return flask.jsonify(player_id=clients[sid]['player_id'], session_id=clients[sid]['session_id'],
-                             most_recent_action="ERROR: Player cannot be present in two games at once!")
+                             most_recent_action="ERROR: Player cannot be present in two games at once!",
+                             username=clients[sid]['username'])
 
     session_id = args['session_id']
     if session_id is None or session_id not in games.keys():
         return flask.jsonify(player_id=-1, session_id=None,
-                             most_recent_action="ERROR: Could not find game!")
+                             most_recent_action="ERROR: Could not find game!", username=None)
 
     player = Player()
     with lock:
@@ -217,6 +219,8 @@ def change_username():
     with lock:
         ret = lobby.change_username(request.get_json(), games)
     if ret.get_json() != 'OK':
+        if ret.get_json() == 'UNCHANGED':
+            return flask.jsonify("OK")
         return ret
 
     session_id = request.get_json()['session_id']
@@ -243,7 +247,7 @@ def is_game_started():
 def drop_out():
     with lock:
         ret = lobby.drop_out(request.get_json(), games, clients)
-    if ret.get_json() != 'OK':
+    if ret.get_json() != 'OK' or request.get_json()['session_id'] not in games.keys():
         return ret
 
     session_id = request.get_json()['session_id']
@@ -401,14 +405,24 @@ def io_connect():
 @socketio.on('disconnect')
 def io_disconnect():
     cli = clients[request.sid]
+    session_id = None
     if cli['session_id'] is not None:
-        gm = games[cli['session_id']]
+        session_id = cli['session_id']
+        gm = games[session_id]
         g_room = gm.room
         leave_room(g_room)
         with lock:
             lobby.drop_out(cli, games, clients)
     with lock:
         del clients[request.sid]
+
+    if session_id is not None and session_id in games.keys():
+        if games[session_id].player_turn >= 0:
+            emit_update_game(session_id)
+        else:
+            emit_update_lobby(session_id)
+
+        emit_update_chat(session_id)
 
     # print('Client disconnected.', flush=True)
 
