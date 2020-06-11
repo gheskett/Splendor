@@ -60,7 +60,7 @@ export default class lobby extends Phaser.Scene {
         startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
         const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
-        const startGame = this.add.image(gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0);
+        const startGame = this.add.image(gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0).setVisible(false);
 
         var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation, startConfirmation]);
         var interactiveGroup = thisLobby.add.group([startGame, exitLobby]);
@@ -343,12 +343,17 @@ export default class lobby extends Phaser.Scene {
             }
 
             hostID = data.host_id;
-            if (thisLobby.playerID === hostID && lobbyBoxUserIDs.length > 1) {
-                startGame.setFrame(0);
-                startGame.setInteractive({useHandCursor: true});
+            if (thisLobby.playerID === hostID) {
+                startGame.setVisible(true);
+                if (lobbyBoxUserIDs.length > 1) {
+                    startGame.setFrame(0);
+                    startGame.setInteractive({useHandCursor: true});
+                } else {
+                    startGame.setFrame(1);
+                    startGame.disableInteractive();
+                }
             } else {
-                startGame.setFrame(1);
-                startGame.disableInteractive();
+                startGame.setVisible(false);
             }
         }
 
