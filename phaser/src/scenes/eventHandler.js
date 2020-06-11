@@ -1,6 +1,6 @@
 import Phaser from "phaser"
 import * as constants from "../constants.js"
-import coverGame from "../assets/images/lobby_bg.png"
+import coverGame from "../assets/images/white_rectangle.png"
 
 const eventHandler = new Phaser.Events.EventEmitter();
 export default eventHandler;

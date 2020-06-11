@@ -60,7 +60,7 @@ export default class lobby extends Phaser.Scene {
         startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
         const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
-        const startGame = this.add.image(gameWidth / 2, gameHeight - 150, "startGame", 1).setDepth(0);
+        const startGame = this.add.image(gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0);
 
         var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation, startConfirmation]);
         var interactiveGroup = thisLobby.add.group([startGame, exitLobby]);
@@ -317,7 +317,7 @@ export default class lobby extends Phaser.Scene {
                 var currentPlayerID = data.players[Object.keys(data.players)[i]].player_id;
                 var currentUsername = data.players[Object.keys(data.players)[i]].username;
                 lobbyBoxUserIDs[i] = currentPlayerID;
-                lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * (gameWidth / 2)), (i >= 2 ? 300 : 0) + 200).createFromCache("lobbyBox").setOrigin(0).setDepth(0);
+                lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * (gameWidth / 2)), gameHeight / 2 + (i >= 2 ? 150 : -150)).createFromCache("lobbyBox").setOrigin(0, 0.5).setDepth(0);
 
                 if (thisLobby.playerID === currentPlayerID) {
                     lobbyBoxes[i].getChildByID("pencil").style.display = "inline-block";
