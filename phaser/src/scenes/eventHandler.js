@@ -27,6 +27,7 @@ export class eventManger extends Phaser.Scene {
 
         this.scene.launch("mainMenu", {client: events.client});
         this.scene.launch("lobby");
+        this.scene.launch("chat");
         this.scene.launch("board");
 
         eventHandler.on("main_menu_ready", function() {

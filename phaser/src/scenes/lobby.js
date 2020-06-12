@@ -38,13 +38,13 @@ export default class lobby extends Phaser.Scene {
         //#region Initial Variables
         var lobbyOn = false;
         const thisLobby = this;
-        const DIM = 0.75
+        const DIM = 0.75;
         const lobbyColors = ['linear-gradient(to top, rgb(175, 0, 0), rgb(255, 60, 55))',
                              'linear-gradient(to top, rgb(0, 90, 200), rgb(47, 143, 255))',
                              'linear-gradient(to top, rgb(190, 0, 190), rgb(255, 47, 255))',
                              'linear-gradient(to top, rgb(0, 161, 0), rgb(47, 209, 47))'];
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
-        var lobbyIDText = this.add.dom(gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
+        var lobbyIDText = this.add.dom(constants.notChat * gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
         var lobbyBoxes = [];
         lobbyIDText.getChildByID("idValue").innerHTML = this.lobbyID;
 
@@ -60,7 +60,7 @@ export default class lobby extends Phaser.Scene {
         startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
         const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
-        const startGame = this.add.image(gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0).setVisible(false);
+        const startGame = this.add.image(constants.notChat * gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0).setVisible(false);
 
         var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation, startConfirmation]);
         var interactiveGroup = thisLobby.add.group([startGame, exitLobby]);
@@ -317,7 +317,7 @@ export default class lobby extends Phaser.Scene {
                 var currentPlayerID = data.players[Object.keys(data.players)[i]].player_id;
                 var currentUsername = data.players[Object.keys(data.players)[i]].username;
                 lobbyBoxUserIDs[i] = currentPlayerID;
-                lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * (gameWidth / 2)), gameHeight / 2 + (i >= 2 ? 150 : -150)).createFromCache("lobbyBox").setOrigin(0, 0.5).setDepth(0);
+                lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * ( constants.notChat * gameWidth / 2)), gameHeight / 2 + (i >= 2 ? 150 : -150)).createFromCache("lobbyBox").setOrigin(0, 0.5).setDepth(0);
 
                 if (thisLobby.playerID === currentPlayerID) {
                     lobbyBoxes[i].getChildByID("pencil").style.display = "inline-block";

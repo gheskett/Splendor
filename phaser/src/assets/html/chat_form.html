@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Quintessential' rel='stylesheet'>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        #fullChatContainer {
+            width: 384px;
+            height: 1080px;
+            background-color: gray;
+        }
+
+        #chatBox {
+            width: 100%;
+            height: 15%;
+            position: absolute;
+            bottom: 0px;
+            padding: 10px;
+        }
+
+
+        #logContainer {
+            position: relative;
+            height: 85%;
+            width: 100%;
+            padding: 5px 5%;
+            margin: 0 auto;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #chatLog {
+            width: 91%;
+            max-height: 100%;
+            min-height: fit-content;
+            position: absolute;
+            bottom: 0px;
+        }
+
+        #msg {
+            font-family: Quintessential;
+            font-size: 26px;
+            color: black;
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            resize: none;
+        }
+
+        p {
+            width: 100%;
+            font-family: Quintessential;
+            font-size: 26px;
+            color: black;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id=fullChatContainer onload="plzWork();">
+        <form id=chatBox action="" onSubmit="return false;">
+            <textarea id="msg" contenteditable="true" placeholder="Send a message..."></textarea>
+        </form>
+        <div id="logContainer">
+            <div id="chatLog">
+                <p>Drugs are really bad for you and you should MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM probably never do them because there is a good chance that they could end your life</p>
+                <p>boop2</p>
+                <p>Drugs are really bad for you and you should probably never do them because there is a good chance that they could end your life</p>
+                <p>boop2</p>
+                <p>Drugs are really bad for you and you should probably never do them because there is a good chance that they could end your life</p>
+                <p>boop2</p>
+                <p>Drugs are really bad for you and you should probably never do them because there is a good chance that they could end your life</p>
+                <p>boop2</p>
+                <p>Drugs are really bad for you and you should probably never do them because there is a good chance that they could end your life</p>
+                <p>boop2</p>
+            </div>
+        </div>
+    </div>
+</body>

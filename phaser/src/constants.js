@@ -6,3 +6,4 @@ export const headers = {
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*"
 };
+export const notChat = 0.8;
