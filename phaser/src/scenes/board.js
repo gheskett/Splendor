@@ -20,7 +20,7 @@ export default class board extends Phaser.Scene {
 
     //TODO: this should be auto-detected
     this.centerX = 1012;
-    this.centerY = 575;
+    this.upperBit = 59;
     this.server = new serverManager();
     this.nobles = [];
     
@@ -127,9 +127,8 @@ export default class board extends Phaser.Scene {
     var spacedWidth = width + spacingX;
     var spacedHeight = height + spacingY;
 
-    var upperBit = 100;
     var flippedCardStartX = thisBoard.centerX - spacedWidth * (numColumns / 2) + .5 * spacedWidth;
-    var flippedCardStartY = upperBit + .5 * spacedHeight;
+    var flippedCardStartY = this.upperBit + .5 * spacedHeight;
     var cardMid = flippedCardStartY + spacedHeight;
     
     for (var row = 0; row < numRows; row++) {
@@ -149,7 +148,6 @@ export default class board extends Phaser.Scene {
     //TODO: get numbers from server
     var numNobles = 5;
     var scale = thisBoard.scales;
-    console.log(scale);
     var nobleHeight = 731 * scale;
     let nobleX = thisBoard.centerX + spacedWidth * (numColumns / 2) + .5 * nobleHeight + 20;
     let nobleY = cardMid - (numNobles / 2 * nobleHeight) + nobleHeight / 2;
