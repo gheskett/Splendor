@@ -1,5 +1,5 @@
 import Phaser from "phaser"
-import * as constants from "../constants.js"
+import * as globals from "../globals.js"
 import coverGame from "../assets/images/white_rectangle.png"
 
 const eventHandler = new Phaser.Events.EventEmitter();
@@ -8,11 +8,11 @@ export default eventHandler;
 export class eventManger extends Phaser.Scene {
 
     constructor() {
-        super({key: "eventManager"})
+        super({ key: "eventManager" })
     }
 
     init() {
-        this.client = constants.ioc.connect( constants.fullAddr );
+        this.client = globals.ioc.connect(globals.fullAddr);
     }
 
     preload() {
@@ -25,16 +25,16 @@ export class eventManger extends Phaser.Scene {
 
         const coverGame = this.add.image(0, 0, "coverGame").setOrigin(0);
 
-        this.scene.launch("mainMenu", {client: events.client});
+        this.scene.launch("mainMenu", { client: events.client });
         this.scene.launch("lobby");
         this.scene.launch("chat");
         this.scene.launch("board");
 
-        eventHandler.on("main_menu_ready", function() {
+        eventHandler.on("main_menu_ready", function () {
             eventHandler.emit("new_main_menu");
             coverGame.setVisible(false);
         });
-    
+
         //#region Server Listeners
 
         //Called immediately when connection is made between the client and python server
@@ -42,7 +42,7 @@ export class eventManger extends Phaser.Scene {
             console.log("Connected to API server!")
             // Connected, yay!
         });
-        
+
         // Called immediately if client loses connection with server
         this.client.on('disconnect', () => {
             console.log("Lost connection to API server!")

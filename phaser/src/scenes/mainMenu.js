@@ -1,6 +1,6 @@
 import Phaser from "phaser"
 import eventHandler from "./eventHandler.js"
-import * as constants from "../constants.js"
+import * as globals from "../globals.js"
 
 import newGame from "../assets/images/new_game.svg"
 import joinGame from "../assets/images//join_game.svg"
@@ -14,7 +14,7 @@ export default class mainMenu extends Phaser.Scene {
     constructor(config) {
         super(config);
     }
-    
+
     init(data) {
         this.client = data.client;
     }
@@ -44,10 +44,10 @@ export default class mainMenu extends Phaser.Scene {
         const title = this.add.image(gameWidth / 2, 150, "title").setScale(1.5);
         const dimmingObject = this.add.image(0, 0, "dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
 
-        const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
-        const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
-        const debugButton = this.add.text(gameWidth / 2, 660, "Enter Board (No Players will be active)", 
-            {fontFamily: "serif", color: "#ff00ff", fontSize: "40px"}).setInteractive({useHandCursor: true}).setOrigin(0.5);
+        const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({ useHandCursor: true }).setAlpha(NOT_SELECTED);
+        const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({ useHandCursor: true }).setAlpha(NOT_SELECTED);
+        const debugButton = this.add.text(gameWidth / 2, 660, "Enter Board (No Players will be active)",
+            { fontFamily: "serif", color: "#ff00ff", fontSize: "40px" }).setInteractive({ useHandCursor: true }).setOrigin(0.5);
 
         var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
         var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
@@ -64,14 +64,14 @@ export default class mainMenu extends Phaser.Scene {
 
         //#endregion Initial Variables
 
-        eventHandler.on("new_main_menu", function() {
+        eventHandler.on("new_main_menu", function () {
             thisMainMenu.scene.bringToTop();
             interactiveGroup.getChildren().forEach(element => {
-                element.setInteractive({useHandCursor: true});
+                element.setInteractive({ useHandCursor: true });
             });
         });
 
-        eventHandler.on("terminate_main_menu", function() {
+        eventHandler.on("terminate_main_menu", function () {
             HTMLgroup.getChildren().forEach(element => {
                 element.setVisible(false);
             });
@@ -82,53 +82,53 @@ export default class mainMenu extends Phaser.Scene {
         });
 
         //#region Mouse-button behavior
-        newGame.on('pointerover', function() {
+        newGame.on('pointerover', function () {
             this.setAlpha(SELECTED).setScale(1.05);
         });
 
-        newGame.on('pointerdown', function() {
+        newGame.on('pointerdown', function () {
             this.setTint(0xdddddd);
             this.setScale(.95);
         });
 
-        newGame.on('pointerout', function() {
+        newGame.on('pointerout', function () {
             this.setAlpha(NOT_SELECTED).setScale(1);
             this.clearTint();
         });
 
-        joinGame.on('pointerdown', function() {
+        joinGame.on('pointerdown', function () {
             this.setTint(0xdddddd);
             this.setScale(.95);
         });
 
-        joinGame.on('pointerover', function() {
+        joinGame.on('pointerover', function () {
             this.setAlpha(SELECTED).setScale(1.05);
         });
-        
-        joinGame.on('pointerout', function() {
+
+        joinGame.on('pointerout', function () {
             this.setAlpha(NOT_SELECTED).setScale(1);
             this.clearTint();
         });
         //#endregion Mouse-button behavior
 
         //#region Button Click Behavior
-        newGame.on('pointerup', function() {
+        newGame.on('pointerup', function () {
             this.setAlpha(NOT_SELECTED).setScale(1);
             this.clearTint();
             newGameForm.setVisible(true);
             playButtonEnable(false);
         });
 
-        joinGame.on('pointerup', function() {
+        joinGame.on('pointerup', function () {
             this.setAlpha(NOT_SELECTED).setScale(1);
             this.clearTint();
             joinGameForm.setVisible(true);
             playButtonEnable(false);
         });
 
-        debugButton.on('pointerup', function() {
+        debugButton.on('pointerup', function () {
             eventHandler.emit("terminate_main_menu");
-            eventHandler.emit("new_board", {lobbyID: null, playerID: null, username: null});
+            eventHandler.emit("new_board");
         });
         //#endregion Button Click Behavior
 
@@ -137,7 +137,7 @@ export default class mainMenu extends Phaser.Scene {
         newGameForm.addListener("click");
         newGameForm.on("click", function (event) {
 
-            var username = this.getChildByName("usernameField").value;
+            var username = this.getChildByName("usernameField").value.trim();
 
             if (event.target.name === "start") {
 
@@ -145,31 +145,35 @@ export default class mainMenu extends Phaser.Scene {
                     sid: thisMainMenu.client.id,
                     username: username
                 }
-                fetch(constants.fullAddr + "/api/new_game/", {
+                fetch(globals.fullAddr + "/api/new_game/", {
                     method: "POST",
-                    headers: constants.headers,
+                    headers: globals.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
-                .then(result => {
-                    //console.log(result);
-                    if (result.player_id !== -1) {
-                        this.getChildByName("usernameField").value = "";
-                        eventHandler.emit("terminate_main_menu");
-                        eventHandler.emit("new_lobby", {lobbyID: result.session_id, playerID: result.player_id, username: username});
-                    } else {
-                        console.warn(result.most_recent_action);
-                    }
-                }).catch(error => {
-                    console.error(error);
-                });
+                    .then(result => {
+                        //console.log(result);
+                        if (result.player_id !== -1) {
+                            this.getChildByName("usernameField").value = "";
+                            globals.setPlayerID(result.player_id);
+                            globals.setLobbyID(result.session_id);
+                            globals.setUsername(username, result.player_id);
+                            eventHandler.emit("terminate_main_menu");
+                            eventHandler.emit("new_lobby");
+                            eventHandler.emit("new_chat");
+                        } else {
+                            console.warn(result.most_recent_action);
+                        }
+                    }).catch(error => {
+                        console.error(error);
+                    });
 
                 this.setVisible(false);
                 playButtonEnable(true);
-            
+
             }
 
             //Enable play buttons and remove username form on cancel
-            if (event.target.name === "cancel") {
+            else if (event.target.name === "cancel") {
 
                 this.getChildByName("usernameField").value = "";
 
@@ -183,7 +187,7 @@ export default class mainMenu extends Phaser.Scene {
         joinGameForm.addListener("click");
         joinGameForm.on("click", function (event) {
 
-            var username = this.getChildByName("usernameField").value;
+            var username = this.getChildByName("usernameField").value.trim();
             var lobbyID = this.getChildByName("lobbyIdField").value;
 
             if (event.target.name === "join") {
@@ -193,32 +197,36 @@ export default class mainMenu extends Phaser.Scene {
                     username: username,
                     session_id: lobbyID
                 }
-                fetch(constants.fullAddr + "/api/join_game/", {
+                fetch(globals.fullAddr + "/api/join_game/", {
                     method: "POST",
-                    headers: constants.headers,
+                    headers: globals.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
-                .then(result => {
-                    //console.log(result);
-                    if (result.player_id !== -1) {
-                        this.getChildByName("usernameField").value = "";
-                        this.getChildByName("lobbyIdField").value = "";
-                        eventHandler.emit("terminate_main_menu");
-                        eventHandler.emit("new_lobby", {lobbyID: result.session_id, playerID: result.player_id, username: username});
-                    } else {
-                        console.warn(result.most_recent_action);
-                    }
-                }).catch(error => {
-                    console.error("Error: ", error);
-                });
-                
+                    .then(result => {
+                        //console.log(result);
+                        if (result.player_id !== -1) {
+                            this.getChildByName("usernameField").value = "";
+                            this.getChildByName("lobbyIdField").value = "";
+                            globals.setPlayerID(result.player_id);
+                            globals.setLobbyID(result.session_id);
+                            globals.setUsername(username, result.player_id);
+                            eventHandler.emit("terminate_main_menu");
+                            eventHandler.emit("new_lobby");
+                            eventHandler.emit("new_chat");
+                        } else {
+                            console.warn(result.most_recent_action);
+                        }
+                    }).catch(error => {
+                        console.error("Error: ", error);
+                    });
+
                 this.setVisible(false);
                 playButtonEnable(true);
-            
+
             }
 
             //Enable play buttons and remove username form on cancel
-            if (event.target.name === "cancel") {
+            else if (event.target.name === "cancel") {
 
                 this.getChildByName("usernameField").value = "";
 
@@ -237,14 +245,14 @@ export default class mainMenu extends Phaser.Scene {
          */
         function playButtonEnable(enable) {
             if (enable) {
-            newGame.setInteractive({useHandCursor: true});
-            joinGame.setInteractive({useHandCursor: true});
-            dimmingObject.setVisible(false);
-            } 
+                newGame.setInteractive({ useHandCursor: true });
+                joinGame.setInteractive({ useHandCursor: true });
+                dimmingObject.setVisible(false);
+            }
             else {
-            newGame.disableInteractive();
-            joinGame.disableInteractive();
-            dimmingObject.setVisible(true);
+                newGame.disableInteractive();
+                joinGame.disableInteractive();
+                dimmingObject.setVisible(true);
             }
         }
 

@@ -1,6 +1,6 @@
 import Phaser from "phaser"
 import eventHandler from "./eventHandler.js"
-import * as constants from "../constants.js"
+import * as globals from "../globals.js"
 
 import sessionIDText from "../assets/html/session_id_text.html"
 import lobbyBox from "../assets/html/lobby_box.html"
@@ -39,12 +39,8 @@ export default class lobby extends Phaser.Scene {
         var lobbyOn = false;
         const thisLobby = this;
         const DIM = 0.75;
-        const lobbyColors = ['linear-gradient(to top, rgb(175, 0, 0), rgb(255, 60, 55))',
-                             'linear-gradient(to top, rgb(0, 90, 200), rgb(47, 143, 255))',
-                             'linear-gradient(to top, rgb(190, 0, 190), rgb(255, 47, 255))',
-                             'linear-gradient(to top, rgb(0, 161, 0), rgb(47, 209, 47))'];
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
-        var lobbyIDText = this.add.dom(constants.notChat * gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
+        var lobbyIDText = this.add.dom(globals.notChat * gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
         var lobbyBoxes = [];
         lobbyIDText.getChildByID("idValue").innerHTML = this.lobbyID;
 
@@ -59,8 +55,8 @@ export default class lobby extends Phaser.Scene {
         var startConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
         startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
-        const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
-        const startGame = this.add.image(constants.notChat * gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0).setVisible(false);
+        const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
+        const startGame = this.add.image(globals.notChat * gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0).setVisible(false);
 
         var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation, startConfirmation]);
         var interactiveGroup = thisLobby.add.group([startGame, exitLobby]);
@@ -75,49 +71,54 @@ export default class lobby extends Phaser.Scene {
 
         //#endregion Initial Variables
 
-        eventHandler.on("new_lobby", function(data) {
+        eventHandler.on("new_lobby", function (data) {
             lobbyOn = true;
-            thisLobby.lobbyID = data.lobbyID;
-            thisLobby.playerID = data.playerID;
-            thisLobby.username = data.username;
-            lobbyIDText.getChildByID("idValue").innerHTML = thisLobby.lobbyID;
+            lobbyIDText.getChildByID("idValue").innerHTML = globals.lobbyID;
             lobbyIDText.setVisible(true);
             thisLobby.scene.setVisible(true);
-            exitLobby.setInteractive({useHandCursor: true});
+            exitLobby.setInteractive({ useHandCursor: true });
             thisLobby.scene.bringToTop();
 
-            fetch(constants.fullAddr + "/api/is_game_started?" + new URLSearchParams({
-                session_id: thisLobby.lobbyID,
+            fetch(globals.fullAddr + "/api/is_game_started?" + new URLSearchParams({
+                session_id: globals.lobbyID,
             }))
-            .then(handleErrors)
-            .then(result => {
-                if (result.exists) {
-                    eventHandler.emit("update_lobby", result);
-                } else {
-                    console.warn(result);
-                }
-            })
-            .catch(error => {
-                console.error(error);
-            });
+                .then(handleErrors)
+                .then(result => {
+                    if (result.exists) {
+                        eventHandler.emit("update_lobby", result);
+                    } else {
+                        console.warn(result);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
         });
 
         eventHandler.on("update_lobby", function (data) {
             if (lobbyOn) {
                 createLobbyBoxes(data);
+            } else {
+                for (var i = 0; i < Object.keys(data.players).length; i++) {
+
+                    var currentPlayerID = data.players[Object.keys(data.players)[i]].player_id;
+                    var currentUsername = data.players[Object.keys(data.players)[i]].username;
+                    globals.setUsername(currentUsername, currentPlayerID);
+
+                }
             }
         });
 
-        eventHandler.on("update_game", function(data) {
+        eventHandler.on("update_game", function (data) {
 
             if (data.exists && data.is_started && lobbyOn) {
                 eventHandler.emit("terminate_lobby");
-                eventHandler.emit("new_board", {lobbyID: thisLobby.lobbyID, playerID: thisLobby.playerID, username: thisLobby.username});
+                eventHandler.emit("new_board");
             }
 
         });
 
-        eventHandler.on("terminate_lobby", function() {
+        eventHandler.on("terminate_lobby", function () {
             lobbyOn = false;
             for (var i = 0; i < lobbyBoxes.length; i++) {
                 lobbyBoxes[i].destroy();
@@ -136,20 +137,20 @@ export default class lobby extends Phaser.Scene {
 
         //#region Exit Button Behavior
 
-        exitLobby.on('pointerover', function() {
+        exitLobby.on('pointerover', function () {
             this.setTint(0xdfdfdf).setScale(1.05);
         });
 
-        exitLobby.on('pointerdown', function() {
+        exitLobby.on('pointerdown', function () {
             this.setTint(0xcccccc).setScale(.95);
         });
 
-        exitLobby.on('pointerout', function() {
+        exitLobby.on('pointerout', function () {
             this.setScale(1);
             this.clearTint();
         });
 
-        exitLobby.on('pointerup', function() {
+        exitLobby.on('pointerup', function () {
             this.setScale(1);
             this.clearTint();
             leaveConfirmation.setVisible(true);
@@ -162,32 +163,32 @@ export default class lobby extends Phaser.Scene {
             if (event.target.name === "confirm") {
 
                 var args = {
-                    player_id: thisLobby.playerID,
-                    session_id: thisLobby.lobbyID,
+                    player_id: globals.playerID,
+                    session_id: globals.lobbyID,
                 }
-                fetch(constants.fullAddr + "/api/drop_out/", {
+                fetch(globals.fullAddr + "/api/drop_out/", {
                     method: "POST",
-                    headers: constants.headers,
+                    headers: globals.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
-                .then(result => {
-                    console.log(result);
-                    if (result === "OK") {
-                        eventHandler.emit("new_main_menu");
-                        eventHandler.emit("terminate_lobby");
-                    } else {
-                        console.warn(result);
-                    }
-                }).catch(error => {
-                    console.error(error);
-                });
+                    .then(result => {
+                        console.log(result);
+                        if (result === "OK") {
+                            eventHandler.emit("new_main_menu");
+                            eventHandler.emit("terminate_lobby");
+                        } else {
+                            console.warn(result);
+                        }
+                    }).catch(error => {
+                        console.error(error);
+                    });
 
                 this.setVisible(false);
                 toggleLobbyElements(true);
-            
+
             }
 
-            if (event.target.name === "cancel") {
+            else if (event.target.name === "cancel") {
 
                 this.setVisible(false);
                 toggleLobbyElements(true);
@@ -200,20 +201,20 @@ export default class lobby extends Phaser.Scene {
 
         //#region Start Game Button Behavior
 
-        startGame.on('pointerover', function() {
+        startGame.on('pointerover', function () {
             this.setTint(0xdfdfdf).setScale(1.05);
         });
 
-        startGame.on('pointerdown', function() {
+        startGame.on('pointerdown', function () {
             this.setTint(0xcccccc).setScale(.95);
         });
 
-        startGame.on('pointerout', function() {
+        startGame.on('pointerout', function () {
             this.setScale(1);
             this.clearTint();
         });
 
-        startGame.on('pointerup', function() {
+        startGame.on('pointerup', function () {
             this.setScale(1);
             this.clearTint();
             startConfirmation.setVisible(true);
@@ -226,28 +227,28 @@ export default class lobby extends Phaser.Scene {
             if (event.target.name === "confirm") {
 
                 var args = {
-                    player_id: thisLobby.playerID,
-                    session_id: thisLobby.lobbyID,
+                    player_id: globals.playerID,
+                    session_id: globals.lobbyID,
                 }
-                fetch(constants.fullAddr + "/api/start_game/", {
+                fetch(globals.fullAddr + "/api/start_game/", {
                     method: "POST",
-                    headers: constants.headers,
+                    headers: globals.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
-                .then(result => {
-                    if (result !== "OK") {
-                        console.warn(result);
-                    }
-                }).catch(error => {
-                    console.error(error);
-                });
+                    .then(result => {
+                        if (result !== "OK") {
+                            console.warn(result);
+                        }
+                    }).catch(error => {
+                        console.error(error);
+                    });
 
                 this.setVisible(false);
                 toggleLobbyElements(true);
-            
+
             }
 
-            if (event.target.name === "cancel") {
+            else if (event.target.name === "cancel") {
 
                 this.setVisible(false);
                 toggleLobbyElements(true);
@@ -264,39 +265,39 @@ export default class lobby extends Phaser.Scene {
         changeUsernameForm.on("click", function (event) {
 
             console.log(event);
-            var newName = this.getChildByName("usernameField").value;
+            var newName = this.getChildByName("usernameField").value.trim();
 
             if (event.target.name === "change") {
 
                 var args = {
-                    player_id: thisLobby.playerID,
+                    player_id: globals.playerID,
                     username: newName,
-                    session_id: thisLobby.lobbyID
+                    session_id: globals.lobbyID
                 }
-                fetch(constants.fullAddr + "/api/change_username/", {
+                fetch(globals.fullAddr + "/api/change_username/", {
                     method: "POST",
-                    headers: constants.headers,
+                    headers: globals.headers,
                     body: JSON.stringify(args)
                 }).then(handleErrors)
-                .then(result => {
-                    console.log(result);
-                    if (result === "OK") {
-                        thisLobby.username = newName;
-                        console.log("Username Changed to " + newName);
-                    } else {
-                        console.warn("Username Change Failed", result);
-                    }
-                }).catch(error => {
-                    console.error("Error: ", error);
-                });
-                
+                    .then(result => {
+                        console.log(result);
+                        if (result === "OK") {
+                            thisLobby.username = newName;
+                            console.log("Username Changed to " + newName);
+                        } else {
+                            console.warn("Username Change Failed", result);
+                        }
+                    }).catch(error => {
+                        console.error("Error: ", error);
+                    });
+
                 this.setVisible(false);
                 toggleLobbyElements(true);
-            
+
             }
 
-            if (event.target.name === "cancel") {
-                this.getChildByName("usernameField").value = thisLobby.username;
+            else if (event.target.name === "cancel") {
+                this.getChildByName("usernameField").value = globals.usernames[globals.playerID];
 
                 this.setVisible(false);
                 toggleLobbyElements(true);
@@ -306,24 +307,25 @@ export default class lobby extends Phaser.Scene {
 
         //#endregion Form Behavior
 
-        function createLobbyBoxes (data) {
+        function createLobbyBoxes(data) {
             for (var i = 0; i < lobbyBoxes.length; i++) {
                 lobbyBoxes[i].destroy();
             }
             lobbyBoxes = [];
             lobbyBoxUserIDs = [];
-             for (var i = 0; i < Object.keys(data.players).length; i++) {
+            for (var i = 0; i < Object.keys(data.players).length; i++) {
 
                 var currentPlayerID = data.players[Object.keys(data.players)[i]].player_id;
                 var currentUsername = data.players[Object.keys(data.players)[i]].username;
+                globals.setUsername(currentUsername, currentPlayerID);
                 lobbyBoxUserIDs[i] = currentPlayerID;
-                lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * ( constants.notChat * gameWidth / 2)), gameHeight / 2 + (i >= 2 ? 150 : -150)).createFromCache("lobbyBox").setOrigin(0, 0.5).setDepth(0);
+                lobbyBoxes[i] = thisLobby.add.dom(((i % 2) * (globals.notChat * gameWidth / 2)), gameHeight / 2 + (i >= 2 ? 150 : -150)).createFromCache("lobbyBox").setOrigin(0, 0.5).setDepth(0);
 
-                if (thisLobby.playerID === currentPlayerID) {
+                if (globals.playerID === currentPlayerID) {
                     lobbyBoxes[i].getChildByID("pencil").style.display = "inline-block";
                     lobbyBoxes[i].getChildByID("userContainer").style.border = "10px solid gold";
                     lobbyBoxes[i].addListener("click");
-                    lobbyBoxes[i].on("click", function(event) {
+                    lobbyBoxes[i].on("click", function (event) {
                         if (event.target.id === "pencil") {
                             changeUsernameForm.setVisible(true);
                             toggleLobbyElements(false);
@@ -334,7 +336,7 @@ export default class lobby extends Phaser.Scene {
 
                 lobbyBoxes[i].getChildByID("usernameValue").innerHTML = currentUsername;
                 lobbyBoxes[i].getChildByID("playerValue").innerHTML = i + 1;
-                lobbyBoxes[i].getChildByID("userContainer").style.background = lobbyColors[currentPlayerID];
+                lobbyBoxes[i].getChildByID("userContainer").style.background = globals.lobbyColors[currentPlayerID];
 
                 if (data.host_id === currentPlayerID) {
                     lobbyBoxes[i].getChildByID("host").style.display = "inline-block";
@@ -343,11 +345,11 @@ export default class lobby extends Phaser.Scene {
             }
 
             hostID = data.host_id;
-            if (thisLobby.playerID === hostID) {
+            if (globals.playerID === hostID) {
                 startGame.setVisible(true);
                 if (lobbyBoxUserIDs.length > 1) {
                     startGame.setFrame(0);
-                    startGame.setInteractive({useHandCursor: true});
+                    startGame.setInteractive({ useHandCursor: true });
                 } else {
                     startGame.setFrame(1);
                     startGame.disableInteractive();
@@ -364,7 +366,7 @@ export default class lobby extends Phaser.Scene {
         function toggleLobbyElements(enable) {
             if (enable) {
                 dimmingObject.setVisible(false);
-            } 
+            }
             else {
                 dimmingObject.setVisible(true);
             }
