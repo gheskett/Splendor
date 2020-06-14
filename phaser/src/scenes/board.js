@@ -96,6 +96,7 @@ export default class board extends Phaser.Scene {
     //The `thisBoard` constant is used to avoid pontential conflicts with buttons, fetches, and events
     const thisBoard = this;
     thisBoard.boardOn = false;
+    thisBoard.updatable = false;
     thisBoard.gameState = null;
     thisBoard.f_cards = [];
     thisBoard.f_nobles = [];
@@ -126,13 +127,13 @@ export default class board extends Phaser.Scene {
 
     //#endregion Game Variables
 
-    draw_board(false)
+    draw_board()
 
     //#region Idk whatever Nathan did so idk what to name the region, but it should be renamed
 
 
 
-    function draw_board(is_loaded) {
+    function draw_board() {
       for (i = 0; i < thisBoard.f_cards.length; ++i)
         thisBoard.f_cards[i].destroy();
       for (i = 0; i < thisBoard.f_nobles.length; ++i)
@@ -274,7 +275,16 @@ export default class board extends Phaser.Scene {
       //only do something if the board is active and the session exists (Phaser is stupid)
       if (thisBoard.boardOn && data.exists) {
         thisBoard.gameState = data;
-        draw_board(false);
+        if (thisBoard.updatable || thisBoard.gameState.is_started) {
+          if (thisBoard.gameState.is_started)
+            thisBoard.updatable = true;
+          else
+            thisBoard.updatable = false;
+          
+          draw_board();
+          // TODO: draw_player();
+          // TODO: if (thisBoard.gameState.victory.length > 0) { draw_victory(); }
+        }
       }
 
     });
