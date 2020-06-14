@@ -21,16 +21,16 @@ export class noble {
     }
 
     drawNoble(x, y, length, scale) {
-        this.board.add.sprite(x, y, "noble_front").setScale(scale);
+        this.board.f_nobles.push(this.board.add.sprite(x, y, "noble_front").setScale(scale));
 
-        var cardInfo = this.board.server.lookUpNoble(this.nobleID);
+        var cardInfo = this.board.server.lookUpNoble(this.board.noblesDatabase, this.nobleID);
         drawCostNoble(x - length * .5, y + length * .5, cardInfo, this.cardMap, this.board, .5);
 
         var prestige = cardInfo["prestige_points"];
         var size = 128;
         var numScale = .5;
         var halfSize = size / 2 * numScale;
-        this.board.add.sprite(x + length *.5 - halfSize + 2, y - length * .5 + halfSize, prestige + "x" + size).setScale(numScale);
+        this.board.f_nobles.push(this.board.add.sprite(x + length *.5 - halfSize + 2, y - length * .5 + halfSize, prestige + "x" + size).setScale(numScale));
     }
 }
 
@@ -44,8 +44,8 @@ export function drawCostNoble(x, y, serverCost, gemToSprite, board, scale) {
             continue;
         }
 
-        board.add.sprite(x + 16, y - 16, gemToSprite[gemtype]).setScale(scale);
-        board.add.sprite(x + 16, y - 16, cost + "x128").setScale(scale / 2);
+        board.f_nobles.push(board.add.sprite(x + 16, y - 16, gemToSprite[gemtype]).setScale(scale));
+        board.f_nobles.push(board.add.sprite(x + 16, y - 16, cost + "x128").setScale(scale / 2));
 
         //TODO: this probably needs to be spaced better
         y -= 64 * scale + 4;

@@ -59,7 +59,7 @@ export class eventManger extends Phaser.Scene {
 
         // Called whenever game elements are updated ('/api/get_game_state' equivalent)
         this.client.on("/io/update_game/", (data) => {
-            console.log(data);
+            //console.log(data);
             eventHandler.emit("update_game", data);
         });
 

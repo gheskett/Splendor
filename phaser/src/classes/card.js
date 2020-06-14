@@ -9,8 +9,8 @@ export function drawCost(x, y, serverCost, gemToSprite, board, scale) {
             continue;
         }
 
-        board.add.sprite(x + 16, y - 16, gemToSprite[gemtype]).setScale(scale);
-        board.add.sprite(x + 16, y - 16, cost + "x128").setScale(scale / 2);
+        board.f_cards.push(board.add.sprite(x + 16, y - 16, gemToSprite[gemtype]).setScale(scale));
+        board.f_cards.push(board.add.sprite(x + 16, y - 16, cost + "x128").setScale(scale / 2));
 
         //TODO: this probably needs to be spaced better
         y -= 64 * scale + 4;
@@ -42,7 +42,12 @@ export class card {
     }
 
     drawCard(x, y, width, height) {
-        var dicEntry = this.board.server.lookUpCard(this.cardID);
+        if (this.cardID == null) {
+            this.board.f_cards.push(this.board.add.sprite(x, y, "card_outline_x1024").setScale(this.board.scales));
+            return;
+        }
+
+        var dicEntry = this.board.server.lookUpCard(this.board.cardsDatabase, this.cardID);
         
         const gemScale = 48 / 128;
         const gemLength = 128 * gemScale;
@@ -52,16 +57,16 @@ export class card {
         var upperCornerY = y - height * .5;
         
         var cardColor = this.cardMap[dicEntry["gem_type"]];
-        this.board.add.sprite(x, y, this.getCardName(cardColor)).setScale(this.board.scales);
-        this.board.add.sprite(upperCornerX + width - gemHalfLength, 
+        this.board.f_cards.push(this.board.add.sprite(x, y, this.getCardName(cardColor)).setScale(this.board.scales));
+        this.board.f_cards.push(this.board.add.sprite(upperCornerX + width - gemHalfLength,
             upperCornerY + gemHalfLength + 5, cardColor + "_symbol_x128")
-            .setScale(gemScale);
+            .setScale(gemScale));
 
         var prestige = dicEntry["prestige_points"];
 
         if (prestige != 0) {
             var numHalfLength = 64 / 2;
-            this.board.add.sprite(upperCornerX + numHalfLength - 8, upperCornerY + numHalfLength - 3, prestige + "x128").setScale(64 / 128);
+            this.board.f_cards.push(this.board.add.sprite(upperCornerX + numHalfLength - 8, upperCornerY + numHalfLength - 3, prestige + "x128").setScale(64 / 128));
         }
 
         drawCost(upperCornerX, upperCornerY + height, dicEntry, this.spriteCostMap, this.board, 30 / 64);

@@ -44,10 +44,8 @@ export default class mainMenu extends Phaser.Scene {
         const title = this.add.image(gameWidth / 2, 150, "title").setScale(1.5);
         const dimmingObject = this.add.image(0, 0, "dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
 
-        const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({ useHandCursor: true }).setAlpha(NOT_SELECTED);
-        const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({ useHandCursor: true }).setAlpha(NOT_SELECTED);
-        const debugButton = this.add.text(gameWidth / 2, 660, "Enter Board (No Players will be active)",
-            { fontFamily: "serif", color: "#ff00ff", fontSize: "40px" }).setInteractive({ useHandCursor: true }).setOrigin(0.5);
+        const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
+        const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
 
         var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
         var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
@@ -57,7 +55,7 @@ export default class mainMenu extends Phaser.Scene {
             element.setVisible(false);
         });
 
-        var interactiveGroup = this.add.group([newGame, joinGame, debugButton]);
+        var interactiveGroup = this.add.group([newGame, joinGame]);
         interactiveGroup.getChildren().forEach(element => {
             element.disableInteractive();
         });
@@ -125,11 +123,7 @@ export default class mainMenu extends Phaser.Scene {
             joinGameForm.setVisible(true);
             playButtonEnable(false);
         });
-
-        debugButton.on('pointerup', function () {
-            eventHandler.emit("terminate_main_menu");
-            eventHandler.emit("new_board");
-        });
+        
         //#endregion Button Click Behavior
 
         //#region Form Behavior
