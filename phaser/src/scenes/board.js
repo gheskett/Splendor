@@ -76,6 +76,12 @@ export default class board extends Phaser.Scene {
       }
 
     }
+    
+    var outline = "card_outline_x1024";
+    this.load.image(outline, outline + fExtension);
+    
+    outline = "circle_outline_x128";
+    this.load.image(outline, outline + fExtension);
 
     for (var i = 1; i < 4; i++) {
       var name = "cardback_r" + i + "_731x1024";
@@ -87,15 +93,19 @@ export default class board extends Phaser.Scene {
     
   create() {
 
-    //The `thisBoard` constant is used to aviod pontential conflicts with buttons, fetches, and events
+    //The `thisBoard` constant is used to avoid pontential conflicts with buttons, fetches, and events
     const thisBoard = this;
+    thisBoard.boardOn = false;
+    thisBoard.gameState = null;
+    thisBoard.f_cards = [];
+    thisBoard.f_nobles = [];
+    thisBoard.f_chips = [];
     thisBoard.scene.sendToBack();
 
     //#region Game Variables
 
     const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
-    
-    var boardOn = false;
+
     const DIM = .75;
 
     const exitBoard = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({useHandCursor: true}).setDepth(0);
@@ -116,58 +126,89 @@ export default class board extends Phaser.Scene {
 
     //#endregion Game Variables
 
+    draw_board(false)
+
     //#region Idk whatever Nathan did so idk what to name the region, but it should be renamed
 
-    const spacingX = 16;
-    const spacingY = 8;
 
-    var width = 731 * thisBoard.scales;
-    var height = 1024 * thisBoard.scales;
 
-    var spacedWidth = width + spacingX;
-    var spacedHeight = height + spacingY;
+    function draw_board(is_loaded) {
+      for (i = 0; i < thisBoard.f_cards.length; ++i)
+        thisBoard.f_cards[i].destroy();
+      for (i = 0; i < thisBoard.f_nobles.length; ++i)
+        thisBoard.f_nobles[i].destroy();
+      for (i = 0; i < thisBoard.f_chips.length; ++i)
+        thisBoard.f_chips[i].destroy();
 
-    var flippedCardStartX = thisBoard.centerX - spacedWidth * (numColumns / 2) + .5 * spacedWidth;
-    var flippedCardStartY = this.upperBit + .5 * spacedHeight;
-    var cardMid = flippedCardStartY + spacedHeight;
-    
-    for (var row = 0; row < numRows; row++) {
-      //Display backwards cards
-      //TODO: empty cards
-      thisBoard.add.sprite(flippedCardStartX - spacedWidth - 16, flippedCardStartY + spacedHeight * row, "cardback_r" + (3 - row) + "_731x1024").setScale(thisBoard.scales);
+      thisBoard.f_cards = [];
+      thisBoard.f_nobles = [];
+      thisBoard.f_chips = [];
 
-      for (var column = 0; column < numColumns; column++) {
-        //just display jnk data for now
-        thisBoard.cards[row][column] = new card(thisBoard, 0);
-
-        thisBoard.cards[row][column].drawCard(flippedCardStartX + spacedWidth * column, 
-          flippedCardStartY + spacedHeight * row, width, height);
+      const spacingX = 16;
+      const spacingY = 8;
+  
+      var width = 731 * thisBoard.scales;
+      var height = 1024 * thisBoard.scales;
+  
+      var spacedWidth = width + spacingX;
+      var spacedHeight = height + spacingY;
+  
+      var flippedCardStartX = thisBoard.centerX - spacedWidth * (numColumns / 2) + .5 * spacedWidth;
+      var flippedCardStartY = thisBoard.upperBit + .5 * spacedHeight;
+      var cardMid = flippedCardStartY + spacedHeight;
+      
+      for (var row = 0; row < numRows; row++) {
+        //Display backwards cards
+        if (!thisBoard.gameState || thisBoard.gameState.cards_remaining[row] > 0) {
+          thisBoard.f_cards.push(thisBoard.add.sprite(flippedCardStartX - spacedWidth - 16, flippedCardStartY + spacedHeight * (numRows - 1 - row), "cardback_r" + (row + 1) + "_731x1024").setScale(thisBoard.scales));
+        }
+        else {
+          thisBoard.f_cards.push(thisBoard.add.sprite(flippedCardStartX - spacedWidth - 16, flippedCardStartY + spacedHeight * (numRows - 1 - row), "card_outline_x1024").setScale(thisBoard.scales));
+        }
+  
+        for (var column = 0; column < numColumns; column++) {
+          if (thisBoard.gameState != null && thisBoard.cardsDatabase != undefined)
+            thisBoard.cards[row][column] = new card(thisBoard, thisBoard.gameState.field_cards[row][column]);
+          else
+            thisBoard.cards[row][column] = new card(thisBoard, -1);
+  
+          thisBoard.cards[row][column].drawCard(flippedCardStartX + spacedWidth * column, 
+            flippedCardStartY + spacedHeight * (numRows - 1 - row), width, height);
+        }
       }
-    }
-
-    //TODO: get numbers from server
-    var numNobles = 5;
-    var scale = thisBoard.scales;
-    var nobleHeight = 731 * scale;
-    let nobleX = thisBoard.centerX + spacedWidth * (numColumns / 2) + .5 * nobleHeight + 20;
-    let nobleY = cardMid - (numNobles / 2 * nobleHeight) + nobleHeight / 2;
-
-    for (var i = 0; i < numNobles; i++) {
-      //TODO: get data from server
-      thisBoard.nobles[i] = new noble(thisBoard, 0);
-      thisBoard.nobles[i].drawNoble(nobleX,
-        nobleY + i * nobleHeight, nobleHeight, scale * 0.934);
-    }
-
-    const chipHeight = 64 + 32;
-
-    var tokenX = flippedCardStartX - spacedWidth * 1.5 - chipHeight * .5 - 24;
-    var tokenY = cardMid + chipHeight * .5 - chipHeight * 3;
-    for (var chip in thisBoard.tokenSprites) {
-      var num = thisBoard.server.lookUpFieldChips(chip);
-      thisBoard.add.sprite(tokenX, tokenY, thisBoard.tokenSprites[chip]);
-      thisBoard.add.sprite(tokenX, tokenY, num + "x64");
-      tokenY += chipHeight;
+  
+      var numNobles = 5;
+      if (thisBoard.gameState != null)
+        numNobles = thisBoard.gameState.field_nobles.length
+      var scale = thisBoard.scales;
+      var nobleHeight = 731 * scale;
+      let nobleX = thisBoard.centerX + spacedWidth * (numColumns / 2) + .5 * nobleHeight + 20;
+      let nobleY = cardMid - (numNobles / 2 * nobleHeight) + nobleHeight / 2;
+  
+      for (var i = 0; i < numNobles; i++) {
+        //TODO: get data from server
+        if (thisBoard.gameState != null && thisBoard.noblesDatabase != undefined)
+          thisBoard.nobles[i] = new noble(thisBoard, thisBoard.gameState.field_nobles[i]);
+        else
+          thisBoard.nobles[i] = new noble(thisBoard, -1);
+        thisBoard.nobles[i].drawNoble(nobleX,
+          nobleY + i * nobleHeight, nobleHeight, scale * 0.934);
+      }
+  
+      const chipHeight = 64 + 32;
+  
+      var tokenX = flippedCardStartX - spacedWidth * 1.5 - chipHeight * .5 - 24;
+      var tokenY = cardMid + chipHeight * .5 - chipHeight * 3;
+      for (var chip in thisBoard.tokenSprites) {
+        var num = thisBoard.server.lookUpFieldChips(thisBoard.gameState, chip);
+        if (num > 0)
+          thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, thisBoard.tokenSprites[chip]));
+        else
+          thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, "circle_outline_x128").setScale(0.5));
+          
+        thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, num + "x64"));
+        tokenY += chipHeight;
+      }
     }
     
     //#endregion Idk whatever Nathan did so idk what to name the region, but it should be renamed
@@ -175,18 +216,55 @@ export default class board extends Phaser.Scene {
     //What to do when a new board is created
     eventHandler.on("new_board", function(data) {
 
-      boardOn = true;
+      thisBoard.boardOn = true;
 
-      //If it's usefull, this data is avaliable
+      //If it's useful, this data is available
       thisBoard.lobbyID = data.lobbyID;
       thisBoard.playerID = data.playerID;
-      thisBoard.username = data.username;
+      
+      fetch(constants.fullAddr + "/api/get_cards_database" + new URLSearchParams({
+      }))
+      .then(handleErrors)
+      .then(result => {
+        thisBoard.cardsDatabase = result
+      }).then(function() {
 
-      thisBoard.scene.bringToTop();
+        fetch(constants.fullAddr + "/api/get_nobles_database")
+        .then(handleErrors)
+        .then(result => {
+          thisBoard.noblesDatabase = result
+        }).then(function() {
 
-      interactiveGroup.getChildren().forEach(element => {
-        element.setInteractive({useHandCursor: true});
-      });
+          fetch(constants.fullAddr + "/api/get_game_state?" + new URLSearchParams({
+            session_id: thisBoard.lobbyID,
+            playerID: thisBoard.playerID
+          }))
+          .then(handleErrors)
+          .then(result => {
+            if (result.exists) {
+                eventHandler.emit("update_game", result);
+
+                thisBoard.scene.bringToTop();
+
+                interactiveGroup.getChildren().forEach(element => {
+                  element.setInteractive({useHandCursor: true});
+                });
+                
+            } else {
+                console.warn(result);
+                return;
+              }
+          })
+          .catch(error => {
+              console.error(error);
+              return;
+          });
+        })
+        .catch(error => {
+          console.error(error);
+          return;
+        });
+      })
 
     });
 
@@ -194,16 +272,16 @@ export default class board extends Phaser.Scene {
     eventHandler.on("update_game", function(data) {
 
       //only do something if the board is active and the session exists (Phaser is stupid)
-      if (boardOn && data.exists) {
-
+      if (thisBoard.boardOn && data.exists) {
+        thisBoard.gameState = data;
+        draw_board(false);
       }
 
     });
 
     //What to do when a board is destroyed
     eventHandler.on("terminate_board", function() {
-
-      boardOn = false;
+      thisBoard.boardOn = false;
       HTMLgroup.getChildren().forEach(element => {
         element.setVisible(false);
       });

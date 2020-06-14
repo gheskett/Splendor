@@ -112,7 +112,7 @@ export default class lobby extends Phaser.Scene {
 
             if (data.exists && data.is_started && lobbyOn) {
                 eventHandler.emit("terminate_lobby");
-                eventHandler.emit("new_board", {lobbyID: thisLobby.lobbyID, playerID: thisLobby.playerID, username: thisLobby.username});
+                eventHandler.emit("new_board", {lobbyID: thisLobby.lobbyID, playerID: thisLobby.playerID});
             }
 
         });
