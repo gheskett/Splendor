@@ -44,8 +44,8 @@ export default class mainMenu extends Phaser.Scene {
         const title = this.add.image(gameWidth / 2, 150, "title").setScale(1.5);
         const dimmingObject = this.add.image(0, 0, "dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
 
-        const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
-        const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({useHandCursor: true}).setAlpha(NOT_SELECTED);
+        const newGame = this.add.image(gameWidth / 2, 420, "newGame").setInteractive({ useHandCursor: true }).setAlpha(NOT_SELECTED);
+        const joinGame = this.add.image(gameWidth / 2, 550, "joinGame").setInteractive({ useHandCursor: true }).setAlpha(NOT_SELECTED);
 
         var newGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("newGameForm").setVisible(false);
         var joinGameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("joinGameForm").setVisible(false);
@@ -123,7 +123,7 @@ export default class mainMenu extends Phaser.Scene {
             joinGameForm.setVisible(true);
             playButtonEnable(false);
         });
-        
+
         //#endregion Button Click Behavior
 
         //#region Form Behavior

@@ -22,36 +22,35 @@ export default class chat extends Phaser.Scene {
         const thisChat = this;
         const BG_DIM = 0.8;
         const maxMessages = 50;
-        const playerColors = ["rgb(175, 0, 0)",
-            "rgb(0, 90, 200)",
-            "rgb(190, 0, 190)",
-            "rgb(0, 161, 0)"
+        const playerColors = ["rgb(255, 70, 70)",
+            "rgb(47, 143, 255)",
+            "rgb(188, 0, 255)",
+            "rgb(20, 170, 0)"
         ];
-        const serverColor = "rgb(210, 210, 210)";
+        const serverColor = "yellow";
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
 
-        const chatForm = this.add.dom(gameWidth * globals.notChat, 0).createFromCache("chatForm").setOrigin(0).setVisible(false);
+        const chatForm = this.add.dom(gameWidth * globals.notChat, 0).createFromCache("chatForm").setOrigin(0).setVisible(false).setDepth(0);
 
         //#endregion Initial Variable
 
         eventHandler.on("new_chat", function () {
-            chatOn = true;
+            thisChat.chatOn = true;
             chatForm.setVisible(true);
 
             fetch(globals.fullAddr + "/api/get_messages?" + new URLSearchParams({
-                session_id: globals.lobbyID,
-                num_messages: maxMessages
+                session_id: globals.lobbyID
             })).then(handleErrors)
                 .then(result => {
                     if (result.length >= 1) {
                         var messagesInfo = [];
                         for (var i = 0; i < result.length; i++) {
-                            messagesInfo.push({message: "", playerID: -1, name: ""})
+                            messagesInfo.push({ message: "", playerID: -1, name: "" })
                             if (!result[i].is_game_event) {
                                 messagesInfo[i].playerID = result[i].player_id;
                                 messagesInfo[i].name = globals.usernames[result[i].player_id];
                             }
-                            messagesInfo[i].message = result[i].message;   
+                            messagesInfo[i].message = result[i].message.trim();
                         }
 
                         makeChat(messagesInfo);
@@ -65,11 +64,21 @@ export default class chat extends Phaser.Scene {
         });
 
         eventHandler.on("update_chat", function (data) {
-
+            if (thisChat.chatOn && (data.player_id !== globals.playerID || data.is_game_event)) {
+                var messageInfo = { message: "", playerID: -1, name: "" };
+                if (!data.is_game_event) {
+                    messageInfo.playerID = data.player_id;
+                    messageInfo.name = globals.usernames[data.player_id];
+                }
+                messageInfo.message = data.message.trim();
+                makeChat([messageInfo]);
+            }
         });
 
         eventHandler.on("terminate_chat", function () {
-
+            chatForm.setVisible(false);
+            chatForm.getChildByID("chatLog").innerHTML = "";
+            thisChat.chatOn = false;
         });
 
         eventHandler.on("local_message", function (msg) {
@@ -88,7 +97,7 @@ export default class chat extends Phaser.Scene {
                 .then(result => {
                     console.log(result);
                     if (result === "OK") {
-                        makeChat([{message: msg.msg, playerID: globals.playerID, name: globals.usernames[globals.playerID]}]);
+                        makeChat([{ message: msg.msg, playerID: globals.playerID, name: globals.usernames[globals.playerID] }]);
                     } else {
                         console.warn(result);
                     }
@@ -99,7 +108,7 @@ export default class chat extends Phaser.Scene {
         });
 
         chatForm.getChildByID("msg").addEventListener("keypress", function (event) {
-            if (event.which === 13 && !event.shiftKey) {
+            if (event.which === 13) {
                 event.preventDefault(); // Prevents the addition of a new line in the text field (not needed in a lot of cases)
                 const msg = event.target.value;
                 if (msg.trim() != "") {
@@ -108,6 +117,20 @@ export default class chat extends Phaser.Scene {
                 event.target.value = "";
             }
         });
+
+        //#region Unfocus text area on click
+
+        thisChat.input.on("pointerdown", function (pointer) {
+            if (pointer.currentlyOver) {
+                if (!pointer.currentlyOver.includes(chatForm)) {
+                    chatForm.getChildByID("msg").blur();
+                }
+            } else {
+                chatForm.getChildByID("msg").blur();
+            }
+        });
+
+        //#endregion Unfocus text area on click
 
 
         /**
@@ -121,7 +144,7 @@ export default class chat extends Phaser.Scene {
                 var content = document.createElement("p");
 
                 if (messages[i].playerID === -1) {
-                    content.innerHTML = messages[i].message;
+                    content.innerHTML = "<i>" + messages[i].message + "</i>";
                     content.style.color = serverColor;
                 } else {
                     var userpart = document.createElement("span");
@@ -138,6 +161,9 @@ export default class chat extends Phaser.Scene {
                 }
 
             }
+
+            chatForm.getChildByID("logContainer").scrollTop = chatForm.getChildByID("logContainer").scrollHeight;
+
         }
 
         function handleErrors(response) {

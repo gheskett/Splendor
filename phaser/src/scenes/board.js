@@ -76,10 +76,10 @@ export default class board extends Phaser.Scene {
       }
 
     }
-    
+
     var outline = "card_outline_x1024";
     this.load.image(outline, outline + fExtension);
-    
+
     outline = "circle_outline_x128";
     this.load.image(outline, outline + fExtension);
 
@@ -110,7 +110,7 @@ export default class board extends Phaser.Scene {
     var boardOn = false;
     const DIM = .75;
 
-    const exitBoard = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
+    const exitBoard = this.add.image(globals.notChat * gameWidth - 50, 50, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
     var leaveConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
     leaveConfirmation.getChildByID("confirmationText").innerHTML = "Leave Game?";
     var dimmingObject = this.add.dom(0, 0).createFromCache("dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
@@ -148,17 +148,17 @@ export default class board extends Phaser.Scene {
 
       const spacingX = 16;
       const spacingY = 8;
-  
+
       var width = 731 * thisBoard.scales;
       var height = 1024 * thisBoard.scales;
-  
+
       var spacedWidth = width + spacingX;
       var spacedHeight = height + spacingY;
-  
+
       var flippedCardStartX = thisBoard.centerX - spacedWidth * (numColumns / 2) + .5 * spacedWidth;
       var flippedCardStartY = thisBoard.upperBit + .5 * spacedHeight;
       var cardMid = flippedCardStartY + spacedHeight;
-      
+
       for (var row = 0; row < numRows; row++) {
         //Display backwards cards
         if (!thisBoard.gameState || thisBoard.gameState.cards_remaining[row] > 0) {
@@ -167,18 +167,18 @@ export default class board extends Phaser.Scene {
         else {
           thisBoard.f_cards.push(thisBoard.add.sprite(flippedCardStartX - spacedWidth - 16, flippedCardStartY + spacedHeight * (numRows - 1 - row), "card_outline_x1024").setScale(thisBoard.scales));
         }
-  
+
         for (var column = 0; column < numColumns; column++) {
           if (thisBoard.gameState != null && thisBoard.cardsDatabase != undefined)
             thisBoard.cards[row][column] = new card(thisBoard, thisBoard.gameState.field_cards[row][column]);
           else
             thisBoard.cards[row][column] = new card(thisBoard, -1);
-  
-          thisBoard.cards[row][column].drawCard(flippedCardStartX + spacedWidth * column, 
+
+          thisBoard.cards[row][column].drawCard(flippedCardStartX + spacedWidth * column,
             flippedCardStartY + spacedHeight * (numRows - 1 - row), width, height);
         }
       }
-  
+
       var numNobles = 5;
       if (thisBoard.gameState != null)
         numNobles = thisBoard.gameState.field_nobles.length
@@ -186,7 +186,7 @@ export default class board extends Phaser.Scene {
       var nobleHeight = 731 * scale;
       let nobleX = thisBoard.centerX + spacedWidth * (numColumns / 2) + .5 * nobleHeight + 20;
       let nobleY = cardMid - (numNobles / 2 * nobleHeight) + nobleHeight / 2;
-  
+
       for (var i = 0; i < numNobles; i++) {
         //TODO: get data from server
         if (thisBoard.gameState != null && thisBoard.noblesDatabase != undefined)
@@ -196,9 +196,9 @@ export default class board extends Phaser.Scene {
         thisBoard.nobles[i].drawNoble(nobleX,
           nobleY + i * nobleHeight, nobleHeight, scale * 0.934);
       }
-  
+
       const chipHeight = 64 + 32;
-  
+
       var tokenX = flippedCardStartX - spacedWidth * 1.5 - chipHeight * .5 - 24;
       var tokenY = cardMid + chipHeight * .5 - chipHeight * 3;
       for (var chip in thisBoard.tokenSprites) {
@@ -207,7 +207,7 @@ export default class board extends Phaser.Scene {
           thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, thisBoard.tokenSprites[chip]));
         else
           thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, "circle_outline_x128").setScale(0.5));
-          
+
         thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, num + "x64"));
         tokenY += chipHeight;
       }
@@ -225,50 +225,50 @@ export default class board extends Phaser.Scene {
       interactiveGroup.getChildren().forEach(element => {
         element.setInteractive({ useHandCursor: true });
       });
-      
+
       fetch(globals.fullAddr + "/api/get_cards_database" + new URLSearchParams({
       }))
-      .then(handleErrors)
-      .then(result => {
-        thisBoard.cardsDatabase = result
-      }).then(function() {
-
-        fetch(globals.fullAddr + "/api/get_nobles_database")
         .then(handleErrors)
         .then(result => {
-          thisBoard.noblesDatabase = result
-        }).then(function() {
+          thisBoard.cardsDatabase = result
+        }).then(function () {
 
-          fetch(globals.fullAddr + "/api/get_game_state?" + new URLSearchParams({
-            session_id: globals.lobbyID,
-            playerID: globals.playerID
-          }))
-          .then(handleErrors)
-          .then(result => {
-            if (result.exists) {
-                eventHandler.emit("update_game", result);
+          fetch(globals.fullAddr + "/api/get_nobles_database")
+            .then(handleErrors)
+            .then(result => {
+              thisBoard.noblesDatabase = result
+            }).then(function () {
 
-                thisBoard.scene.bringToTop();
+              fetch(globals.fullAddr + "/api/get_game_state?" + new URLSearchParams({
+                session_id: globals.lobbyID,
+                playerID: globals.playerID
+              }))
+                .then(handleErrors)
+                .then(result => {
+                  if (result.exists) {
+                    eventHandler.emit("update_game", result);
 
-                interactiveGroup.getChildren().forEach(element => {
-                  element.setInteractive({useHandCursor: true});
+                    thisBoard.scene.bringToTop();
+
+                    interactiveGroup.getChildren().forEach(element => {
+                      element.setInteractive({ useHandCursor: true });
+                    });
+
+                  } else {
+                    console.warn(result);
+                    return;
+                  }
+                })
+                .catch(error => {
+                  console.error(error);
+                  return;
                 });
-                
-            } else {
-                console.warn(result);
-                return;
-              }
-          })
-          .catch(error => {
+            })
+            .catch(error => {
               console.error(error);
               return;
-          });
+            });
         })
-        .catch(error => {
-          console.error(error);
-          return;
-        });
-      })
 
     });
 
@@ -283,7 +283,7 @@ export default class board extends Phaser.Scene {
             thisBoard.updatable = true;
           else
             thisBoard.updatable = false;
-          
+
           draw_board();
           // TODO: draw_player();
           // TODO: if (thisBoard.gameState.victory.length > 0) { draw_victory(); }
@@ -293,7 +293,7 @@ export default class board extends Phaser.Scene {
     });
 
     //What to do when a board is destroyed
-    eventHandler.on("terminate_board", function() {
+    eventHandler.on("terminate_board", function () {
       thisBoard.boardOn = false;
       HTMLgroup.getChildren().forEach(element => {
         element.setVisible(false);
@@ -332,14 +332,15 @@ export default class board extends Phaser.Scene {
     leaveConfirmation.on("click", function (event) {
 
       if (event.target.name === "confirm") {
-        if (thisBoard.playerID === null && thisBoard.lobbyID === null) {
+        if (globals.playerID === null && globals.lobbyID === null) {
           eventHandler.emit("new_main_menu");
+          eventHandler.emit("terminate_chat");
           eventHandler.emit("terminate_board");
           return;
         }
         var args = {
-          player_id: thisBoard.playerID,
-          session_id: thisBoard.lobbyID,
+          player_id: globals.playerID,
+          session_id: globals.lobbyID,
         }
         fetch(globals.fullAddr + "/api/drop_out/", {
           method: "POST",
@@ -349,6 +350,7 @@ export default class board extends Phaser.Scene {
           .then(result => {
             if (result === "OK") {
               eventHandler.emit("new_main_menu");
+              eventHandler.emit("terminate_chat");
               eventHandler.emit("terminate_board");
             } else {
               console.warn(result);

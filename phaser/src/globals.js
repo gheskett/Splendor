@@ -9,29 +9,29 @@ export const headers = {
   "Access-Control-Allow-Origin": "*"
 };
 export const notChat = 0.8;
-export const lobbyColors = ['linear-gradient(to top, rgb(175, 0, 0), rgb(255, 60, 55))',
-  'linear-gradient(to top, rgb(0, 90, 200), rgb(47, 143, 255))',
-  'linear-gradient(to top, rgb(190, 0, 190), rgb(255, 47, 255))',
-  'linear-gradient(to top, rgb(0, 161, 0), rgb(47, 209, 47))'];
+export const lobbyColors = ['linear-gradient(to top, rgb(150, 0, 0), rgb(255, 70, 70))',
+  'linear-gradient(to top, rgb(20, 80, 180), rgb(47, 143, 255))',
+  'linear-gradient(to top, rgb(110, 0, 140), rgb(188, 0, 255))',
+  'linear-gradient(to top, rgb(20, 105, 15), rgb(20, 170, 0))'];
 
 //#endregion constants
 
 //#region variables
-/** @global @type {integer}  */
+/** @global @type {integer} The player id of this player */
 export var playerID;
-export function setPlayerID (value) {
+export function setPlayerID(value) {
   playerID = value;
 }
 
-/** @global @type {string}  */
+/** @global @type {string}  The id of the lobby */
 export var lobbyID;
-export function setLobbyID (value) {
+export function setLobbyID(value) {
   lobbyID = value;
 }
 
-/** @global @type {Array <string>}  */
+/** @global @type {Array <string>}  Array converting player id to username */
 export var usernames = ["", "", "", ""];
-export function setUsername (value, index) {
+export function setUsername(value, index) {
   usernames[index] = value;
 }
 

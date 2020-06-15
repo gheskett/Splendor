@@ -36,8 +36,8 @@ export default class lobby extends Phaser.Scene {
         this.scene.sendToBack();
 
         //#region Initial Variables
-        var lobbyOn = false;
         const thisLobby = this;
+        thisLobby.lobbyOn = false;
         const DIM = 0.75;
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
         var lobbyIDText = this.add.dom(globals.notChat * gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
@@ -55,7 +55,7 @@ export default class lobby extends Phaser.Scene {
         var startConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
         startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
-        const exitLobby = this.add.image(gameWidth - 50, 50, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
+        const exitLobby = this.add.image(globals.notChat * gameWidth - 50, 50, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
         const startGame = this.add.image(globals.notChat * gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0).setVisible(false);
 
         var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation, startConfirmation]);
@@ -72,7 +72,7 @@ export default class lobby extends Phaser.Scene {
         //#endregion Initial Variables
 
         eventHandler.on("new_lobby", function (data) {
-            lobbyOn = true;
+            thisLobby.lobbyOn = true;
             lobbyIDText.getChildByID("idValue").innerHTML = globals.lobbyID;
             lobbyIDText.setVisible(true);
             thisLobby.scene.setVisible(true);
@@ -96,7 +96,7 @@ export default class lobby extends Phaser.Scene {
         });
 
         eventHandler.on("update_lobby", function (data) {
-            if (lobbyOn) {
+            if (thisLobby.lobbyOn) {
                 createLobbyBoxes(data);
             } else {
                 for (var i = 0; i < Object.keys(data.players).length; i++) {
@@ -111,7 +111,7 @@ export default class lobby extends Phaser.Scene {
 
         eventHandler.on("update_game", function (data) {
 
-            if (data.exists && data.is_started && lobbyOn) {
+            if (data.exists && data.is_started && thisLobby.lobbyOn) {
                 eventHandler.emit("terminate_lobby");
                 eventHandler.emit("new_board");
             }
@@ -119,7 +119,7 @@ export default class lobby extends Phaser.Scene {
         });
 
         eventHandler.on("terminate_lobby", function () {
-            lobbyOn = false;
+            thisLobby.lobbyOn = false;
             for (var i = 0; i < lobbyBoxes.length; i++) {
                 lobbyBoxes[i].destroy();
             }
@@ -175,6 +175,7 @@ export default class lobby extends Phaser.Scene {
                         console.log(result);
                         if (result === "OK") {
                             eventHandler.emit("new_main_menu");
+                            eventHandler.emit("terminate_chat");
                             eventHandler.emit("terminate_lobby");
                         } else {
                             console.warn(result);
