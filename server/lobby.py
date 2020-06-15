@@ -32,6 +32,8 @@ def new_game(player, args, game, games):
 
     player.sid = args['sid']
 
+    game.most_recent_action = "Welcome to Splendor!\nShare the Lobby ID with others to play!"
+
     game.messages.append({'player_id': player.player_id, 'message': game.most_recent_action, 'is_game_event': True,
                           'index': len(game.messages)})
 
@@ -180,10 +182,14 @@ def drop_out(args, games, clients):
 
     game.player_order.pop(x)
 
+    num_players = len(game.players)
     for y in range(0, 6):
         game.field_chips[y] += game.players[player_id].player_chips[y]
         if y != 5:
-            game.field_chips[y] -= 1  # intentionally can become negative, must be properly relayed in client
+            if num_players >= 4:
+                game.field_chips[y] -= 2  # intentionally can become negative, must be properly relayed in client
+            else:
+                game.field_chips[y] -= 1  # intentionally can become negative, must be properly relayed in client
 
     tmp = game.players[player_id].username
     sid = game.players[player_id].sid
@@ -206,6 +212,7 @@ def drop_out(args, games, clients):
     if game.player_turn >= 0 and len(game.players) == 1:
         game.victory.append(game.player_order[0])
         game.player_turn = -2
+        game.new_victory = True
         game.most_recent_action += "\n\n" + game.players[game.player_order[0]].username + " is the only player left, " \
                                                                                           "so this means they win the" \
                                                                                           " game!"

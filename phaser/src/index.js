@@ -4,6 +4,7 @@ import mainMenu from "./scenes/mainMenu.js"
 import lobby from "./scenes/lobby.js"
 import {eventManger} from "./scenes/eventHandler.js"
 import board from "./scenes/board.js"
+import chat from "./scenes/chat.js"
 
 const config = {
   type: Phaser.AUTO,
@@ -30,6 +31,7 @@ function preload() {
   this.scene.add("lobby", lobby);
   this.scene.add("eventManager", eventManger);
   this.scene.add("board", board);
+  this.scene.add("chat", chat);
 }
 
 function create() {
