@@ -4,7 +4,7 @@ import { noble } from "../classes/noble.js"
 import eventHandler from "./eventHandler.js"
 import * as globals from "../globals.js"
 
-import whiteRectangle from "../assets/images/white_rectangle.png"
+import gameBackground from "../assets/images/game_bg.png"
 
 const numRows = 3;
 const numColumns = 4;
@@ -40,7 +40,7 @@ export default class board extends Phaser.Scene {
 
   preload() {
 
-    this.load.image("whiteRectangle", whiteRectangle);
+    this.load.image("gameBackground", gameBackground);
 
     const fExtension = ".png";
 
@@ -110,14 +110,14 @@ export default class board extends Phaser.Scene {
     var boardOn = false;
     const DIM = .75;
 
-    const exitBoard = this.add.image(globals.notChat * gameWidth - 50, 50, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
+    const exitBoard = this.add.image(globals.notChat * gameWidth - 25, 25, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
     var leaveConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
     leaveConfirmation.getChildByID("confirmationText").innerHTML = "Leave Game?";
     var dimmingObject = this.add.dom(0, 0).createFromCache("dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
     var HTMLgroup = thisBoard.add.group([dimmingObject, leaveConfirmation]);
     var interactiveGroup = thisBoard.add.group([exitBoard]);
 
-    const background = this.add.image(0, 0, "whiteRectangle").setOrigin(0).setDepth(-1);
+    this.add.image(0, 0, "gameBackground").setOrigin(0).setDepth(-1);
 
     HTMLgroup.getChildren().forEach(element => {
       element.setVisible(false);
@@ -160,7 +160,7 @@ export default class board extends Phaser.Scene {
       var cardMid = flippedCardStartY + spacedHeight;
 
       for (var row = 0; row < numRows; row++) {
-        //Display backwards cards
+        //Display cards
         if (!thisBoard.gameState || thisBoard.gameState.cards_remaining[row] > 0) {
           thisBoard.f_cards.push(thisBoard.add.sprite(flippedCardStartX - spacedWidth - 16, flippedCardStartY + spacedHeight * (numRows - 1 - row), "cardback_r" + (row + 1) + "_731x1024").setScale(thisBoard.scales));
         }
@@ -188,7 +188,6 @@ export default class board extends Phaser.Scene {
       let nobleY = cardMid - (numNobles / 2 * nobleHeight) + nobleHeight / 2;
 
       for (var i = 0; i < numNobles; i++) {
-        //TODO: get data from server
         if (thisBoard.gameState != null && thisBoard.noblesDatabase != undefined)
           thisBoard.nobles[i] = new noble(thisBoard, thisBoard.gameState.field_nobles[i]);
         else
@@ -203,10 +202,13 @@ export default class board extends Phaser.Scene {
       var tokenY = cardMid + chipHeight * .5 - chipHeight * 3;
       for (var chip in thisBoard.tokenSprites) {
         var num = thisBoard.server.lookUpFieldChips(thisBoard.gameState, chip);
-        if (num > 0)
+        if (num > 0) {
           thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, thisBoard.tokenSprites[chip]));
-        else
+        }
+        else {
           thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, "circle_outline_x128").setScale(0.5));
+          num = 0;
+        }
 
         thisBoard.f_chips.push(thisBoard.add.sprite(tokenX, tokenY, num + "x64"));
         tokenY += chipHeight;
@@ -284,8 +286,8 @@ export default class board extends Phaser.Scene {
           else
             thisBoard.updatable = false;
 
+          // TODO: draw_player(active_view);
           draw_board();
-          // TODO: draw_player();
           // TODO: if (thisBoard.gameState.victory.length > 0) { draw_victory(); }
         }
       }

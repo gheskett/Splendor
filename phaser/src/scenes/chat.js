@@ -95,7 +95,6 @@ export default class chat extends Phaser.Scene {
                 body: JSON.stringify(args)
             }).then(handleErrors)
                 .then(result => {
-                    console.log(result);
                     if (result === "OK") {
                         makeChat([{ message: msg.msg, playerID: globals.playerID, name: globals.usernames[globals.playerID] }]);
                     } else {
@@ -108,7 +107,7 @@ export default class chat extends Phaser.Scene {
         });
 
         chatForm.getChildByID("msg").addEventListener("keypress", function (event) {
-            if (event.which === 13) {
+            if (event.which === 13 && !event.shiftKey) {
                 event.preventDefault(); // Prevents the addition of a new line in the text field (not needed in a lot of cases)
                 const msg = event.target.value;
                 if (msg.trim() != "") {
@@ -161,9 +160,14 @@ export default class chat extends Phaser.Scene {
                 }
 
             }
+            
+            if (chatForm.getChildByID("logContainer").scrollHeight > chatForm.getChildByID("logContainer").clientHeight)  {
+                chatForm.getChildByID("logContainer").style.height = 895 * 100 / 1080 + "%";
+            } else {
+                chatForm.getChildByID("logContainer").style.height = 918 * 100 / 1080 + "%";
+            }
 
             chatForm.getChildByID("logContainer").scrollTop = chatForm.getChildByID("logContainer").scrollHeight;
-
         }
 
         function handleErrors(response) {

@@ -99,7 +99,8 @@ class Game:
         self.field_chips = [3, 3, 3, 3, 3, 5]
         self.field_nobles = []
         self.victory = []
-        self.most_recent_action = "New lobby created successfully!"
+        self.new_victory = False
+        self.most_recent_action = ""
         self.messages = []
 
 
@@ -121,6 +122,8 @@ def emit_update_game(session_id):
     for _, value in gm.players.items():
         game_ret["players"][str(value.player_id)]["private_reserved_cards"] = value.private_reserved_cards
         socketio.emit('/io/update_game/', game_ret, room=value.sid)
+
+    gm.new_victory = False
 
 
 # emit chat message updates to game session
@@ -254,6 +257,8 @@ def drop_out():
     if games[session_id].player_turn >= 0:
         emit_update_game(session_id)
     else:
+        if games[session_id].new_victory:
+            emit_update_game(session_id)
         emit_update_lobby(session_id)
 
     emit_update_chat(session_id)
@@ -420,6 +425,8 @@ def io_disconnect():
         if games[session_id].player_turn >= 0:
             emit_update_game(session_id)
         else:
+            if games[session_id].new_victory:
+                emit_update_game(session_id)
             emit_update_lobby(session_id)
 
         emit_update_chat(session_id)

@@ -55,7 +55,7 @@ export default class lobby extends Phaser.Scene {
         var startConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
         startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
-        const exitLobby = this.add.image(globals.notChat * gameWidth - 50, 50, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
+        const exitLobby = this.add.image(globals.notChat * gameWidth - 25, 25, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
         const startGame = this.add.image(globals.notChat * gameWidth / 2, gameHeight - 120, "startGame", 1).setDepth(0).setVisible(false);
 
         var HTMLgroup = thisLobby.add.group([lobbyIDText, dimmingObject, changeUsernameForm, leaveConfirmation, startConfirmation]);

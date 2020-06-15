@@ -35,6 +35,7 @@ def check_victory(game):
 
     if len(game.victory) > 0:
         game.player_turn = -2
+        game.new_victory = True
 
         game.most_recent_action += "\n\nThe game is over! Winner"
         if len(game.victory) > 1:

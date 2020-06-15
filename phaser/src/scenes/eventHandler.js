@@ -48,6 +48,11 @@ export class eventManger extends Phaser.Scene {
             console.log("Lost connection to API server!")
             // Disconnected, oh no!
 
+            eventHandler.emit("terminate_lobby");
+            eventHandler.emit("terminate_chat");
+            eventHandler.emit("terminate_board");
+            eventHandler.emit("termainate_main_menu");
+            eventHandler.emit("new_main_menu");
             // TODO: send connection error message to client, return to homepage, clear out old game variables
         });
 
