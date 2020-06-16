@@ -35,25 +35,28 @@ export default class chat extends Phaser.Scene {
         //#endregion Initial Variable
 
         eventHandler.on("new_chat", function () {
-            thisChat.chatOn = true;
             chatForm.setVisible(true);
 
             fetch(globals.fullAddr + "/api/get_messages?" + new URLSearchParams({
                 session_id: globals.lobbyID
-            })).then(handleErrors)
+            }))
+                .then(handleErrors)
                 .then(result => {
                     if (result.length >= 1) {
                         var messagesInfo = [];
                         for (var i = 0; i < result.length; i++) {
-                            messagesInfo.push({ message: "", playerID: -1, name: "" })
+                            messagesInfo.push({ message: "", playerID: -1, name: "", index: -1 })
                             if (!result[i].is_game_event) {
                                 messagesInfo[i].playerID = result[i].player_id;
                                 messagesInfo[i].name = globals.usernames[result[i].player_id];
                             }
+                            messagesInfo[i].index = result[i].index;
                             messagesInfo[i].message = result[i].message.trim();
                         }
 
                         makeChat(messagesInfo);
+
+                        thisChat.chatOn = true;
 
                     }
                 })
@@ -65,11 +68,12 @@ export default class chat extends Phaser.Scene {
 
         eventHandler.on("update_chat", function (data) {
             if (thisChat.chatOn && (data.player_id !== globals.playerID || data.is_game_event)) {
-                var messageInfo = { message: "", playerID: -1, name: "" };
+                var messageInfo = { message: "", playerID: -1, name: "", index: -1 };
                 if (!data.is_game_event) {
                     messageInfo.playerID = data.player_id;
                     messageInfo.name = globals.usernames[data.player_id];
                 }
+                messageInfo.index = data.index;
                 messageInfo.message = data.message.trim();
                 makeChat([messageInfo]);
             }
@@ -153,15 +157,15 @@ export default class chat extends Phaser.Scene {
                     content.appendChild(document.createTextNode(messages[i].message));
                 }
 
-                chatForm.getChildByID("chatLog").appendChild(content);
-
-                if (chatForm.getChildByID("chatLog").children.length > maxMessages) {
-                    chatForm.getChildByID("chatLog").firstChild.remove();
+                if (chatForm.getChildByID("chatLog").children.length >= maxMessages) {
+                    chatForm.getChildByID("chatLog").childNodes[0].remove()
                 }
 
+                chatForm.getChildByID("chatLog").appendChild(content);
+
             }
-            
-            if (chatForm.getChildByID("logContainer").scrollHeight > chatForm.getChildByID("logContainer").clientHeight)  {
+
+            if (chatForm.getChildByID("logContainer").scrollHeight > chatForm.getChildByID("logContainer").clientHeight) {
                 chatForm.getChildByID("logContainer").style.height = 895 * 100 / 1080 + "%";
             } else {
                 chatForm.getChildByID("logContainer").style.height = 918 * 100 / 1080 + "%";
