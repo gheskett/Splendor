@@ -42,7 +42,7 @@ export default class lobby extends Phaser.Scene {
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
         var lobbyIDText = this.add.dom(globals.notChat * gameWidth / 2, 100).createFromCache("lobbyIDText").setOrigin(0.5, 1);
         var lobbyBoxes = [];
-        lobbyIDText.getChildByID("idValue").innerHTML = this.lobbyID;
+        lobbyIDText.getChildByID("idValue").innerHTML = "";
 
         var lobbyBoxUserIDs = [];
         var hostID;
@@ -74,6 +74,7 @@ export default class lobby extends Phaser.Scene {
         eventHandler.on("new_lobby", function (data) {
             thisLobby.lobbyOn = true;
             lobbyIDText.getChildByID("idValue").innerHTML = globals.lobbyID;
+            lobbyIDText.setOrigin(0.5, 1).setPosition(globals.notChat * gameWidth * 0.5, 100);
             lobbyIDText.setVisible(true);
             thisLobby.scene.setVisible(true);
             exitLobby.setInteractive({ useHandCursor: true });
