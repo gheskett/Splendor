@@ -128,11 +128,9 @@ export default class board extends Phaser.Scene {
 
     //#endregion Game Variables
 
-    draw_board()
+    draw_board();
 
     //#region Idk whatever Nathan did so idk what to name the region, but it should be renamed
-
-
 
     function draw_board() {
       for (i = 0; i < thisBoard.f_cards.length; ++i)
