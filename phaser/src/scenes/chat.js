@@ -18,9 +18,8 @@ export default class chat extends Phaser.Scene {
         this.scene.bringToTop();
 
         //#region Initial Variables
-        var chatOn = false;
+        this.chatOn = false;
         const thisChat = this;
-        const BG_DIM = 0.8;
         const maxMessages = 50;
         const playerColors = ["rgb(255, 70, 70)",
             "rgb(47, 143, 255)",
