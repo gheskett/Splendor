@@ -258,6 +258,12 @@ class infoBox extends Phaser.GameObjects.Container {
 
     }
 
+    kill() {
+        this.hoverDetector.destroy();
+        this.nameHTML.destroy();
+        this.destroy(true);
+    }
+
 }
 
 Phaser.GameObjects.GameObjectFactory.register("infoBox", function (x, y) {

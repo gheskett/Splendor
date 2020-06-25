@@ -352,6 +352,7 @@ export default class board extends Phaser.Scene {
               eventHandler.emit("new_main_menu");
               eventHandler.emit("terminate_chat");
               eventHandler.emit("terminate_board");
+              eventHandler.emit("terminate_info_bar");
             } else {
               console.warn(result);
             }

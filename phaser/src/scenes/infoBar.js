@@ -74,12 +74,16 @@ export default class infoBar extends Phaser.Scene {
 
         eventHandler.on("terminate_info_bar", function () {
             thisInfoBar.infoBarOn = false;
-            thisInfoBar.children.destroy();
+            for (let i = 0; i < infoBoxes.length; i++) {
+                infoBoxes[i].kill();
+            }
             infoBoxes = [];
         });
 
         function createBoxes(data) {
-            thisInfoBar.children.destroy();
+            for (let i = 0; i < infoBoxes.length; i++) {
+                infoBoxes[i].kill();
+            }
             infoBoxes = [];
 
             for (let i = 0; i < Object.keys(data.players).length; i++) {
