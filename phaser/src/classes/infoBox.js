@@ -1,6 +1,6 @@
 import Phaser from "phaser"
 
-export default class infoBox extends Phaser.GameObjects.Container {
+class infoBox extends Phaser.GameObjects.Container {
 
     constructor(scene, x, y) {
         super(scene, x, y);
@@ -14,7 +14,6 @@ export default class infoBox extends Phaser.GameObjects.Container {
      */
     createBox(scene) {
 
-
         //#region Box settings
 
         const width = 366; const height = 224; const stroke = 4;
@@ -22,7 +21,8 @@ export default class infoBox extends Phaser.GameObjects.Container {
             x: -1 * (width / 2 - stroke),
             y: -1 * (height / 2 - stroke)
         };
-        const infoColors = [[0xEF8F8F, 0x801B1B], [0x9ED0F4, 0x1B3780], [0xCDB5E4, 0x6E0194], [0x91DF94, 0x116815]];
+        this.infoColors = [[0xEF8F8F, 0x801B1B], [0x9ED0F4, 0x1B3780], [0xCDB5E4, 0x6E0194], [0x91DF94, 0x116815]];
+        this.setSize(width, height);
 
         const textSettings = {
             fontFamily: "Raleway, serif",
@@ -43,7 +43,7 @@ export default class infoBox extends Phaser.GameObjects.Container {
 
         const tokenText = {
             l_edge_dist: tokenInfo.width + tokenInfo.l_edge_dist + 8,
-            t_edge_dist: tokenInfo.t_edge_dist - 5
+            t_edge_dist: tokenInfo.t_edge_dist - 6
         };
 
         const cardInfo = {
@@ -57,7 +57,7 @@ export default class infoBox extends Phaser.GameObjects.Container {
 
         const cardText = {
             l_edge_dist: cardInfo.width + cardInfo.l_edge_dist + 8,
-            t_edge_dist: cardInfo.t_edge_dist - 5
+            t_edge_dist: cardInfo.t_edge_dist - 6
         };
 
         const reserveInfo = {
@@ -79,7 +79,7 @@ export default class infoBox extends Phaser.GameObjects.Container {
         }
 
         const lineInfo = {
-            width: 5,
+            width: 4,
             l_edge_dist: nobleInfo.width + nobleInfo.l_edge_dist + 5,
         }
 
@@ -88,13 +88,17 @@ export default class infoBox extends Phaser.GameObjects.Container {
             t_edge_dist: 30
         }
 
+        const nameInfo = {
+            t_edge_dist: 6 
+        }
+
         //#endregion Box settings
 
         //#region Element creation
 
         //Add background for box with appropriate color
         this.bg = scene.add.rectangle(0, 0, width - (stroke * 2), height - (stroke * 2),
-            infoColors[0][0]).setStrokeStyle(stroke, infoColors[0][1]);
+            this.infoColors[0][0]).setStrokeStyle(stroke, this.infoColors[0][1]);
         this.add(this.bg);
 
         //Create tokens and text
@@ -112,8 +116,6 @@ export default class infoBox extends Phaser.GameObjects.Container {
                 + tokenText.t_edge_dist + (i * (tokenInfo.seperation + tokenInfo.height)),
                 "0", textSettings).setOrigin(0);
             this.add(this.tokens[i][1]);
-
-            console.log(this.tokens);
 
         }
 
@@ -154,7 +156,7 @@ export default class infoBox extends Phaser.GameObjects.Container {
 
         //Create Dividing Line
         this.line = scene.add.rectangle(TLcorner.x + lineInfo.l_edge_dist, TLcorner.y,
-            lineInfo.width, height - (stroke * 2), infoColors[0][1]).setOrigin(0);
+            lineInfo.width, height - (stroke * 2), this.infoColors[0][1]).setOrigin(0);
         this.add(this.line);
 
         //Create PP text
@@ -178,8 +180,81 @@ export default class infoBox extends Phaser.GameObjects.Container {
         }).setOrigin(0.5);
         this.add(this.PPvalue);
 
+
+        this.nameHTML = scene.add.dom(TLcorner.x + this.x, TLcorner.y + this.y + nameInfo.t_edge_dist)
+            .createFromCache("infoName").setOrigin(0, 1);
+
+        this.hoverDetector = scene.add.rectangle(this.x, this.y, width - stroke * 2, height - stroke * 2, 0xDDDDDD).setStrokeStyle(stroke, 0x999999);
+
         //#endregion Element creation
 
+        this.hoverDetector.setInteractive();
+
+        this.defaultx = this.x;
+        this.defaulty = this.y;
+        this.onhover = false;
+
+        this.hoverDetector.on("pointerover", function () {
+            this.setScale(2).setPosition(scene.cameras.main.width / 2, scene.cameras.main.height / 2);
+            this.onhover = true;
+        }, this);
+
+        this.hoverDetector.on("pointerout", function () {
+            this.setScale(1).setPosition(this.defaultx, this.defaulty);
+            this.onhover = false;
+        }, this);
+
+    }
+
+    update(data) {
+        const chipOrder = new Map([
+            [0, "diamond"],
+            [1, "sapphire"],
+            [2, "emerald"],
+            [3, "ruby"],
+            [4, "onyx"],
+            [5, "joker"]
+        ]);
+        const noCrownColor = 0x333333;
+        this.bg.fillColor = this.infoColors[data.player_id][0];
+        this.bg.strokeColor = this.infoColors[data.player_id][1];
+        this.line.fillColor = this.infoColors[data.player_id][1];
+        this.nameHTML.getChildByID("nameText").innerHTML = data.username;
+
+        for (let i = 0; i < this.tokens.length; i++) {
+            this.tokens[i][1].setText(data.player_chips[chipOrder.get(i)].toString());
+        }
+
+        for (let i = 0; i < this.cards.length; i++) {
+            let value = data.player_num_gem_cards[chipOrder.get(i)];
+            if (value > 0) {
+                this.cards[i][1].setText(value.toString());
+                this.cards[i][0].setVisible(true);
+                this.cards[i][1].setVisible(true);
+            } else {
+                this.cards[i][0].setVisible(false);
+                this.cards[i][1].setVisible(false);
+            }
+        }
+
+        for (let i = 0; i < this.reserves.length; i++) {
+            if (data.player_reserved_cards[i] != null) {
+                this.reserves[i].setTexture("reserveCards", data.player_reserved_cards[i] - 1);
+                this.reserves[i].setVisible(true);
+            } else {
+                this.reserves[i].setVisible(false);
+            }
+        }
+
+        for (let i = 0; i < this.nobles.length; i++) {
+            if (data.player_nobles[i] != null) {
+                this.nobles[i].clearTint();
+            } else {
+                this.nobles[i].setTint(noCrownColor);
+            }
+        }
+
+        this.PPvalue.setText(data.prestige_points.toString());
 
     }
 

@@ -49,10 +49,10 @@ export default class lobby extends Phaser.Scene {
 
         const background = thisLobby.add.image(0, 0, "lobbyBackground").setOrigin(0).setDepth(-1);
         var dimmingObject = this.add.dom(0, 0).createFromCache("dimmingObject").setOrigin(0).setAlpha(DIM).setVisible(false).setDepth(1);
-        var changeUsernameForm = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("changeUsernameForm").setVisible(false).setDepth(2);
-        var leaveConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
+        var changeUsernameForm = this.add.dom(globals.notChat * gameWidth / 2, gameHeight / 2 - 80).createFromCache("changeUsernameForm").setVisible(false).setDepth(2);
+        var leaveConfirmation = this.add.dom(globals.notChat * gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
         leaveConfirmation.getChildByID("confirmationText").innerHTML = "Leave Game?";
-        var startConfirmation = this.add.dom(gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
+        var startConfirmation = this.add.dom(globals.notChat * gameWidth / 2, gameHeight / 2 - 80).createFromCache("confirmForm").setVisible(false).setDepth(2);
         startConfirmation.getChildByID("confirmationText").innerHTML = "Start Game?";
 
         const exitLobby = this.add.image(globals.notChat * gameWidth - 25, 25, "exitButton").setInteractive({ useHandCursor: true }).setDepth(0);
@@ -115,6 +115,7 @@ export default class lobby extends Phaser.Scene {
             if (data.exists && data.is_started && thisLobby.lobbyOn) {
                 eventHandler.emit("terminate_lobby");
                 eventHandler.emit("new_board");
+                eventHandler.emit("new_info_bar");
             }
 
         });
