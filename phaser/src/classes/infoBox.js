@@ -215,7 +215,6 @@ class infoBox extends Phaser.GameObjects.Container {
             [4, "onyx"],
             [5, "joker"]
         ]);
-        const noCrownColor = 0x333333;
         this.bg.fillColor = this.infoColors[data.player_id][0];
         this.bg.strokeColor = this.infoColors[data.player_id][1];
         this.line.fillColor = this.infoColors[data.player_id][1];
@@ -248,9 +247,9 @@ class infoBox extends Phaser.GameObjects.Container {
 
         for (let i = 0; i < this.nobles.length; i++) {
             if (data.player_nobles[i] != null) {
-                this.nobles[i].clearTint();
+                this.nobles[i].setVisible(true);
             } else {
-                this.nobles[i].setTint(noCrownColor);
+                this.nobles[i].setVisible(false);
             }
         }
 
