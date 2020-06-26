@@ -13,7 +13,7 @@ export default class infoBar extends Phaser.Scene {
     preload() {
         this.load.html("infoName", infoName);
         this.load.path = "src/assets/images/infoBarAssets/";
-        this.load.spritesheet("uiTokens", "ui_tokens.svg", { frameWidth: 256 });
+        this.load.spritesheet("uiTokens", "ui_tokens.svg", { frameWidth: 104 });
         this.load.spritesheet("infoCards", "info_cards.svg", { frameWidth: 36, frameHeight: 48 });
         this.load.spritesheet("reserveCards", "reserve_cards.svg", { frameWidth: 40, frameHeight: 56 });
         this.load.svg("crown", "crown.svg");
