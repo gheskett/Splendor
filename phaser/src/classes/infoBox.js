@@ -14,6 +14,8 @@ class infoBox extends Phaser.GameObjects.Container {
      */
     createBox(scene) {
 
+        const thisBox = this;
+
         //#region Box settings
 
         const width = 366; const height = 224; const stroke = 4;
@@ -23,6 +25,9 @@ class infoBox extends Phaser.GameObjects.Container {
         };
         this.infoColors = [[0xEF8F8F, 0x801B1B], [0x9ED0F4, 0x1B3780], [0xCDB5E4, 0x6E0194], [0x91DF94, 0x116815]];
         this.setSize(width, height);
+
+        const startColor = [204, 162, 12], endColor = [235, 199, 0];
+        const tweenDuration = 1500;
 
         const textSettings = {
             fontFamily: "Raleway, serif",
@@ -204,6 +209,41 @@ class infoBox extends Phaser.GameObjects.Container {
             this.onhover = false;
         }, this);
 
+        this.playerID = 0;
+
+        this.tween = scene.tweens.add({
+            targets: thisBox.bg,
+            lineWidth: {start: stroke + 2, to: stroke + 4},
+            ease: "Sine.easeInOut",
+            duration: tweenDuration,
+            repeat: -1,
+            yoyo: true,
+            onComplete: function() {
+                thisBox.bg.strokeColor = thisBox.infoColors[thisBox.playerID][1];
+                thisBox.line.fillColor = thisBox.infoColors[thisBox.playerID][1];
+                thisBox.bg.lineWidth = stroke;
+            },
+            onUpdate: function() {
+                let colors = [];
+                for (let i = 0; i < 3; i++) {
+                    colors[i] = (1 - count.getValue()) * startColor[i] + count.getValue() * endColor[i];
+                }
+                thisBox.bg.strokeColor = Phaser.Display.Color.GetColor(colors[0], colors[1], colors[2]);
+                thisBox.line.fillColor = Phaser.Display.Color.GetColor(colors[0], colors[1], colors[2]);
+            }
+        });
+
+        let count = scene.tweens.addCounter({
+            from: 0,
+            to: 1,
+            ease: "Sine.easeInOut",
+            duration: tweenDuration,
+            repeat: -1,
+            yoyo: true
+        }); 
+
+        this.tween.complete();
+
     }
 
     update(data) {
@@ -215,6 +255,7 @@ class infoBox extends Phaser.GameObjects.Container {
             [4, "onyx"],
             [5, "joker"]
         ]);
+        this.playerID = data.player_id;
         this.bg.fillColor = this.infoColors[data.player_id][0];
         this.bg.strokeColor = this.infoColors[data.player_id][1];
         this.line.fillColor = this.infoColors[data.player_id][1];
@@ -255,11 +296,21 @@ class infoBox extends Phaser.GameObjects.Container {
 
         this.PPvalue.setText(data.prestige_points.toString());
 
+        if (data.isTurn) {
+            this.tween.resetTweenData();
+            this.tween.makeActive();
+            this.tween.restart();
+        } else if (this.tween.isPlaying) {
+            this.tween.complete();
+        }
+
     }
 
     kill() {
         this.hoverDetector.destroy();
         this.nameHTML.destroy();
+        this.tween.destroy();
+        this.tween.remove();
         this.destroy(true);
     }
 

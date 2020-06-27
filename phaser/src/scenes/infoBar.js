@@ -64,10 +64,7 @@ export default class infoBar extends Phaser.Scene {
                     numPlayers = data.player_order.length;
                     createBoxes(data);
                 } else {
-                    for (let i = 0; i < Object.keys(data.players).length; i++) {
-                        let currentPlayerID = data.player_order[i];
-                        infoBoxes[i].update(data.players[currentPlayerID.toString()]);
-                    }
+                    updateBoxes(data);
                 }
             }
         });
@@ -85,12 +82,19 @@ export default class infoBar extends Phaser.Scene {
                 infoBoxes[i].kill();
             }
             infoBoxes = [];
-
             for (let i = 0; i < Object.keys(data.players).length; i++) {
-                let currentPlayerID = data.player_order[i];
                 infoBoxes[i] = thisInfoBar.add.infoBox(width / 2,
                     i * gameHeight * .245 + 40 + boxHeight / 2);
-                infoBoxes[i].update(data.players[currentPlayerID.toString()]);
+            }
+            updateBoxes(data);
+        }
+
+        function updateBoxes(data) {
+            for (let i = 0; i < Object.keys(data.players).length; i++) {
+                let currentPlayerID = data.player_order[i];     
+                let updateInfo = data.players[currentPlayerID.toString()];
+                Object.assign(updateInfo, {isTurn: (data.player_turn === currentPlayerID) ? true : false});
+                infoBoxes[i].update(updateInfo);
             }
         }
 
