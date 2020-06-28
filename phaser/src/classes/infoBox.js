@@ -308,8 +308,8 @@ class infoBox extends Phaser.GameObjects.Container {
 
     kill() {
         this.hoverDetector.destroy();
+        this.nameHTML.setVisible(false);
         this.nameHTML.destroy();
-        this.tween.destroy();
         this.tween.remove();
         this.destroy(true);
     }
