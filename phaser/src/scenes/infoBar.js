@@ -47,7 +47,6 @@ export default class infoBar extends Phaser.Scene {
 
                         numPlayers = result.player_order.length;
                         createBoxes(result);
-
                         thisInfoBar.infoBarOn = true;
                     } else {
                         console.warn(result.most_recent_action);
@@ -82,7 +81,7 @@ export default class infoBar extends Phaser.Scene {
                 infoBoxes[i].kill();
             }
             infoBoxes = [];
-            for (let i = 0; i < Object.keys(data.players).length; i++) {
+            for (let i = 0; i < data.player_order.length; i++) {
                 infoBoxes[i] = thisInfoBar.add.infoBox(width / 2,
                     i * gameHeight * .245 + 40 + boxHeight / 2);
             }
@@ -90,10 +89,10 @@ export default class infoBar extends Phaser.Scene {
         }
 
         function updateBoxes(data) {
-            for (let i = 0; i < Object.keys(data.players).length; i++) {
+            for (let i = 0; i < infoBoxes.length; i++) {
                 let currentPlayerID = data.player_order[i];     
                 let updateInfo = data.players[currentPlayerID.toString()];
-                Object.assign(updateInfo, {isTurn: (data.player_turn === currentPlayerID) ? true : false});
+                updateInfo.isTurn = (data.player_turn === currentPlayerID) ? true : false;
                 infoBoxes[i].update(updateInfo);
             }
         }

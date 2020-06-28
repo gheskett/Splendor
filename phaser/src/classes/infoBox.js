@@ -18,12 +18,12 @@ class infoBox extends Phaser.GameObjects.Container {
 
         //#region Box settings
 
-        const width = 366; const height = 224; const stroke = 4;
+        const width = 366; const height = 224; this.stroke = 4;
         const TLcorner = {
-            x: -1 * (width / 2 - stroke),
-            y: -1 * (height / 2 - stroke)
+            x: -1 * (width / 2 - this.stroke),
+            y: -1 * (height / 2 - this.stroke)
         };
-        this.infoColors = [[0xEF8F8F, 0x801B1B], [0x9ED0F4, 0x1B3780], [0xCDB5E4, 0x6E0194], [0x91DF94, 0x116815]];
+        this.infoColors = [[0xEF8F8F, 0x801B1B], [0x9ED0F4, 0x1B3780], [0xCDB5E4, 0x6E0194], [0x7AC47C, 0x084D0B]];
         this.setSize(width, height);
 
         const startColor = [204, 162, 12], endColor = [235, 199, 0];
@@ -89,12 +89,12 @@ class infoBox extends Phaser.GameObjects.Container {
         }
 
         const PPinfo = {
-            l_edge_dist: (lineInfo.width + lineInfo.l_edge_dist + width - stroke) / 2,
+            l_edge_dist: (lineInfo.width + lineInfo.l_edge_dist + width - this.stroke) / 2,
             t_edge_dist: 30
         }
 
         const nameInfo = {
-            t_edge_dist: 6 
+            t_edge_dist: 6
         }
 
         //#endregion Box settings
@@ -102,8 +102,8 @@ class infoBox extends Phaser.GameObjects.Container {
         //#region Element creation
 
         //Add background for box with appropriate color
-        this.bg = scene.add.rectangle(0, 0, width - (stroke * 2), height - (stroke * 2),
-            this.infoColors[0][0]).setStrokeStyle(stroke, this.infoColors[0][1]);
+        this.bg = scene.add.rectangle(0, 0, width - (this.stroke * 2), height - (this.stroke * 2),
+            this.infoColors[0][0]).setStrokeStyle(this.stroke, this.infoColors[0][1]);
         this.add(this.bg);
 
         //Create tokens and text
@@ -161,7 +161,7 @@ class infoBox extends Phaser.GameObjects.Container {
 
         //Create Dividing Line
         this.line = scene.add.rectangle(TLcorner.x + lineInfo.l_edge_dist, TLcorner.y,
-            lineInfo.width, height - (stroke * 2), this.infoColors[0][1]).setOrigin(0);
+            lineInfo.width, height - (this.stroke * 2), this.infoColors[0][1]).setOrigin(0);
         this.add(this.line);
 
         //Create PP text
@@ -189,7 +189,7 @@ class infoBox extends Phaser.GameObjects.Container {
         this.nameHTML = scene.add.dom(TLcorner.x + this.x, TLcorner.y + this.y + nameInfo.t_edge_dist)
             .createFromCache("infoName").setOrigin(0, 1);
 
-        this.hoverDetector = scene.add.rectangle(this.x, this.y, width - stroke * 2, height - stroke * 2, 0xDDDDDD).setStrokeStyle(stroke, 0x999999);
+        this.hoverDetector = scene.add.rectangle(this.x, this.y, width - this.stroke * 2, height - this.stroke * 2, 0xDDDDDD).setStrokeStyle(this.stroke, 0x999999);
 
         //#endregion Element creation
 
@@ -209,44 +209,33 @@ class infoBox extends Phaser.GameObjects.Container {
             this.onhover = false;
         }, this);
 
-        this.playerID = 0;
+        this.isTurn = false;
 
-        this.tween = scene.tweens.add({
-            targets: thisBox.bg,
-            lineWidth: {start: stroke + 2, to: stroke + 4},
-            ease: "Sine.easeInOut",
-            duration: tweenDuration,
-            repeat: -1,
-            yoyo: true,
-            onComplete: function() {
-                thisBox.bg.strokeColor = thisBox.infoColors[thisBox.playerID][1];
-                thisBox.line.fillColor = thisBox.infoColors[thisBox.playerID][1];
-                thisBox.bg.lineWidth = stroke;
-            },
-            onUpdate: function() {
-                let colors = [];
-                for (let i = 0; i < 3; i++) {
-                    colors[i] = (1 - count.getValue()) * startColor[i] + count.getValue() * endColor[i];
-                }
-                thisBox.bg.strokeColor = Phaser.Display.Color.GetColor(colors[0], colors[1], colors[2]);
-                thisBox.line.fillColor = Phaser.Display.Color.GetColor(colors[0], colors[1], colors[2]);
-            }
-        });
-
-        let count = scene.tweens.addCounter({
+        this.tween = scene.tweens.addCounter({
             from: 0,
             to: 1,
             ease: "Sine.easeInOut",
             duration: tweenDuration,
             repeat: -1,
-            yoyo: true
-        }); 
-
-        this.tween.complete();
+            yoyo: true,
+            onUpdate: function () {
+                if (thisBox.isTurn) {
+                    let colors = [];
+                    for (let i = 0; i < 3; i++) {
+                        colors[i] = (1 - this.getValue()) * startColor[i] + this.getValue() * endColor[i];
+                    }
+                    thisBox.bg.strokeColor = Phaser.Display.Color.GetColor(colors[0], colors[1], colors[2]);
+                    thisBox.line.fillColor = Phaser.Display.Color.GetColor(colors[0], colors[1], colors[2]);
+                    thisBox.bg.lineWidth = (1 - this.getValue()) * (thisBox.stroke + 1) + this.getValue() * (thisBox.stroke + 5);
+                }
+            }
+        });
 
     }
 
     update(data) {
+
+        this.isTurn = data.isTurn;
         const chipOrder = new Map([
             [0, "diamond"],
             [1, "sapphire"],
@@ -255,10 +244,10 @@ class infoBox extends Phaser.GameObjects.Container {
             [4, "onyx"],
             [5, "joker"]
         ]);
-        this.playerID = data.player_id;
         this.bg.fillColor = this.infoColors[data.player_id][0];
         this.bg.strokeColor = this.infoColors[data.player_id][1];
         this.line.fillColor = this.infoColors[data.player_id][1];
+        this.bg.lineWidth = this.stroke;
         this.nameHTML.getChildByID("nameText").innerHTML = data.username;
 
         for (let i = 0; i < this.tokens.length; i++) {
@@ -295,14 +284,6 @@ class infoBox extends Phaser.GameObjects.Container {
         }
 
         this.PPvalue.setText(data.prestige_points.toString());
-
-        if (data.isTurn) {
-            this.tween.resetTweenData();
-            this.tween.makeActive();
-            this.tween.restart();
-        } else if (this.tween.isPlaying) {
-            this.tween.complete();
-        }
 
     }
 
