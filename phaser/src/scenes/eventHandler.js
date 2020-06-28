@@ -29,6 +29,7 @@ export class eventManger extends Phaser.Scene {
         this.scene.launch("lobby");
         this.scene.launch("chat");
         this.scene.launch("board");
+        this.scene.launch("infoBar");
 
         eventHandler.on("main_menu_ready", function () {
             eventHandler.emit("new_main_menu");
@@ -52,6 +53,7 @@ export class eventManger extends Phaser.Scene {
             eventHandler.emit("terminate_chat");
             eventHandler.emit("terminate_board");
             eventHandler.emit("termainate_main_menu");
+            eventHandler.emit("terminate_info_bar");
             eventHandler.emit("new_main_menu");
             // TODO: send connection error message to client, return to homepage, clear out old game variables
         });

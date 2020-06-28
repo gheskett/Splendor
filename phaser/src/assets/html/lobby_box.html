@@ -27,7 +27,7 @@
         margin: 10px 10px;
     }
 
-    .playerNum{
+    .playerNum {
         font-family: Quintessential;
         font-size: 38px;
         color: rgba(255, 255, 255, 0.65);
@@ -36,11 +36,13 @@
     #usernameValue {
         font-family: Quintessential;
         font-size: 60px;
-        max-width: 800px;
+        max-height: 90px;
+        max-width: 640px;
         color: white;
         display: inline-block;
         overflow: hidden;
         text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     #pencil {
@@ -53,19 +55,18 @@
         box-sizing: content-box;
         display: none;
     }
-
 </style>
 
 <div id="userContainer">
     <img src="/src/assets/images/host_symbol.svg" alt="Host" title="Host" id="host">
-     <div>
+    <div>
         <label id="usernameValue">undefined</label>
         <img src="/src/assets/images/pencil.svg" alt="Pencil" title="Change Username" id="pencil" name="pencil">
-     </div>
+    </div>
     <div>
-        <label id="playerText" class="playerNum">Player: </label> 
+        <label id="playerText" class="playerNum">Player: </label>
         <label id="playerValue" class="playerNum">X</label>
     </div>
-    
-    
+
+
 </div>

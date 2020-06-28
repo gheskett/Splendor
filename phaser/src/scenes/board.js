@@ -128,11 +128,9 @@ export default class board extends Phaser.Scene {
 
     //#endregion Game Variables
 
-    draw_board()
+    draw_board();
 
     //#region Idk whatever Nathan did so idk what to name the region, but it should be renamed
-
-
 
     function draw_board() {
       for (i = 0; i < thisBoard.f_cards.length; ++i)
@@ -354,6 +352,7 @@ export default class board extends Phaser.Scene {
               eventHandler.emit("new_main_menu");
               eventHandler.emit("terminate_chat");
               eventHandler.emit("terminate_board");
+              eventHandler.emit("terminate_info_bar");
             } else {
               console.warn(result);
             }

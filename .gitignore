@@ -8,3 +8,4 @@ server/python_server.log
 phaser/node_modules
 venv
 .idea
+.vscode/settings.json
