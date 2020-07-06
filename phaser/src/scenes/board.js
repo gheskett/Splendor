@@ -20,7 +20,7 @@ export default class board extends Phaser.Scene {
 
     //TODO: this should be auto-detected
     this.centerX = 1012;
-    this.upperBit = 59;
+    this.upperBit = 150;
     this.server = new serverManager();
     this.nobles = [];
 

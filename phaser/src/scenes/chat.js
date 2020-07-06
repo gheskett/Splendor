@@ -21,11 +21,6 @@ export default class chat extends Phaser.Scene {
         this.chatOn = false;
         const thisChat = this;
         const maxMessages = 50;
-        const playerColors = ["rgb(255, 70, 70)",
-            "rgb(47, 143, 255)",
-            "rgb(188, 0, 255)",
-            "rgb(20, 170, 0)"
-        ];
         const serverColor = "yellow";
         const gameWidth = this.cameras.main.width, gameHeight = this.cameras.main.height;
 
@@ -150,7 +145,7 @@ export default class chat extends Phaser.Scene {
                     content.style.color = serverColor;
                 } else {
                     var userpart = document.createElement("span");
-                    userpart.style.color = playerColors[messages[i].playerID];
+                    userpart.style.color = globals.playerColors[messages[i].playerID];
                     userpart.innerHTML = messages[i].name + ": ";
                     content.appendChild(userpart);
                     content.appendChild(document.createTextNode(messages[i].message));
