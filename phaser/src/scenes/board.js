@@ -93,7 +93,7 @@ export default class board extends Phaser.Scene {
 
   create() {
 
-    //The `thisBoard` constant is used to avoid pontential conflicts with buttons, fetches, and events
+    //The `thisBoard` constant is used to avoid potential conflicts with buttons, fetches, and events
     const thisBoard = this;
     thisBoard.boardOn = false;
     thisBoard.updatable = false;

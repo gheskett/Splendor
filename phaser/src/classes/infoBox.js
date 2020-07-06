@@ -41,7 +41,7 @@ class infoBox extends Phaser.GameObjects.Container {
             amount: 6,
             width: 26,
             height: 26,
-            seperation: 10,
+            separation: 10,
             l_edge_dist: 5,
             t_edge_dist: 5
         };
@@ -55,7 +55,7 @@ class infoBox extends Phaser.GameObjects.Container {
             amount: 5,
             width: 19,
             height: 26,
-            seperation: 10,
+            separation: 10,
             l_edge_dist: tokenInfo.width + tokenInfo.l_edge_dist + 40,
             t_edge_dist: 5
         };
@@ -69,7 +69,7 @@ class infoBox extends Phaser.GameObjects.Container {
             amount: 3,
             width: 40,
             height: 56,
-            seperation: 12,
+            separation: 12,
             l_edge_dist: cardInfo.width + cardInfo.l_edge_dist + 40,
             t_edge_dist: 12
         }
@@ -78,7 +78,7 @@ class infoBox extends Phaser.GameObjects.Container {
             amount: 5,
             width: 64,
             height: 30,
-            seperation: 11,
+            separation: 11,
             l_edge_dist: reserveInfo.width + reserveInfo.l_edge_dist + 20,
             t_edge_dist: 11
         }
@@ -113,12 +113,12 @@ class infoBox extends Phaser.GameObjects.Container {
             this.tokens[i] = [];
 
             this.tokens[i][0] = scene.add.image(TLcorner.x + tokenInfo.l_edge_dist, TLcorner.y
-                + tokenInfo.t_edge_dist + (i * (tokenInfo.seperation + tokenInfo.height)),
+                + tokenInfo.t_edge_dist + (i * (tokenInfo.separation + tokenInfo.height)),
                 "uiTokens", i).setOrigin(0).setDisplaySize(tokenInfo.width, tokenInfo.height);
             this.add(this.tokens[i][0]);
 
             this.tokens[i][1] = scene.add.text(TLcorner.x + tokenText.l_edge_dist, TLcorner.y
-                + tokenText.t_edge_dist + (i * (tokenInfo.seperation + tokenInfo.height)),
+                + tokenText.t_edge_dist + (i * (tokenInfo.separation + tokenInfo.height)),
                 "0", textSettings).setOrigin(0);
             this.add(this.tokens[i][1]);
 
@@ -131,12 +131,12 @@ class infoBox extends Phaser.GameObjects.Container {
             this.cards[i] = [];
 
             this.cards[i][0] = scene.add.image(TLcorner.x + cardInfo.l_edge_dist, TLcorner.y
-                + cardInfo.t_edge_dist + (i * (cardInfo.seperation + cardInfo.height)),
+                + cardInfo.t_edge_dist + (i * (cardInfo.separation + cardInfo.height)),
                 "infoCards", i).setOrigin(0).setDisplaySize(cardInfo.width, cardInfo.height);
             this.add(this.cards[i][0]);
 
             this.cards[i][1] = scene.add.text(TLcorner.x + cardText.l_edge_dist, TLcorner.y
-                + cardText.t_edge_dist + (i * (cardInfo.seperation + cardInfo.height)),
+                + cardText.t_edge_dist + (i * (cardInfo.separation + cardInfo.height)),
                 "0", textSettings).setOrigin(0);
             this.add(this.cards[i][1]);
         }
@@ -145,7 +145,7 @@ class infoBox extends Phaser.GameObjects.Container {
         this.reserves = [];
         for (let i = 0; i < reserveInfo.amount; i++) {
             this.reserves[i] = scene.add.image(TLcorner.x + reserveInfo.l_edge_dist, TLcorner.y
-                + reserveInfo.t_edge_dist + (i * (reserveInfo.seperation + reserveInfo.height)),
+                + reserveInfo.t_edge_dist + (i * (reserveInfo.separation + reserveInfo.height)),
                 "reserveCards", i).setOrigin(0).setDisplaySize(reserveInfo.width, reserveInfo.height);
             this.add(this.reserves[i]);
         }
@@ -154,7 +154,7 @@ class infoBox extends Phaser.GameObjects.Container {
         this.nobles = [];
         for (let i = 0; i < nobleInfo.amount; i++) {
             this.nobles[i] = scene.add.image(TLcorner.x + nobleInfo.l_edge_dist, TLcorner.y
-                + nobleInfo.t_edge_dist + (i * (nobleInfo.seperation + nobleInfo.height)),
+                + nobleInfo.t_edge_dist + (i * (nobleInfo.separation + nobleInfo.height)),
                 "crown").setOrigin(0).setDisplaySize(nobleInfo.width, nobleInfo.height);
             this.add(this.nobles[i]);
         }
