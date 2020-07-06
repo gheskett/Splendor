@@ -248,12 +248,38 @@ def is_game_started():
 # drop out of game
 @app.route('/api/drop_out/', strict_slashes=False, methods=['POST'])
 def drop_out():
+    args = request.get_json()
+    if args is None or 'session_id' not in args.keys() or 'player_id' not in args.keys():
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'player_id', 'session_id'")
+    player_id = args['player_id']
+    session_id = args['session_id']
+    if player_id is None or session_id is None:
+        return flask.jsonify("ERROR: Missing important arguments!\nExpected: 'player_id', 'session_id'")
+
+    player_id = int(player_id)
+
+    if session_id not in games.keys():
+        return flask.jsonify("ERROR: Could not find game!")
+
+    gm = games[session_id]
+    if player_id not in gm.players.keys():
+        return flask.jsonify("ERROR: Could not find player in game!")
+
+    sid = gm.players[player_id].sid
+    rid = gm.room
+
     with lock:
-        ret = lobby.drop_out(request.get_json(), games, clients)
-    if ret.get_json() != 'OK' or request.get_json()['session_id'] not in games.keys():
+        ret = lobby.drop_out(args, games, clients)
+    if ret.get_json() != 'OK':
+        return ret
+
+    leave_room(rid, sid, "/")
+
+    if session_id not in games.keys():
         return ret
 
     session_id = request.get_json()['session_id']
+
     if games[session_id].player_turn >= 0:
         emit_update_game(session_id)
     else:
