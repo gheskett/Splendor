@@ -15,7 +15,7 @@ export default class board extends Phaser.Scene {
   }
 
   init() {
-    this.cards = [[], [], []];
+    this.cards = [[], [], [], []];
     this.scales = .1875;
 
     //TODO: this should be auto-detected
@@ -46,6 +46,7 @@ export default class board extends Phaser.Scene {
 
     const sizes = ["64", "128", "256"];
     const colors = ["blue", "brown", "green", "red", "white", "gold"];
+    const rsvd = ["r1", "r2", "r3"];
 
     this.load.path = "src/assets/images/boardAssets/"
 
@@ -65,6 +66,12 @@ export default class board extends Phaser.Scene {
           this.load.image(name, name + fExtension);
         }
 
+      }
+
+      for (var rank of rsvd) {
+        var name = rank + "x" + size;
+        this.load.image(name, name + fExtension);
+  
       }
     }
 
@@ -173,7 +180,16 @@ export default class board extends Phaser.Scene {
             thisBoard.cards[row][column] = new card(thisBoard, -1);
 
           thisBoard.cards[row][column].drawCard(flippedCardStartX + spacedWidth * column,
-            flippedCardStartY + spacedHeight * (numRows - 1 - row), width, height);
+            flippedCardStartY + spacedHeight * (numRows - 1 - row), width, height, false);
+        }
+      }
+
+      if (thisBoard.gameState != null && thisBoard.cardsDatabase != undefined && globals.playerID >= 0) {
+        let curPlayer = thisBoard.gameState.players[globals.playerID];
+        for (var count = 0; count < curPlayer.private_reserved_cards.length; ++count) {
+          thisBoard.cards[numRows][count] = new card(thisBoard, curPlayer.private_reserved_cards[count]);
+          thisBoard.cards[numRows][count].drawCard(flippedCardStartX + 46 + (spacedWidth * 1.2) * count,
+            flippedCardStartY + 60 + spacedHeight * (numRows), width, height, true);
         }
       }
 
@@ -241,7 +257,7 @@ export default class board extends Phaser.Scene {
 
               fetch(globals.fullAddr + "/api/get_game_state?" + new URLSearchParams({
                 session_id: globals.lobbyID,
-                playerID: globals.playerID
+                player_id: globals.playerID
               }))
                 .then(handleErrors)
                 .then(result => {
