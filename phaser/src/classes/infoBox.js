@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import * as globals from '../globals.js';
 
 class infoBox extends Phaser.GameObjects.Container {
 	constructor(scene, x, y) {
@@ -309,7 +310,7 @@ class infoBox extends Phaser.GameObjects.Container {
 		this.bg.lineWidth = this.stroke;
 		this.nameHTML.getChildByID('nameText').innerHTML = data.username;
 
-		if (this.isTurn) {
+		if (data.player_id === globals.playerID) {
 			this.nameHTML.getChildByID('nameText').style.color = 'yellow';
 		} else {
 			this.nameHTML.getChildByID('nameText').style.color = 'white';
