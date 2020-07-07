@@ -55,8 +55,11 @@ export default class infoBar extends Phaser.Scene {
 				.then((result) => {
 					if (result.exists) {
 						numPlayers = result.player_order.length;
-						createBoxes(result);
-						updateTurnText(result.players[result.player_turn.toString()]);
+                        createBoxes(result);
+                        if (result.player_turn >= 0)
+                            updateTurnText(result.players[result.player_turn.toString()]);
+                        else
+                            updateTurnText(null);
 						turnText.setVisible(true);
 						thisInfoBar.infoBarOn = true;
 					} else {
@@ -76,9 +79,10 @@ export default class infoBar extends Phaser.Scene {
 				} else {
 					updateBoxes(data);
 				}
-				if (data.player_turn >= 0) {
+				if (data.player_turn >= 0)
 					updateTurnText(data.players[data.player_turn.toString()]);
-				}
+				else
+					updateTurnText(null);
 			}
 		});
 
@@ -112,15 +116,20 @@ export default class infoBar extends Phaser.Scene {
 		}
 
 		function updateTurnText(data) {
-			if (data.player_id !== globals.playerID) {
-				turnText.getChildByID('turnValue').innerHTML = data.username;
-				turnText.getChildByID('turnValue').style.color = globals.playerColors[data.player_id];
-				turnText.getChildByID('turnText').innerHTML = "'s Turn";
-			} else {
-				turnText.getChildByID('turnValue').innerHTML = 'YOUR TURN!';
-				turnText.getChildByID('turnText').innerHTML = '';
-				turnText.getChildByID('turnValue').style.color = 'yellow';
-			}
+            if (data === null) {
+				turnText.getChildByID('turnValue').innerHTML = "The game is over!";
+				turnText.getChildByID('turnValue').style.color = 'rgb(199, 199, 15)';
+				turnText.getChildByID('turnText').innerHTML = "";
+            }
+            else if (data.player_id === globals.playerID) {
+                turnText.getChildByID('turnValue').innerHTML = "YOUR TURN!";
+                turnText.getChildByID('turnValue').style.color = 'yellow';
+                turnText.getChildByID('turnText').innerHTML = "";
+            } else {
+                turnText.getChildByID('turnValue').innerHTML = data.username;
+                turnText.getChildByID('turnValue').style.color = globals.playerColors[data.player_id];
+                turnText.getChildByID('turnText').innerHTML = "'s Turn";
+            }
 			turnText.setX(gameWidth / 2 - turnText.width / 2);
 		}
 

@@ -15,7 +15,7 @@ export const lobbyColors = [
 	'linear-gradient(to top, rgb(110, 0, 140), rgb(188, 0, 255))',
 	'linear-gradient(to top, rgb(20, 105, 15), rgb(20, 170, 0))',
 ];
-export const playerColors = ['rgb(255, 70, 70)', 'rgb(47, 143, 255)', 'rgb(188, 0, 255)', 'rgb(20, 170, 0)'];
+export const playerColors = ['rgb(255, 70, 70)', 'rgb(47, 143, 255)', 'rgb(223, 31, 255)', 'rgb(20, 170, 0)'];
 
 //#endregion constants
 
