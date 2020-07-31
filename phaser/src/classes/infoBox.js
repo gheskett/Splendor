@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import * as globals from '../globals.js';
+import Phaser from "phaser";
+import * as globals from "../globals.js";
 
 class infoBox extends Phaser.GameObjects.Container {
 	constructor(scene, x, y) {
@@ -36,10 +36,10 @@ class infoBox extends Phaser.GameObjects.Container {
 		const tweenDuration = 1500;
 
 		const textSettings = {
-			fontFamily: 'Raleway, serif',
-			fontSize: '28px',
-			color: 'white',
-			stroke: 'black',
+			fontFamily: "Raleway, serif",
+			fontSize: "28px",
+			color: "white",
+			stroke: "black",
 			strokeThickness: 4,
 		};
 
@@ -122,7 +122,7 @@ class infoBox extends Phaser.GameObjects.Container {
 				.image(
 					TLcorner.x + tokenInfo.l_edge_dist,
 					TLcorner.y + tokenInfo.t_edge_dist + i * (tokenInfo.separation + tokenInfo.height),
-					'uiTokens',
+					"uiTokens",
 					i
 				)
 				.setOrigin(0)
@@ -133,7 +133,7 @@ class infoBox extends Phaser.GameObjects.Container {
 				.text(
 					TLcorner.x + tokenText.l_edge_dist,
 					TLcorner.y + tokenText.t_edge_dist + i * (tokenInfo.separation + tokenInfo.height),
-					'0',
+					"0",
 					textSettings
 				)
 				.setOrigin(0);
@@ -149,7 +149,7 @@ class infoBox extends Phaser.GameObjects.Container {
 				.image(
 					TLcorner.x + cardInfo.l_edge_dist,
 					TLcorner.y + cardInfo.t_edge_dist + i * (cardInfo.separation + cardInfo.height),
-					'infoCards',
+					"infoCards",
 					i
 				)
 				.setOrigin(0)
@@ -160,7 +160,7 @@ class infoBox extends Phaser.GameObjects.Container {
 				.text(
 					TLcorner.x + cardText.l_edge_dist,
 					TLcorner.y + cardText.t_edge_dist + i * (cardInfo.separation + cardInfo.height),
-					'0',
+					"0",
 					textSettings
 				)
 				.setOrigin(0);
@@ -174,7 +174,7 @@ class infoBox extends Phaser.GameObjects.Container {
 				.image(
 					TLcorner.x + reserveInfo.l_edge_dist,
 					TLcorner.y + reserveInfo.t_edge_dist + i * (reserveInfo.separation + reserveInfo.height),
-					'reserveCards',
+					"reserveCards",
 					i
 				)
 				.setOrigin(0)
@@ -189,7 +189,7 @@ class infoBox extends Phaser.GameObjects.Container {
 				.image(
 					TLcorner.x + nobleInfo.l_edge_dist,
 					TLcorner.y + nobleInfo.t_edge_dist + i * (nobleInfo.separation + nobleInfo.height),
-					'crown'
+					"crown"
 				)
 				.setOrigin(0)
 				.setDisplaySize(nobleInfo.width, nobleInfo.height);
@@ -211,33 +211,33 @@ class infoBox extends Phaser.GameObjects.Container {
 		//Create PP text
 		this.add(
 			scene.add
-				.text(TLcorner.x + PPinfo.l_edge_dist, TLcorner.y + PPinfo.t_edge_dist, 'PP:', {
-					fontFamily: 'Raleway, serif',
-					fontSize: '40px',
-					color: 'white',
-					stroke: 'black',
+				.text(TLcorner.x + PPinfo.l_edge_dist, TLcorner.y + PPinfo.t_edge_dist, "PP:", {
+					fontFamily: "Raleway, serif",
+					fontSize: "40px",
+					color: "white",
+					stroke: "black",
 					strokeThickness: 6,
-					align: 'center',
+					align: "center",
 				})
 				.setOrigin(0.5)
 		);
 
 		//Create PP value
 		this.PPvalue = scene.add
-			.text(TLcorner.x + PPinfo.l_edge_dist, 0, '0', {
-				fontFamily: 'Raleway, serif',
-				fontSize: '72px',
-				color: 'white',
-				stroke: 'black',
+			.text(TLcorner.x + PPinfo.l_edge_dist, 0, "0", {
+				fontFamily: "Raleway, serif",
+				fontSize: "72px",
+				color: "white",
+				stroke: "black",
 				strokeThickness: 10,
-				align: 'center',
+				align: "center",
 			})
 			.setOrigin(0.5);
 		this.add(this.PPvalue);
 
 		this.nameHTML = scene.add
 			.dom(TLcorner.x + this.x, TLcorner.y + this.y + nameInfo.t_edge_dist)
-			.createFromCache('infoName')
+			.createFromCache("infoName")
 			.setOrigin(0, 1);
 
 		this.hoverDetector = scene.add
@@ -253,7 +253,7 @@ class infoBox extends Phaser.GameObjects.Container {
 		this.onhover = false;
 
 		this.hoverDetector.on(
-			'pointerover',
+			"pointerover",
 			function () {
 				this.setScale(2).setPosition(scene.cameras.main.width / 2, scene.cameras.main.height / 2);
 				this.onhover = true;
@@ -262,7 +262,7 @@ class infoBox extends Phaser.GameObjects.Container {
 		);
 
 		this.hoverDetector.on(
-			'pointerout',
+			"pointerout",
 			function () {
 				this.setScale(1).setPosition(this.defaultx, this.defaulty);
 				this.onhover = false;
@@ -275,7 +275,7 @@ class infoBox extends Phaser.GameObjects.Container {
 		this.tween = scene.tweens.addCounter({
 			from: 0,
 			to: 1,
-			ease: 'Sine.easeInOut',
+			ease: "Sine.easeInOut",
 			duration: tweenDuration,
 			repeat: -1,
 			yoyo: true,
@@ -297,23 +297,23 @@ class infoBox extends Phaser.GameObjects.Container {
 	update(data) {
 		this.isTurn = data.isTurn;
 		const chipOrder = new Map([
-			[0, 'diamond'],
-			[1, 'sapphire'],
-			[2, 'emerald'],
-			[3, 'ruby'],
-			[4, 'onyx'],
-			[5, 'joker'],
+			[0, "diamond"],
+			[1, "sapphire"],
+			[2, "emerald"],
+			[3, "ruby"],
+			[4, "onyx"],
+			[5, "joker"],
 		]);
 		this.bg.fillColor = this.infoColors[data.player_id][0];
 		this.bg.strokeColor = this.infoColors[data.player_id][1];
 		this.line.fillColor = this.infoColors[data.player_id][1];
 		this.bg.lineWidth = this.stroke;
-		this.nameHTML.getChildByID('nameText').innerHTML = data.username;
+		this.nameHTML.getChildByID("nameText").innerHTML = data.username;
 
 		if (data.player_id === globals.playerID) {
-			this.nameHTML.getChildByID('nameText').style.color = 'yellow';
+			this.nameHTML.getChildByID("nameText").style.color = "yellow";
 		} else {
-			this.nameHTML.getChildByID('nameText').style.color = 'white';
+			this.nameHTML.getChildByID("nameText").style.color = "white";
 		}
 
 		for (let i = 0; i < this.tokens.length; i++) {
@@ -334,7 +334,7 @@ class infoBox extends Phaser.GameObjects.Container {
 
 		for (let i = 0; i < this.reserves.length; i++) {
 			if (data.player_reserved_cards[i] != null) {
-				this.reserves[i].setTexture('reserveCards', data.player_reserved_cards[i] - 1);
+				this.reserves[i].setTexture("reserveCards", data.player_reserved_cards[i] - 1);
 				this.reserves[i].setVisible(true);
 			} else {
 				this.reserves[i].setVisible(false);
@@ -361,7 +361,7 @@ class infoBox extends Phaser.GameObjects.Container {
 	}
 }
 
-Phaser.GameObjects.GameObjectFactory.register('infoBox', function (x, y) {
+Phaser.GameObjects.GameObjectFactory.register("infoBox", function (x, y) {
 	const box = new infoBox(this.scene, x, y);
 	this.displayList.add(box);
 	return box;

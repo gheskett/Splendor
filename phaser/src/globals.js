@@ -26,6 +26,8 @@ export function setPlayerID(value) {
 	playerID = value;
 }
 
+setPlayerID(-1);
+
 /** @global @type {string}  The id of the lobby */
 export var lobbyID;
 export function setLobbyID(value) {
