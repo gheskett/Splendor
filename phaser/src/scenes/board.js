@@ -1,7 +1,7 @@
 import {card} from "../classes/card.js";
 import {serverManager} from "../classes/serverManager.js";
 import {noble} from "../classes/noble.js";
-import {plusChip} from "../classes/plusChip.js";
+import {takeChips} from "../classes/takeChips.js";
 import eventHandler from "./eventHandler.js";
 import "../classes/plusChip.js";
 import * as globals from "../globals.js";
@@ -86,10 +86,14 @@ export default class board extends Phaser.Scene {
 
 		this.load.image("noble_front", "noble_front_x731" + fExtension);
 		this.load.spritesheet("plus_signs", "plus_signs" + fExtension, {
-			frameWidth: 22,
+			frameWidth: 32,
 		});
 		this.load.spritesheet("minus_signs", "minus_signs" + fExtension, {
-			frameWidth: 22,
+			frameWidth: 32,
+		});
+		this.load.spritesheet("take_chips", "take_chips" + fExtension, {
+			frameWidth: 128,
+			frameHeight: 64,
 		});
 	}
 
@@ -103,6 +107,7 @@ export default class board extends Phaser.Scene {
 		thisBoard.f_nobles = [];
 		thisBoard.f_chips = [];
 		thisBoard.f_chipNumbers = [];
+		thisBoard.f_UI = [];
 		thisBoard.scene.sendToBack();
 
 		//#region Game Variables
@@ -154,11 +159,14 @@ export default class board extends Phaser.Scene {
 			for (i = 0; i < thisBoard.f_nobles.length; ++i) thisBoard.f_nobles[i].destroy();
 			for (i = 0; i < thisBoard.f_chips.length; ++i) thisBoard.f_chips[i].destroy();
 			for (i = 0; i < thisBoard.f_chipNumbers.length; ++i) thisBoard.f_chipNumbers[i].destroy();
+			for (i = 0; i < thisBoard.f_UI.length; ++i) thisBoard.f_UI[i].destroy();
+			eventHandler.off("update_chip_cache");
 
 			thisBoard.f_cards = [];
 			thisBoard.f_nobles = [];
 			thisBoard.f_chips = [];
 			thisBoard.f_chipNumbers = [];
+			thisBoard.f_UI = [];
 
 			thisBoard.cachedChips = [0, 0, 0, 0, 0];
 
@@ -230,11 +238,26 @@ export default class board extends Phaser.Scene {
 				thisBoard.nobles[i].drawNoble(nobleX, nobleY + i * nobleHeight, nobleHeight, scale * 0.934);
 			}
 
-			const chipHeight = 64 + 32;
+			thisBoard.isTurn = false;
+			if (thisBoard.gameState) {
+				if (thisBoard.gameState.player_turn === globals.playerID) {
+					thisBoard.isTurn = true;
+				}
+			}
 
-			var tokenX = flippedCardStartX - spacedWidth * 1.5 - chipHeight * 0.5 - 24;
+			const chipHeight = 64 + 32;
+			const buttonDist = 48;
+
+			var tokenX = flippedCardStartX - spacedWidth * 1.5 - chipHeight * 0.5 - 32;
 			var tokenY = cardMid + chipHeight * 0.5 - chipHeight * 3;
 			let chipNum = 0;
+
+			if (thisBoard.isTurn) {
+				thisBoard.f_UI.push(
+					thisBoard.add.existing(new takeChips(thisBoard, tokenX, tokenY - 84, "take_chips"))
+				);
+			}
+
 			for (var chip in thisBoard.tokenSprites) {
 				var num = thisBoard.server.lookUpFieldChips(thisBoard.gameState, chip);
 				if (num > 0) {
@@ -246,11 +269,9 @@ export default class board extends Phaser.Scene {
 
 				thisBoard.f_chipNumbers.push(thisBoard.add.sprite(tokenX, tokenY, num + "x64"));
 
-				if (thisBoard.gameState) {
-					if (thisBoard.gameState.player_turn === globals.playerID && chipNum < 5) {
-						thisBoard.add.existing(new plusChip(thisBoard, tokenX, tokenY, "plus_signs", true, chipNum));
-						let im = thisBoard.add.image(40, 40, "plus_signs", 1);
-					}
+				if (thisBoard.isTurn && chipNum < 5) {
+					thisBoard.f_UI.push(thisBoard.add.plusChip(tokenX + buttonDist, tokenY, chipNum));
+					thisBoard.f_UI.push(thisBoard.add.minusChip(tokenX - buttonDist, tokenY, chipNum));
 				}
 
 				tokenY += chipHeight;

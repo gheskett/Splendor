@@ -7,7 +7,6 @@ export class plusChip extends Phaser.GameObjects.Image {
 	 * @param {integer} x
 	 * @param {integer} y
 	 * @param {Phaser.Textures.Texture} texture
-	 * @param {integer | string} frame
 	 * @param {boolean} plus
 	 * @param {integer} id
 	 */
@@ -45,29 +44,22 @@ export class plusChip extends Phaser.GameObjects.Image {
 				canDo2 = true;
 			}
 
-			if (button.chipAmt >= 1 && button.playerAmt < 10) {
-				button.setInteractive({
-					hitArea: button,
-					pixelPerfect: true,
-					useHandCursor: true,
-				});
-				button.setFrame(0);
-				board.input.enableDebug(button);
+			if (button.chipAmt >= 1) {
+				button.doActive(true);
 
 				eventHandler.on("update_chip_cache", function () {
 					button.totalCache = button.sumArr(board.cachedChips);
 
 					/*
-          If 3 chips are selected, 2 chips of one type are selected,
-          1 chip of this type is selected and taking 2 chips is not possible,
-          or the number of selected chips will make the player have 10 chips,
+          If 3 chips are selected, 2 chips of one type are selected, or
+          1 chip of this type is selected and taking 2 chips is 
+          not possible and/or more than one chip is already selected,
           then disable this button
           */
 					if (
 						button.totalCache >= 3 ||
 						board.cachedChips.includes(2) ||
-						(board.cachedChips[button.id] === 1 && !canDo2) ||
-						button.playerAmt + button.totalCache >= 10
+						(board.cachedChips[button.id] === 1 && (!canDo2 || button.totalCache > 1))
 					) {
 						button.doActive(false);
 					} else {
@@ -101,6 +93,40 @@ export class plusChip extends Phaser.GameObjects.Image {
 					eventHandler.emit("update_chip_cache");
 				});
 			}
+		} else {
+			eventHandler.on("update_chip_cache", function () {
+				if (board.cachedChips[button.id] >= 1) {
+					button.doActive(true);
+				} else {
+					button.doActive(false);
+				}
+			});
+
+			button.on("pointerover", function () {
+				this.setTint(0xdfdfdf).setScale(1.05);
+			});
+
+			button.on("pointerdown", function () {
+				this.setTint(0xcccccc).setScale(0.95);
+			});
+
+			button.on("pointerout", function () {
+				this.setScale(1);
+				this.clearTint();
+			});
+
+			button.on("pointerup", function () {
+				board.cachedChips[button.id] -= 1;
+				this.setScale(1);
+				this.clearTint();
+				if (button.chipAmt - board.cachedChips[button.id] > 0) {
+					board.f_chips[button.id].setTexture(board.tokenSprites[chipOrder.get(button.id)]).setScale(1);
+				}
+				board.f_chipNumbers[button.id].setTexture(
+					(button.chipAmt - board.cachedChips[button.id]).toString() + "x64"
+				);
+				eventHandler.emit("update_chip_cache");
+			});
 		}
 	}
 
@@ -110,7 +136,10 @@ export class plusChip extends Phaser.GameObjects.Image {
 
 	doActive(active) {
 		if (active) {
-			this.setInteractive();
+			this.setInteractive({
+				pixelPerfect: true,
+				useHandCursor: true,
+			});
 			this.setFrame(0);
 		} else {
 			this.disableInteractive();
@@ -119,7 +148,7 @@ export class plusChip extends Phaser.GameObjects.Image {
 	}
 
 	sumObj(obj) {
-		const sum = Object.values(obj).reduce((a, b) => a + b, 0);
+		const sum = Object.values(obj).reduce((n, x) => n + x, 0);
 		return sum;
 	}
 
@@ -128,7 +157,19 @@ export class plusChip extends Phaser.GameObjects.Image {
 	 */
 
 	sumArr(arr) {
-		const sum = arr.reduce((a, b) => a + b, 0);
+		const sum = arr.reduce((n, x) => n + x, 0);
 		return sum;
 	}
 }
+
+Phaser.GameObjects.GameObjectFactory.register("plusChip", function (x, y, id) {
+	const plus = new plusChip(this.scene, x, y, "plus_signs", true, id);
+	this.displayList.add(plus);
+	return plus;
+});
+
+Phaser.GameObjects.GameObjectFactory.register("minusChip", function (x, y, id) {
+	const minus = new plusChip(this.scene, x, y, "minus_signs", false, id);
+	this.displayList.add(minus);
+	return minus;
+});
