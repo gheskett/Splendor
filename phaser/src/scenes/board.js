@@ -2,6 +2,7 @@ import {card} from "../classes/card.js";
 import {serverManager} from "../classes/serverManager.js";
 import {noble} from "../classes/noble.js";
 import {takeChips} from "../classes/takeChips.js";
+import {returnChips} from "../classes/returnChips.js";
 import eventHandler from "./eventHandler.js";
 import "../classes/plusChip.js";
 import * as globals from "../globals.js";
@@ -42,6 +43,7 @@ export default class board extends Phaser.Scene {
 
 	preload() {
 		this.load.image("gameBackground", gameBackground);
+		this.load.html("returnChips", "src/assets/html/return_chips.html");
 
 		const fExtension = ".png";
 
@@ -115,13 +117,18 @@ export default class board extends Phaser.Scene {
 		const gameWidth = this.cameras.main.width,
 			gameHeight = this.cameras.main.height;
 
-		var boardOn = false;
 		const DIM = 0.75;
+
+		thisBoard.boardEvents = new Phaser.Events.EventEmitter();
 
 		const exitBoard = this.add
 			.image(globals.notChat * gameWidth - 25, 25, "exitButton")
 			.setInteractive({useHandCursor: true})
 			.setDepth(0);
+
+		thisBoard.returnBox = this.add.existing(
+			new returnChips(thisBoard, gameWidth / 2, gameHeight / 2, "returnChips")
+		);
 
 		var leaveConfirmation = this.add
 			.dom(gameWidth / 2, gameHeight / 2 - 80)
@@ -136,7 +143,8 @@ export default class board extends Phaser.Scene {
 			.setAlpha(DIM)
 			.setVisible(false)
 			.setDepth(1);
-		var HTMLgroup = thisBoard.add.group([dimmingObject, leaveConfirmation]);
+		var HTMLgroup = thisBoard.add.group([dimmingObject, leaveConfirmation, thisBoard.returnBox]);
+
 		var interactiveGroup = thisBoard.add.group([exitBoard]);
 
 		this.add.image(0, 0, "gameBackground").setOrigin(0).setDepth(-1);
@@ -146,6 +154,20 @@ export default class board extends Phaser.Scene {
 		});
 		interactiveGroup.getChildren().forEach(element => {
 			element.disableInteractive();
+		});
+
+		eventHandler.on("disable_interactive", disabled => {
+			thisBoard.boardEvents.emit("disable_interactive", disabled);
+			toggleBoardElements(!disabled);
+			if (thisBoard.boardOn && !disabled) {
+				interactiveGroup.getChildren().forEach(element => {
+					element.setInteractive({useHandCursor: true});
+				});
+			} else if (disabled) {
+				interactiveGroup.getChildren().forEach(element => {
+					element.disableInteractive();
+				});
+			}
 		});
 
 		//#endregion Game Variables
@@ -160,7 +182,7 @@ export default class board extends Phaser.Scene {
 			for (i = 0; i < thisBoard.f_chips.length; ++i) thisBoard.f_chips[i].destroy();
 			for (i = 0; i < thisBoard.f_chipNumbers.length; ++i) thisBoard.f_chipNumbers[i].destroy();
 			for (i = 0; i < thisBoard.f_UI.length; ++i) thisBoard.f_UI[i].destroy();
-			eventHandler.off("update_chip_cache");
+			thisBoard.boardEvents.removeAllListeners();
 
 			thisBoard.f_cards = [];
 			thisBoard.f_nobles = [];
@@ -385,7 +407,7 @@ export default class board extends Phaser.Scene {
 			this.setScale(1);
 			this.clearTint();
 			leaveConfirmation.setVisible(true);
-			toggleBoardElements(false);
+			eventHandler.emit("disable_interactive", true);
 		});
 
 		leaveConfirmation.addListener("click");
@@ -422,12 +444,10 @@ export default class board extends Phaser.Scene {
 					});
 
 				this.setVisible(false);
-				toggleBoardElements(true);
-			}
-
-			if (event.target.name === "cancel") {
+				eventHandler.emit("disable_interactive", false);
+			} else if (event.target.name === "cancel") {
 				this.setVisible(false);
-				toggleBoardElements(true);
+				eventHandler.emit("disable_interactive", false);
 			}
 		});
 		//#endregion Exit Button Behavior

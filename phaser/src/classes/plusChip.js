@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import * as globals from "../globals.js";
-import eventHandler from "../scenes/eventHandler.js";
 export class plusChip extends Phaser.GameObjects.Image {
 	/**
 	 * @param {Phaser.Scene} scene
@@ -47,15 +46,33 @@ export class plusChip extends Phaser.GameObjects.Image {
 			if (button.chipAmt >= 1) {
 				button.doActive(true);
 
-				eventHandler.on("update_chip_cache", function () {
+				board.boardEvents.on("disable_interactive", disabled => {
+					if (disabled) {
+						button.disableInteractive();
+					} else {
+						button.totalCache = button.sumArr(board.cachedChips);
+						if (
+							button.totalCache >= 3 ||
+							board.cachedChips.includes(2) ||
+							(board.cachedChips[button.id] === 1 && (!canDo2 || button.totalCache > 1))
+						) {
+							button.doActive(false);
+						} else {
+							button.doActive(true);
+						}
+					}
+				});
+
+				board.boardEvents.on("update_chip_cache", function () {
 					button.totalCache = button.sumArr(board.cachedChips);
 
 					/*
-          If 3 chips are selected, 2 chips of one type are selected, or
-          1 chip of this type is selected and taking 2 chips is 
-          not possible and/or more than one chip is already selected,
-          then disable this button
-          */
+         			If 3 chips are selected, 2 chips of one type are selected, or
+          			1 chip of this type is selected and taking 2 chips is 
+          			not possible and/or more than one chip is already selected,
+          			then disable this button
+          			*/
+
 					if (
 						button.totalCache >= 3 ||
 						board.cachedChips.includes(2) ||
@@ -90,11 +107,19 @@ export class plusChip extends Phaser.GameObjects.Image {
 					board.f_chipNumbers[button.id].setTexture(
 						(button.chipAmt - board.cachedChips[button.id]).toString() + "x64"
 					);
-					eventHandler.emit("update_chip_cache");
+					board.boardEvents.emit("update_chip_cache");
 				});
 			}
 		} else {
-			eventHandler.on("update_chip_cache", function () {
+			board.boardEvents.on("disable_interactive", disabled => {
+				if (disabled) {
+					button.disableInteractive();
+				} else {
+					button.doActive(board.cachedChips[button.id] >= 1);
+				}
+			});
+
+			board.boardEvents.on("update_chip_cache", function () {
 				if (board.cachedChips[button.id] >= 1) {
 					button.doActive(true);
 				} else {
@@ -125,7 +150,7 @@ export class plusChip extends Phaser.GameObjects.Image {
 				board.f_chipNumbers[button.id].setTexture(
 					(button.chipAmt - board.cachedChips[button.id]).toString() + "x64"
 				);
-				eventHandler.emit("update_chip_cache");
+				board.boardEvents.emit("update_chip_cache");
 			});
 		}
 	}

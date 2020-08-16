@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import * as globals from "../globals.js";
+import eventHandler from "../scenes/eventHandler.js";
 
 class infoBox extends Phaser.GameObjects.Container {
 	constructor(scene, x, y) {
@@ -247,6 +248,16 @@ class infoBox extends Phaser.GameObjects.Container {
 		//#endregion Element creation
 
 		this.hoverDetector.setInteractive();
+
+		eventHandler.on("disable_interactive", disabled => {
+			if (thisBox.active) {
+				if (!disabled) {
+					thisBox.hoverDetector.setInteractive();
+				} else {
+					thisBox.hoverDetector.disableInteractive();
+				}
+			}
+		});
 
 		this.defaultx = this.x;
 		this.defaulty = this.y;

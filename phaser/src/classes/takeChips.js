@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import * as globals from "../globals.js";
 import eventHandler from "../scenes/eventHandler.js";
+import {returnChips} from "../classes/returnChips.js";
 
 export class takeChips extends Phaser.GameObjects.Image {
 	/**
@@ -42,7 +43,16 @@ export class takeChips extends Phaser.GameObjects.Image {
 
 		button.doActive(button.canTakeChips());
 
-		eventHandler.on("update_chip_cache", function () {
+		board.boardEvents.on("disable_interactive", disabled => {
+			if (disabled) {
+				button.disableInteractive();
+			} else {
+				button.totalCache = button.sumArr(board.cachedChips);
+				button.doActive(button.canTakeChips());
+			}
+		});
+
+		board.boardEvents.on("update_chip_cache", function () {
 			button.totalCache = button.sumArr(board.cachedChips);
 			button.doActive(button.canTakeChips());
 		});
@@ -64,42 +74,52 @@ export class takeChips extends Phaser.GameObjects.Image {
 			this.setScale(1);
 			this.clearTint();
 
-			const args = {
-				player_id: globals.playerID,
-				session_id: globals.lobbyID,
-				grabbed_chips: {
-					diamond: board.cachedChips[0],
-					sapphire: board.cachedChips[1],
-					emerald: board.cachedChips[2],
-					ruby: board.cachedChips[3],
-					onyx: board.cachedChips[4],
-					joker: 0,
-				},
-				returned_chips: {
-					diamond: 0,
-					sapphire: 0,
-					emerald: 0,
-					ruby: 0,
-					onyx: 0,
-					joker: 0,
-				},
-			};
-			fetch(globals.fullAddr + "/api/grab_chips/", {
-				method: "POST",
-				headers: globals.headers,
-				body: JSON.stringify(args),
-			})
-				.then(button.handleErrors)
-				.then(result => {
-					if (result === "OK") {
-					} else {
-						console.warn(result);
-					}
-				})
-				.catch(error => {
-					console.error(error);
+			let returned_chips = {diamond: 0, sapphire: 0, emerald: 0, ruby: 0, onyx: 0, joker: 0};
+
+			if (button.totalCache + button.playerAmt > 10) {
+				board.returnBox.createReturnChips("chip_overflow");
+				eventHandler.emit("disable_interactive", true);
+				board.boardEvents.on("chips_returned", new_return => {
+					returned_chips = new_return;
+					button.submitPress(returned_chips);
 				});
+			} else {
+				this.submitPress(returned_chips);
+			}
 		});
+	}
+
+	submitPress(returned_chips) {
+		const board = this.scene;
+		const button = this;
+		const args = {
+			player_id: globals.playerID,
+			session_id: globals.lobbyID,
+			grabbed_chips: {
+				diamond: board.cachedChips[0],
+				sapphire: board.cachedChips[1],
+				emerald: board.cachedChips[2],
+				ruby: board.cachedChips[3],
+				onyx: board.cachedChips[4],
+				joker: 0,
+			},
+			returned_chips: returned_chips,
+		};
+		fetch(globals.fullAddr + "/api/grab_chips/", {
+			method: "POST",
+			headers: globals.headers,
+			body: JSON.stringify(args),
+		})
+			.then(button.handleErrors)
+			.then(result => {
+				if (result === "OK") {
+				} else {
+					console.warn(result);
+				}
+			})
+			.catch(error => {
+				console.error(error);
+			});
 	}
 
 	canTakeChips() {
