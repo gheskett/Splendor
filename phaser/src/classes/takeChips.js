@@ -36,7 +36,7 @@ export class takeChips extends Phaser.GameObjects.Image {
 			button.f_chipsArr[i] = board.server.lookUpFieldChips(board.gameState, chipOrder.get(i));
 		}
 		button.f_chipTotal = button.sumArr(button.f_chipsArr);
-		button.availableChips = button.f_chipsArr.reduce((n, x) => n + (x !== 0));
+		button.availableChips = button.f_chipsArr.reduce((n, x) => n + (x > 0 ? 1 : 0), 0);
 
 		button.playerAmt = button.sumObj(board.gameState.players[globals.playerID.toString()].player_chips);
 		button.totalCache = 0;
