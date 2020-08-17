@@ -87,7 +87,7 @@ def token_str(total, lst):
             index += 1
 
     if total == 0:
-        ret += "no"
+        ret += "no "
     ret += "token"
 
     return ret
