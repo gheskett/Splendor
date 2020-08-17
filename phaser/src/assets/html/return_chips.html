@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<link href="https://fonts.googleapis.com/css?family=Quintessential" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+<style>
+	* {
+		box-sizing: border-box;
+	}
+
+	#return_container {
+		background: #333333;
+		border: 8px solid rgb(248, 248, 248);
+		border-radius: 16px;
+		display: flex;
+		width: 1024px;
+		height: 512px;
+		align-content: flex-start;
+		justify-content: center;
+		flex-flow: column nowrap;
+	}
+
+	#return_title {
+		color: white;
+		width: inherit;
+		font-size: 80px;
+		font-family: "Quintessential", "Noto Serif", serif;
+		text-align: center;
+		overflow: hidden;
+		-khtml-user-select: none;
+		-o-user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		user-select: none;
+		margin-top: -32px;
+	}
+
+	#return_subtitle {
+		color: lightgrey;
+		width: inherit;
+		font-size: 40px;
+		font-family: "Noto Serif", serif;
+		text-align: center;
+		overflow: hidden;
+		-khtml-user-select: none;
+		-o-user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		user-select: none;
+		margin-top: -8px;
+	}
+
+	#chip_container {
+		width: inherit;
+		height: 128px;
+		display: flex;
+		justify-content: space-evenly;
+		align-content: center;
+		flex-flow: row nowrap;
+		margin-top: 16px;
+	}
+
+	.chip_and_num {
+		width: 128px;
+		height: 128px;
+		display: inline-block;
+	}
+
+	.chip_and_num > div {
+		position: relative;
+		width: 128px;
+		height: 128px;
+		display: inline-block;
+		overflow: hidden;
+		font-family: "Noto Serif", serif;
+		font-size: 40px;
+		text-align: center;
+		left: 0;
+		right: 0;
+		top: -96px;
+		z-index: 2;
+		color: white;
+		-khtml-user-select: none;
+		-o-user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	.chip_and_num > img {
+		width: 128px;
+		height: 128px;
+		-khtml-user-select: none;
+		-o-user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	#num_container {
+		width: inherit;
+		height: 48px;
+		display: flex;
+		justify-content: space-evenly;
+		align-content: center;
+		flex-flow: row nowrap;
+	}
+
+	#num_container > label {
+		font-family: "Noto Serif", serif;
+		font-size: 64px;
+		width: 128px;
+		text-align: center;
+		color: white;
+		display: inline-block;
+		-khtml-user-select: none;
+		-o-user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	#plus_minus_container {
+		width: inherit;
+		height: 32px;
+		display: flex;
+		justify-content: space-evenly;
+		align-content: center;
+		flex-flow: row nowrap;
+		margin-top: 32px;
+	}
+
+	.plus_minus {
+		width: 128px;
+		height: 64px;
+		display: flex;
+		justify-content: center;
+		align-content: center;
+		flex-flow: row nowrap;
+	}
+
+	.plus_minus > button {
+		width: 60px;
+		height: 60px;
+		font-size: 48px;
+		text-align: center;
+		border: 2px solid black;
+		border-radius: 50%;
+		outline: none;
+		margin: 2px;
+		-khtml-user-select: none;
+		-o-user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		user-select: none;
+		cursor: pointer;
+	}
+
+	.plus_minus > button:disabled {
+		background-color: #7e7e7e;
+		cursor: default;
+	}
+
+	.plus {
+		background-color: #38df0c;
+	}
+
+	.plus:hover {
+		background-color: #2fb40b;
+	}
+
+	.plus:active {
+		background-color: #258a09;
+	}
+
+	.minus {
+		background-color: #d71313;
+	}
+
+	.minus:hover {
+		background-color: #c00e0e;
+	}
+
+	.minus:active {
+		background-color: #aa0f0f;
+	}
+
+	#submit_decline_container {
+		width: inherit;
+		height: 36px;
+		display: flex;
+		justify-content: space-evenly;
+		align-content: center;
+		flex-flow: row-reverse nowrap;
+		margin-top: 50px;
+	}
+
+	#submit_decline_container > button {
+		-khtml-user-select: none;
+		-o-user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		user-select: none;
+		height: 32px;
+		font-family: "Noto Serif", serif;
+		font-size: 24px;
+		text-align: center;
+		border: 2px solid black;
+		border-radius: 6px;
+		outline: none;
+		margin: 2px;
+		line-height: 0px;
+		cursor: pointer;
+	}
+
+	#submit_chips {
+		width: 65%;
+		background-color: #38df0c;
+	}
+
+	#cancel_chips {
+		width: 25%;
+		background-color: #d71313;
+	}
+
+	#submit_decline_container > button:disabled {
+		background-color: #7e7e7e;
+		cursor: default;
+	}
+
+	#submit_chips:hover {
+		background-color: #2fb40b;
+	}
+
+	#submit_chips:active {
+		background-color: #258a09;
+	}
+
+	#cancel_chips:hover {
+		background-color: #c00e0e;
+	}
+
+	#cancel_chips:active {
+		background-color: #aa0f0f;
+	}
+</style>
+
+<div id="return_container">
+	<label id="return_title">Too many cooks</label>
+	<label id="return_subtitle">will spoil the broth</label>
+	<div id="chip_container">
+		<div class="chip_and_num">
+			<img
+				src="/src/assets/images/boardAssets/white_token_x128.png"
+				draggable="false"
+				alt="Diamond"
+				id="diamond"
+				name="diamond"
+			/>
+			<div id="og_diamond">0</div>
+		</div>
+		<div class="chip_and_num">
+			<img
+				src="/src/assets/images/boardAssets/blue_token_x128.png"
+				draggable="false"
+				alt="Sapphire"
+				id="sapphire"
+				name="sapphire"
+			/>
+			<div id="og_sapphire">0</div>
+		</div>
+		<div class="chip_and_num">
+			<img
+				src="/src/assets/images/boardAssets/green_token_x128.png"
+				draggable="false"
+				alt="Emerald"
+				id="emerald"
+				name="emerald"
+			/>
+			<div id="og_emerald">0</div>
+		</div>
+		<div class="chip_and_num">
+			<img
+				src="/src/assets/images/boardAssets/red_token_x128.png"
+				draggable="false"
+				alt="Ruby"
+				id="ruby"
+				name="ruby"
+			/>
+			<div id="og_ruby">0</div>
+		</div>
+		<div class="chip_and_num">
+			<img
+				src="/src/assets/images/boardAssets/brown_token_x128.png"
+				draggable="false"
+				alt="Onyx"
+				id="onyx"
+				name="onyx"
+			/>
+			<div id="og_onyx">0</div>
+		</div>
+		<div class="chip_and_num">
+			<img
+				src="/src/assets/images/boardAssets/gold_token_x128.png"
+				draggable="false"
+				alt="Joker"
+				id="joker"
+				name="joker"
+			/>
+			<div id="og_joker">0</div>
+		</div>
+	</div>
+	<div id="num_container">
+		<label for="diamond" id="diamond_value">0</label>
+		<label for="sapphire" id="sapphire_value">0</label>
+		<label for="emerald" id="emerald_value">0</label>
+		<label for="ruby" id="ruby_value">0</label>
+		<label for="onyx" id="onyx_value">0</label>
+		<label for="joker" id="joker_value">0</label>
+	</div>
+	<div id="plus_minus_container">
+		<div class="plus_minus" id="plus_minus_diamond">
+			<button class="minus">&minus;</button>
+			<button class="plus">&plus;</button>
+		</div>
+		<div class="plus_minus" id="plus_minus_sapphire">
+			<button class="minus">&minus;</button>
+			<button class="plus">&plus;</button>
+		</div>
+		<div class="plus_minus" id="plus_minus_emerald">
+			<button class="minus">&minus;</button>
+			<button class="plus">&plus;</button>
+		</div>
+		<div class="plus_minus" id="plus_minus_ruby">
+			<button class="minus">&minus;</button>
+			<button class="plus">&plus;</button>
+		</div>
+		<div class="plus_minus" id="plus_minus_onyx">
+			<button class="minus">&minus;</button>
+			<button class="plus">&plus;</button>
+		</div>
+		<div class="plus_minus" id="plus_minus_joker">
+			<button class="minus">&minus;</button>
+			<button class="plus">&plus;</button>
+		</div>
+	</div>
+	<div id="submit_decline_container">
+		<button id="submit_chips" disabled>Submit</button>
+		<button id="cancel_chips">Cancel</button>
+	</div>
+</div>
