@@ -103,10 +103,13 @@ export class plusChip extends Phaser.GameObjects.Image {
 					this.clearTint();
 					if (button.chipAmt - board.cachedChips[button.id] <= 0) {
 						board.f_chips[button.id].setTexture("circle_outline_x128").setScale(0.5);
+						board.f_chipNumbers[button.id].setTexture("0x64");
 					}
-					board.f_chipNumbers[button.id].setTexture(
-						(button.chipAmt - board.cachedChips[button.id]).toString() + "x64"
-					);
+					else {
+						board.f_chipNumbers[button.id].setTexture(
+							(button.chipAmt - board.cachedChips[button.id]).toString() + "x64"
+						);
+					}
 					board.boardEvents.emit("update_chip_cache");
 				});
 			}
@@ -146,10 +149,13 @@ export class plusChip extends Phaser.GameObjects.Image {
 				this.clearTint();
 				if (button.chipAmt - board.cachedChips[button.id] > 0) {
 					board.f_chips[button.id].setTexture(board.tokenSprites[chipOrder.get(button.id)]).setScale(1);
+					board.f_chipNumbers[button.id].setTexture(
+						(button.chipAmt - board.cachedChips[button.id]).toString() + "x64"
+					);
 				}
-				board.f_chipNumbers[button.id].setTexture(
-					(button.chipAmt - board.cachedChips[button.id]).toString() + "x64"
-				);
+				else {
+					board.f_chipNumbers[button.id].setTexture("0x64");
+				}
 				board.boardEvents.emit("update_chip_cache");
 			});
 		}
