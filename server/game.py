@@ -482,7 +482,7 @@ def reserve_card(args, games):
 
     if returned > 0:
         for x in range(0, 6):
-            player.player_chips -= returned_chips[x]
+            player.player_chips[x] -= returned_chips[x]
 
     next_turn(game)
 

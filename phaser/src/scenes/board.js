@@ -18,7 +18,7 @@ export default class board extends Phaser.Scene {
 	}
 
 	init() {
-		this.cards = [[], [], []];
+		this.cards = [[], [], [], []];
 		this.scales = 0.1875;
 
 		//TODO: this should be auto-detected
@@ -49,6 +49,7 @@ export default class board extends Phaser.Scene {
 
 		const sizes = ["64", "128", "256"];
 		const colors = ["blue", "brown", "green", "red", "white", "gold"];
+		const rsvd = ["r1", "r2", "r3"];
 
 		this.load.path = "src/assets/images/boardAssets/";
 
@@ -65,6 +66,11 @@ export default class board extends Phaser.Scene {
 					var name = color + "_" + shape + "_x" + size;
 					this.load.image(name, name + fExtension);
 				}
+			}
+
+			for (var rank of rsvd) {
+				var name = rank + "x" + size;
+				this.load.image(name, name + fExtension);
 			}
 		}
 
@@ -97,6 +103,14 @@ export default class board extends Phaser.Scene {
 			frameWidth: 128,
 			frameHeight: 64,
 		});
+		this.load.spritesheet("purchase_button", "purchase_button" + fExtension, {
+			frameWidth: 768,
+			frameHeight: 192,
+		});
+		this.load.spritesheet("reserve_button", "reserve_button" + fExtension, {
+			frameWidth: 768,
+			frameHeight: 192,
+		});
 	}
 
 	create() {
@@ -105,11 +119,12 @@ export default class board extends Phaser.Scene {
 		thisBoard.boardOn = false;
 		thisBoard.updatable = false;
 		thisBoard.gameState = null;
-		thisBoard.f_cards = [];
+		thisBoard.f_cardbacks = [];
 		thisBoard.f_nobles = [];
 		thisBoard.f_chips = [];
 		thisBoard.f_chipNumbers = [];
 		thisBoard.f_UI = [];
+		thisBoard.cardObjects = [];
 		thisBoard.scene.sendToBack();
 
 		//#region Game Variables
@@ -177,18 +192,20 @@ export default class board extends Phaser.Scene {
 		//#region Idk whatever Nathan did so idk what to name the region, but it should be renamed
 
 		function draw_board() {
-			for (i = 0; i < thisBoard.f_cards.length; ++i) thisBoard.f_cards[i].destroy();
+			for (i = 0; i < thisBoard.f_cardbacks.length; ++i) thisBoard.f_cardbacks[i].destroy();
 			for (i = 0; i < thisBoard.f_nobles.length; ++i) thisBoard.f_nobles[i].destroy();
 			for (i = 0; i < thisBoard.f_chips.length; ++i) thisBoard.f_chips[i].destroy();
 			for (i = 0; i < thisBoard.f_chipNumbers.length; ++i) thisBoard.f_chipNumbers[i].destroy();
 			for (i = 0; i < thisBoard.f_UI.length; ++i) thisBoard.f_UI[i].destroy();
+			for (i = 0; i < thisBoard.cardObjects.length; ++i) thisBoard.cardObjects[i].destroy(true);
 			thisBoard.boardEvents.removeAllListeners();
 
-			thisBoard.f_cards = [];
+			thisBoard.f_cardbacks = [];
 			thisBoard.f_nobles = [];
 			thisBoard.f_chips = [];
 			thisBoard.f_chipNumbers = [];
 			thisBoard.f_UI = [];
+			thisBoard.cardObjects = [];
 
 			thisBoard.cachedChips = [0, 0, 0, 0, 0];
 
@@ -208,7 +225,7 @@ export default class board extends Phaser.Scene {
 			for (var row = 0; row < numRows; row++) {
 				//Display cards
 				if (!thisBoard.gameState || thisBoard.gameState.cards_remaining[row] > 0) {
-					thisBoard.f_cards.push(
+					thisBoard.f_cardbacks.push(
 						thisBoard.add
 							.sprite(
 								flippedCardStartX - spacedWidth - 16,
@@ -218,7 +235,7 @@ export default class board extends Phaser.Scene {
 							.setScale(thisBoard.scales)
 					);
 				} else {
-					thisBoard.f_cards.push(
+					thisBoard.f_cardbacks.push(
 						thisBoard.add
 							.sprite(
 								flippedCardStartX - spacedWidth - 16,
@@ -230,18 +247,33 @@ export default class board extends Phaser.Scene {
 				}
 
 				for (var column = 0; column < numColumns; column++) {
-					if (thisBoard.gameState != null && thisBoard.cardsDatabase != undefined)
+					if (thisBoard.gameState != null && thisBoard.cardsDatabase != undefined) {
 						thisBoard.cards[row][column] = new card(
 							thisBoard,
 							thisBoard.gameState.field_cards[row][column]
 						);
-					else thisBoard.cards[row][column] = new card(thisBoard, -1);
+					} else thisBoard.cards[row][column] = new card(thisBoard, -1);
 
 					thisBoard.cards[row][column].drawCard(
 						flippedCardStartX + spacedWidth * column,
 						flippedCardStartY + spacedHeight * (numRows - 1 - row),
 						width,
-						height
+						height,
+						false
+					);
+				}
+			}
+
+			if (thisBoard.gameState != null && thisBoard.cardsDatabase != undefined && globals.playerID >= 0) {
+				let curPlayer = thisBoard.gameState.players[globals.playerID];
+				for (let count = 0; count < curPlayer.private_reserved_cards.length; ++count) {
+					thisBoard.cards[numRows][count] = new card(thisBoard, curPlayer.private_reserved_cards[count]);
+					thisBoard.cards[numRows][count].drawCard(
+						flippedCardStartX + 46 + spacedWidth * 1.2 * count,
+						flippedCardStartY + 60 + spacedHeight * numRows,
+						width,
+						height,
+						true
 					);
 				}
 			}
@@ -330,7 +362,7 @@ export default class board extends Phaser.Scene {
 									"/api/get_game_state?" +
 									new URLSearchParams({
 										session_id: globals.lobbyID,
-										playerID: globals.playerID,
+										player_id: globals.playerID,
 									})
 							)
 								.then(handleErrors)
@@ -470,5 +502,38 @@ export default class board extends Phaser.Scene {
 			}
 			return response.json();
 		}
+	}
+
+	calculateReturn(cardID) {
+		let needed_chips = {diamond: 0, sapphire: 0, emerald: 0, ruby: 0, onyx: 0, joker: 0};
+		const chipOrder = new Map([
+			[0, "diamond"],
+			[1, "sapphire"],
+			[2, "emerald"],
+			[3, "ruby"],
+			[4, "onyx"],
+			[5, "joker"],
+		]);
+		const player = this.gameState.players[globals.playerID.toString()];
+		let jokers = 0;
+
+		for (let i = 0; i < Object.keys(needed_chips).length - 1; i++) {
+			let cardCost = this.server.lookUpCard(this.cardsDatabase, cardID)[chipOrder.get(i)];
+			let cardWorth = player.player_num_gem_cards[chipOrder.get(i)];
+			let adjustedCost = cardCost - cardWorth;
+			if (adjustedCost < 0) {
+				adjustedCost = 0;
+			}
+
+			if (adjustedCost > player.player_chips[chipOrder.get(i)]) {
+				jokers += adjustedCost - player.player_chips[chipOrder.get(i)];
+				adjustedCost -= adjustedCost - player.player_chips[chipOrder.get(i)];
+			}
+			needed_chips[chipOrder.get(i)] = adjustedCost;
+		}
+
+		needed_chips.joker = jokers;
+
+		return needed_chips;
 	}
 }
