@@ -204,7 +204,7 @@ export class returnChips extends Phaser.GameObjects.DOMElement {
 					.getElementsByClassName("chip_and_num")
 					.item(i).lastElementChild;
 
-				og_chipNums[i].innerHTML = og_chipValues[i].toString();
+				og_chipNums[i].innerHTML = player.player_chips[chipOrder.get(i)].toString();
 				if (og_chipValues[i] > player.player_chips[chipOrder.get(i)]) og_chipNums[i].style.color = "yellow";
 				else og_chipNums[i].style.color = "white";
 
@@ -262,7 +262,7 @@ export class returnChips extends Phaser.GameObjects.DOMElement {
 					}
 
 					for (let i = 0; i < minusButtons.length; i++)
-						minusButtons[i].disabled = !(og_chipValues[i] > 0 && i !== inverseChipMap.joker);
+						minusButtons[i].disabled = !(returnValues[i] > 0 && i !== inverseChipMap.joker);
 				} else if (pressedButton.type === "minus") {
 					returnValues[pressedButton.id] -= 1;
 					returnValues[inverseChipMap.joker] += 1;
@@ -280,7 +280,7 @@ export class returnChips extends Phaser.GameObjects.DOMElement {
 
 					for (let i = 0; i < minusButtons.length; i++)
 						minusButtons[i].disabled = !(
-							og_chipValues[i] > 0 &&
+							returnValues[i] > 0 &&
 							emptyJokers >= 1 &&
 							i !== inverseChipMap.joker
 						);

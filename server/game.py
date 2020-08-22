@@ -476,6 +476,9 @@ def reserve_card(args, games):
         game.field_chips[5] -= 1
         game.most_recent_action += " and earned a " + gems[5] + " token"
 
+    if returned > 0:
+        game.most_recent_action += ", while returning " + token_str(returned, returned_chips)
+
     game.most_recent_action += "!"
 
     game.cards_remaining[index[0]] -= 1
@@ -483,6 +486,7 @@ def reserve_card(args, games):
     if returned > 0:
         for x in range(0, 6):
             player.player_chips[x] -= returned_chips[x]
+            game.field_chips[x] += returned_chips[x]
 
     next_turn(game)
 

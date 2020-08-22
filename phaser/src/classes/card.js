@@ -202,7 +202,7 @@ export class card {
 
 					let returned_chips = {diamond: 0, sapphire: 0, emerald: 0, ruby: 0, onyx: 0, joker: 0};
 
-					if (1 + thisCard.sumObj(player.player_chips) > 10) {
+					if (1 + thisCard.sumObj(player.player_chips) > 10 && thisCard.board.gameState.field_chips["joker"] > 0) {
 						thisCard.board.returnBox.createReturnChips("chip_overflow_2");
 						eventHandler.emit("disable_interactive", true);
 						thisCard.board.boardEvents.on("chips_returned", new_return => {
