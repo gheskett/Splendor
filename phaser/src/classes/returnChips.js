@@ -104,6 +104,13 @@ export class returnChips extends Phaser.GameObjects.DOMElement {
 					.item(i).firstElementChild;
 				minusButtons[i].disabled = true;
 
+				if (i === inverseChipMap["joker"]) {
+					chipReturn
+					.getChildByID("plus_minus_container")
+					.getElementsByClassName("plus_minus")
+					.item(i).style.opacity = 1;
+				}
+
 				returnNums[i] = chipReturn.getChildByID("num_container").children.item(i);
 				returnNums[i].innerHTML = returnValues[i].toString();
 			}
@@ -226,6 +233,13 @@ export class returnChips extends Phaser.GameObjects.DOMElement {
 					.getElementsByClassName("plus_minus")
 					.item(i).lastElementChild;
 				plusButtons[i].disabled = true;
+
+				if (i === inverseChipMap["joker"]) {
+					chipReturn
+					.getChildByID("plus_minus_container")
+					.getElementsByClassName("plus_minus")
+					.item(i).style.opacity = 0;
+				}
 
 				returnNums[i] = chipReturn.getChildByID("num_container").children.item(i);
 				returnNums[i].innerHTML = returnValues[i].toString();
