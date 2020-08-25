@@ -1,9 +1,11 @@
 //#region constants
 
 export const ioc = require('socket.io-client');
-export const ip = 'http://localhost';
+// export const ip = 'http://localhost';
+export const ip = window.location.protocol + "//" + window.location.hostname;
 export const port = 36251;
 export const fullAddr = ip + ':' + port;
+// console.log(fullAddr);
 export const headers = {
 	'Content-Type': 'application/json',
 	'Access-Control-Allow-Origin': '*',
