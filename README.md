@@ -1,6 +1,9 @@
 # Splendor
 Web variant of the popular board game Splendor
 
+To build and run all services automatically (requires docker):
+ - run `build_and_deploy.sh`
+
 To run game API server:
  - Install Python 3.7+ with pip
  - Navigate to /server directory
