@@ -1,0 +1,13 @@
+# docker-compose.yml
+version: "3.7"
+services:
+    backend:
+        build: ./server
+        hostname: backend
+        ports:
+          - 36251:36251
+    phaser:
+        build: ./phaser
+        hostname: frontend
+        ports:
+          - 80:80
