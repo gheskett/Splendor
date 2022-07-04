@@ -14,7 +14,8 @@ fi
 
 export TOP=$PWD
 cd ./phaser
+npm install
 npm run build
 cd $TOP
 
-docker-compose up --detach
+docker compose up --detach
