@@ -539,7 +539,7 @@ def buy_card(args, games, cards, nobles):
     if card is None:
         return flask.jsonify("ERROR: Requested card does not exist in game!")
 
-    if noble_acquired > 0:
+    if noble_acquired >= 0:
         for x in range(0, len(nobles)):
             if nobles[x].noble_id == noble_acquired:
                 noble = nobles[x]
